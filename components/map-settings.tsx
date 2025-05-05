@@ -1,25 +1,25 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { useDroneContext } from "./drone-context"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { useState } from "react";
+import { useDroneContext } from "./drone-context";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export function MapSettings() {
-  const { updateArea } = useDroneContext()
-  const [latitude, setLatitude] = useState("")
-  const [longitude, setLongitude] = useState("")
+  const { updateArea } = useDroneContext();
+  const [latitude, setLatitude] = useState("");
+  const [longitude, setLongitude] = useState("");
 
   const handleSave = () => {
     if (latitude && longitude) {
-      updateArea({ latitude, longitude })
-      alert("Area coordinates saved successfully!")
+      updateArea({ latitude, longitude });
+      alert("Map coordinates saved successfully!");
     } else {
-      alert("Please enter both latitude and longitude")
+      alert("Please enter both latitude and longitude");
     }
-  }
+  };
 
   return (
     <Card>
@@ -52,5 +52,5 @@ export function MapSettings() {
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }
