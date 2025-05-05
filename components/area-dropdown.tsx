@@ -9,30 +9,30 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-type Drone = {
+type Area = {
   name: string;
-  drone_id: string;
+  area_id: string;
 };
 
-export function DroneDropdown({
-  selectedDroneId,
-  setSelectedDroneId,
-}: {
-  selectedDroneId: string | null;
-  setSelectedDroneId: (id: string) => void;
-}) {
-  const [drones, setDrones] = useState<Drone[]>([]);
+type AreaDropdownProps = {
+  selectedAreaId: string | null;
+  setSelectedAreaId: (value: string) => void;
+};
+
+export function AreaDropdown({ selectedAreaId, setSelectedAreaId }: AreaDropdownProps) {
+  const [drones, setDrones] = useState<Area[]>([]);
+
 
   useEffect(() => {
     const fetchDrones = async () => {
       try {
-        const res = await fetch("http://localhost:5000/drones");
+        const res = await fetch("http://localhost:5000/areas");
         const response = await res.json();
         if (response.status) {
           if (response.data) {
             const data = response.data;
             setDrones(data || []);
-            console.log("Drones fetched successfully:", data);
+            console.log("Areas fetched successfully:", data);
             return;
           }
         }
@@ -48,16 +48,16 @@ export function DroneDropdown({
   return (
     <div className="mt-4">
       <Select
-        value={selectedDroneId || ""}
-        onValueChange={(value) => setSelectedDroneId(value)}
+        value={selectedAreaId || ""}
+        onValueChange={(value) => setSelectedAreaId(value)}
       >
         <SelectTrigger className="w-full">
-          <SelectValue placeholder="Select a drone" />
+          <SelectValue placeholder="Select a Area" />
         </SelectTrigger>
         <SelectContent>
           {drones.length > 0 ? (
             drones.map((drone) => (
-              <SelectItem key={drone.name} value={drone.drone_id}>
+              <SelectItem key={drone.name} value={drone.area_id}>
                 {drone.name}
               </SelectItem>
             ))

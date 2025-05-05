@@ -1,27 +1,38 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { useDroneContext } from "./drone-context"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export function DroneSettings() {
-  const { addDrone } = useDroneContext()
-  const [droneId, setDroneId] = useState("")
-  const [droneName, setDroneName] = useState("")
+  const [droneId, setDroneId] = useState("");
+  const [droneName, setDroneName] = useState("");
+  const baseUrl = "http://localhost:5000";
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (droneId && droneName) {
-      addDrone({ id: droneId, name: droneName })
-      setDroneId("")
-      setDroneName("")
-      alert("Drone added successfully!")
+      const res = await fetch(`${baseUrl}/drones/create`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ name: droneName, drone_id: droneId }),
+      });
+
+      const result = await res.json();
+
+      alert(result.message);
+
+      console.log(result);
+
+      setDroneId("");
+      setDroneName("");
     } else {
-      alert("Please enter both drone ID and name")
+      alert("Please fill in all fields");
     }
-  }
+  };
 
   return (
     <Card>
@@ -54,5 +65,5 @@ export function DroneSettings() {
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }

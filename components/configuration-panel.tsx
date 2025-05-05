@@ -1,23 +1,87 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { useDroneContext } from "./drone-context"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { useState } from "react";
+import { useDroneContext } from "./drone-context";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-export function ConfigurationPanel() {
-  const { drones, selectedDroneId } = useDroneContext()
-  const [latitude, setLatitude] = useState("")
-  const [longitude, setLongitude] = useState("")
-  const [altitude, setAltitude] = useState("")
+interface ConfigurationPanelProps {
+  selectedDroneId: string;
+  selectedAreaId: string;
+}
 
-  const selectedDrone = drones.find((drone) => drone.id === selectedDroneId)
+export function ConfigurationPanel({
+  selectedDroneId: propSelectedDroneId,
+  selectedAreaId,
+}: ConfigurationPanelProps) {
+  const [latitude, setLatitude] = useState("");
+  const [longitude, setLongitude] = useState("");
+  const [altitude, setAltitude] = useState("");
+  const baseUrl = "http://localhost:5000";
 
-  const handleSendDrone = () => {
-    alert(`Sending ${selectedDrone?.name || "drone"} to coordinates: ${latitude}, ${longitude}, ${altitude}`)
-  }
+  const handleSendDrone = async () => {
+    try {
+      if (latitude && longitude && altitude) {
+        console.log(typeof latitude, typeof longitude, typeof altitude);
+        const res = await fetch(`${baseUrl}/drones/send`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            drone_id: propSelectedDroneId,
+            area_id: selectedAreaId,
+            latitude: Number(latitude),
+            longitude: Number(longitude),
+            altitude: Number(altitude),
+          }),
+        });
+
+        const result = await res.json();
+
+        alert(result.message);
+
+        console.log(result);
+
+        setLatitude("");
+        setLongitude("");
+        setAltitude("");
+      } else {
+        alert("Please fill in all fields");
+      }
+    } catch (error) {
+      console.error("Error sending drone:", error);
+      alert("Failed to send drone. Please try again.");
+    }
+  };
+
+  const handleDropPayload = async () => {
+    try {
+      if (propSelectedDroneId && selectedAreaId) {
+        const res = await fetch(`${baseUrl}/drones/dropPayload`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            drone_id: propSelectedDroneId,
+            area_id: selectedAreaId,
+          }),
+        });
+
+        const result = await res.json();
+
+        alert(result.message);
+
+        console.log(result);
+      }
+    } catch (error) {
+      console.error("Error dropping payload:", error);
+      alert("Failed to drop payload. Please try again.");
+    }
+  };
 
   return (
     <Card>
@@ -30,6 +94,7 @@ export function ConfigurationPanel() {
             <Label htmlFor="latitude">Latitude</Label>
             <Input
               id="latitude"
+              type="number"
               value={latitude}
               onChange={(e) => setLatitude(e.target.value)}
               placeholder="Enter latitude"
@@ -40,6 +105,7 @@ export function ConfigurationPanel() {
             <Label htmlFor="longitude">Longitude</Label>
             <Input
               id="longitude"
+              type="number"
               value={longitude}
               onChange={(e) => setLongitude(e.target.value)}
               placeholder="Enter longitude"
@@ -50,17 +116,36 @@ export function ConfigurationPanel() {
             <Label htmlFor="altitude">Altitude</Label>
             <Input
               id="altitude"
+              type="number"
               value={altitude}
               onChange={(e) => setAltitude(e.target.value)}
               placeholder="Enter altitude"
             />
           </div>
 
-          <Button className="w-full" onClick={handleSendDrone} disabled={!selectedDroneId}>
-            Send {selectedDrone?.name || "Drone"}
+          <Button
+            className="w-full"
+            onClick={handleSendDrone}
+            disabled={!propSelectedDroneId || !selectedAreaId}
+          >
+            Send Drone{" "}
+            <h1 className="text-red-500">
+              {">>"} {propSelectedDroneId}
+            </h1>
+          </Button>
+
+          <Button
+            className="w-full bg-green-500 hover:bg-green-600 transition-all ease-in-out"
+            onClick={handleDropPayload}
+            disabled={!propSelectedDroneId || !selectedAreaId}
+          >
+            Drop Payload{" "}
+            <h1 className="text-red-500">
+              {">>"} {propSelectedDroneId}
+            </h1>
           </Button>
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }

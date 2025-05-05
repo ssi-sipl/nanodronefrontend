@@ -1,27 +1,39 @@
-"use client"
+"use client";
 
-import { useState } from "react"
+import { useState } from "react";
 
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export function AreaSettings() {
+  const [areaId, setAreaId] = useState("");
+  const [areaName, setAreaName] = useState("");
+  const baseUrl = "http://localhost:5000";
 
-  const [areaId, setAreaId] = useState("")
-  const [areaName, setAreaName] = useState("")
+  const handleSave = async () => {
+    if (areaId && areaName) {
+      const res = await fetch(`${baseUrl}/areas/create`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ name: areaName, area_id: areaId }),
+      });
 
-  const handleSave = () => {
-    // if (areaId && areaName) {
-    //   addArea({ id: areaId, name: areaName })
-    //   setAreaId("")
-    //   setAreaName("")
-    //   alert("Area added successfully!")
-    // } else {
-    //   alert("Please enter both area ID and name")
-    // }
-  }
+      const result = await res.json();
+
+      alert(result.message);
+
+      console.log(result);
+
+      setAreaId("");
+      setAreaName("");
+    } else {
+      alert("Please fill in all fields");
+    }
+  };
 
   return (
     <Card>
@@ -54,5 +66,5 @@ export function AreaSettings() {
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }
