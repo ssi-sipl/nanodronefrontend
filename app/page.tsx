@@ -1,6 +1,13 @@
 "use client";
 
-import { MapDisplay } from "@/components/map-display";
+import dynamic from "next/dynamic";
+
+// Import MapDisplay only on client-side
+const MapDisplay = dynamic(() => import("@/components/map-display"), {
+  ssr: false,
+});
+
+// import { MapDisplay } from "@/components/map-display";
 import { ConfigurationPanel } from "@/components/configuration-panel";
 import { DroneDropdown } from "@/components/drone-dropdown";
 import { AreaDropdown } from "@/components/area-dropdown";

@@ -1,14 +1,13 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { useDroneContext } from "./drone-context";
 
-export function MapDisplay() {
+export default function MapDisplay() {
   const { area } = useDroneContext();
   const mapRef = useRef<HTMLDivElement | null>(null);
-  const leafletMapRef = useRef<L.Map | null>(null);
+  const leafletMapRef = useRef<any>(null); // We'll define L inside useEffect
 
   const lat = parseFloat(area.latitude);
   const lng = parseFloat(area.longitude);
@@ -17,27 +16,28 @@ export function MapDisplay() {
   useEffect(() => {
     if (!isValidCoordinates) return;
 
-    if (mapRef.current && !leafletMapRef.current) {
-      // Initialize map
-      leafletMapRef.current = L.map(mapRef.current).setView([lat, lng], 13);
+    // Dynamically import Leaflet to avoid SSR issues
+    import("leaflet").then((L) => {
+      if (mapRef.current && !leafletMapRef.current) {
+        leafletMapRef.current = L.map(mapRef.current).setView([lat, lng], 13);
 
-      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        attribution: "© OpenStreetMap contributors",
-      }).addTo(leafletMapRef.current);
+        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+          attribution: "© OpenStreetMap contributors",
+        }).addTo(leafletMapRef.current);
 
-      L.marker([lat, lng])
-        .addTo(leafletMapRef.current)
-        .bindPopup("Current Location")
-        .openPopup();
-    } else if (leafletMapRef.current) {
-      // Update map position and marker
-      leafletMapRef.current.setView([lat, lng], 13);
+        L.marker([lat, lng])
+          .addTo(leafletMapRef.current)
+          .bindPopup("Current Location")
+          .openPopup();
+      } else if (leafletMapRef.current) {
+        leafletMapRef.current.setView([lat, lng], 13);
 
-      L.marker([lat, lng])
-        .addTo(leafletMapRef.current)
-        .bindPopup("Updated Location")
-        .openPopup();
-    }
+        L.marker([lat, lng])
+          .addTo(leafletMapRef.current)
+          .bindPopup("Updated Location")
+          .openPopup();
+      }
+    });
   }, [lat, lng, isValidCoordinates]);
 
   return (
