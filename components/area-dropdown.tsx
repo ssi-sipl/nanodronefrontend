@@ -24,28 +24,28 @@ export function AreaDropdown({
   selectedAreaId,
   setSelectedAreaId,
 }: AreaDropdownProps) {
-  const [drones, setDrones] = useState<Area[]>([]);
+  const [areas, setAreas] = useState<Area[]>([]);
 
   useEffect(() => {
-    const fetchDrones = async () => {
+    const fetchAreas = async () => {
       try {
         const res = await fetch(`${baseUrl}/areas`);
         const response = await res.json();
         if (response.status) {
           if (response.data) {
             const data = response.data;
-            setDrones(data || []);
+            setAreas(data || []);
             console.log("Areas fetched successfully:", data);
             return;
           }
         }
-        alert(response.message);
+        // alert(response.message);
       } catch (error) {
-        console.error("Failed to fetch drones:", error);
+        console.error("Failed to fetch areas:", error);
       }
     };
 
-    fetchDrones();
+    fetchAreas();
   }, []);
 
   return (
@@ -58,15 +58,15 @@ export function AreaDropdown({
           <SelectValue placeholder="Select a Area" />
         </SelectTrigger>
         <SelectContent>
-          {drones.length > 0 ? (
-            drones.map((drone) => (
+          {areas.length > 0 ? (
+            areas.map((drone) => (
               <SelectItem key={drone.name} value={drone.area_id}>
                 {drone.name}
               </SelectItem>
             ))
           ) : (
             <SelectItem value="none" disabled>
-              No drones available
+              No areas available
             </SelectItem>
           )}
         </SelectContent>

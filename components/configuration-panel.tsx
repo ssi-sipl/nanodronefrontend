@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { use, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -9,21 +9,41 @@ import { baseUrl } from "@/lib/config";
 
 interface ConfigurationPanelProps {
   selectedDroneId: string;
-  selectedAreaId: string;
 }
 
 export function ConfigurationPanel({
   selectedDroneId: propSelectedDroneId,
-  selectedAreaId,
 }: ConfigurationPanelProps) {
   const [latitude, setLatitude] = useState("");
   const [longitude, setLongitude] = useState("");
   const [altitude, setAltitude] = useState("");
+  const [areaId, setAreaId] = useState("");
+
+  useEffect(() => {
+    const fetchAreaByDroneId = async () => {
+      try {
+        const res = await fetch(
+          `${baseUrl}/drones/drone/${propSelectedDroneId}`
+        );
+        const data = await res.json();
+
+        if (!res.ok) throw new Error(data.message || "Failed to fetch area");
+
+        setAreaId(data.data.area_id);
+      } catch (err) {
+        // alert("Failed to fetch area by drone ID");
+        setAreaId("No Area");
+      } finally {
+        // setLoading(false);
+      }
+    };
+
+    fetchAreaByDroneId();
+  }, [propSelectedDroneId]);
 
   const handleSendDrone = async () => {
     try {
-      if (latitude && longitude && altitude) {
-        console.log(typeof latitude, typeof longitude, typeof altitude);
+      if (latitude && longitude && altitude && propSelectedDroneId && areaId) {
         const res = await fetch(`${baseUrl}/drones/send`, {
           method: "POST",
           headers: {
@@ -31,7 +51,7 @@ export function ConfigurationPanel({
           },
           body: JSON.stringify({
             drone_id: propSelectedDroneId,
-            area_id: selectedAreaId,
+            area_id: areaId,
             latitude: Number(latitude),
             longitude: Number(longitude),
             altitude: Number(altitude),
@@ -58,7 +78,7 @@ export function ConfigurationPanel({
 
   const handleDropPayload = async () => {
     try {
-      if (propSelectedDroneId && selectedAreaId) {
+      if (propSelectedDroneId && areaId) {
         const res = await fetch(`${baseUrl}/drones/dropPayload`, {
           method: "POST",
           headers: {
@@ -66,7 +86,7 @@ export function ConfigurationPanel({
           },
           body: JSON.stringify({
             drone_id: propSelectedDroneId,
-            area_id: selectedAreaId,
+            area_id: areaId,
           }),
         });
 
@@ -125,7 +145,7 @@ export function ConfigurationPanel({
           <Button
             className="w-full"
             onClick={handleSendDrone}
-            disabled={!propSelectedDroneId || !selectedAreaId}
+            disabled={!propSelectedDroneId}
           >
             Send Drone{" "}
             <h1 className="text-red-500">
@@ -136,11 +156,11 @@ export function ConfigurationPanel({
           <Button
             className="w-full bg-green-500 hover:bg-green-600 transition-all ease-in-out"
             onClick={handleDropPayload}
-            disabled={!propSelectedDroneId || !selectedAreaId}
+            disabled={!propSelectedDroneId}
           >
             Drop Payload{" "}
             <h1 className="text-red-500">
-              {">>"} {propSelectedDroneId}
+              {">>"} {propSelectedDroneId} {">>"} {areaId}
             </h1>
           </Button>
         </div>

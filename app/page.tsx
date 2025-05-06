@@ -15,7 +15,7 @@ import { useState } from "react";
 
 export default function Dashboard() {
   const [selectedDroneId, setSelectedDroneId] = useState<string | undefined>();
-  const [selectedAreaId, setSelectedAreaId] = useState<string | undefined>();
+  // const [selectedAreaId, setSelectedAreaId] = useState<string | undefined>();
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -28,17 +28,14 @@ export default function Dashboard() {
             selectedDroneId={selectedDroneId ?? null}
             setSelectedDroneId={(id) => setSelectedDroneId(id)}
           />
-          <AreaDropdown
+          {/* <AreaDropdown
             selectedAreaId={selectedAreaId || null}
             setSelectedAreaId={(value) => setSelectedAreaId(value)}
-          />
+          /> */}
         </div>
 
         <div>
-          <ConfigurationPanel
-            selectedDroneId={selectedDroneId ?? ""}
-            selectedAreaId={selectedAreaId ?? ""}
-          />
+          <ConfigurationPanel selectedDroneId={selectedDroneId ?? ""} />
         </div>
       </div>
     </div>

@@ -37,7 +37,7 @@ export function DroneDropdown({
             return;
           }
         }
-        alert(response.message);
+        // alert(response.message);
       } catch (error) {
         console.error("Failed to fetch drones:", error);
       }
