@@ -8,6 +8,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { baseUrl } from "@/lib/config.js";
 
 type Drone = {
   name: string;
@@ -26,7 +27,7 @@ export function DroneDropdown({
   useEffect(() => {
     const fetchDrones = async () => {
       try {
-        const res = await fetch("http://localhost:5000/drones");
+        const res = await fetch(`${baseUrl}/drones`);
         const response = await res.json();
         if (response.status) {
           if (response.data) {

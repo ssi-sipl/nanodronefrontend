@@ -1,11 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { useDroneContext } from "./drone-context";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { baseUrl } from "@/lib/config";
 
 interface ConfigurationPanelProps {
   selectedDroneId: string;
@@ -19,7 +19,6 @@ export function ConfigurationPanel({
   const [latitude, setLatitude] = useState("");
   const [longitude, setLongitude] = useState("");
   const [altitude, setAltitude] = useState("");
-  const baseUrl = "http://localhost:5000";
 
   const handleSendDrone = async () => {
     try {

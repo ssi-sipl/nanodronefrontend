@@ -8,6 +8,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { baseUrl } from "@/lib/config";
 
 type Area = {
   name: string;
@@ -19,14 +20,16 @@ type AreaDropdownProps = {
   setSelectedAreaId: (value: string) => void;
 };
 
-export function AreaDropdown({ selectedAreaId, setSelectedAreaId }: AreaDropdownProps) {
+export function AreaDropdown({
+  selectedAreaId,
+  setSelectedAreaId,
+}: AreaDropdownProps) {
   const [drones, setDrones] = useState<Area[]>([]);
-
 
   useEffect(() => {
     const fetchDrones = async () => {
       try {
-        const res = await fetch("http://localhost:5000/areas");
+        const res = await fetch(`${baseUrl}/areas`);
         const response = await res.json();
         if (response.status) {
           if (response.data) {
