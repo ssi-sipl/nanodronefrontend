@@ -9,18 +9,34 @@ import { baseUrl } from "@/lib/config";
 import { DroneDropdown } from "./drone-dropdown";
 import { Area } from "recharts";
 import { AreaDropdown } from "./area-dropdown";
+import { set } from "date-fns";
 
-interface ConfigurationPanelProps {
-  selectedDroneId: string;
+interface Sensor {
+  __v: number;
+  _id: string;
+  area_id: string;
+  latitude: number;
+  longitude: number;
+  name: string;
+  sensor_id: string;
 }
 
-export function ConfigurationPanel() {
+interface ConfigurationPanelProps {
+  currentSensor: Sensor | null;
+}
+
+export function ConfigurationPanel({ currentSensor }: ConfigurationPanelProps) {
   const [latitude, setLatitude] = useState("");
   const [longitude, setLongitude] = useState("");
-  const [altitude, setAltitude] = useState("");
+  const [altitude, setAltitude] = useState("10");
   const [areaId, setAreaId] = useState("");
   const [selectedDroneId, setSelectedDroneId] = useState<string | undefined>();
 
+  useEffect(() => {
+    if (!currentSensor) return;
+    setLatitude(currentSensor?.latitude.toString() ?? "");
+    setLongitude(currentSensor?.longitude.toString() ?? "");
+  }, [currentSensor]);
   useEffect(() => {
     const fetchAreaByDroneId = async () => {
       try {
