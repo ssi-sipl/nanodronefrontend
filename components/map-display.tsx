@@ -10,21 +10,23 @@ export default function MapDisplay() {
   const mapRef = useRef<HTMLDivElement | null>(null);
   const leafletMapRef = useRef<any>(null);
 
-  const lat = parseFloat(area.latitude);
-  const lng = parseFloat(area.longitude);
-  const isValidCoordinates = !isNaN(lat) && !isNaN(lng);
+  const DEFAULT_LAT = 28.523798;
+  const DEFAULT_LNG = 77.076847;
 
-  // Define bounds to limit the panning area (adjust based on your tile coverage)
-  // const southWest = [28.44961, 77.054527]; // min lat, min lng
-  // const northEast = [28.598357, 77.099167]; // max lat, max lng
+  const lat = !isNaN(parseFloat(area.latitude))
+    ? parseFloat(area.latitude)
+    : DEFAULT_LAT;
+
+  const lng = !isNaN(parseFloat(area.longitude))
+    ? parseFloat(area.longitude)
+    : DEFAULT_LNG;
+
   const bounds: LatLngBoundsLiteral = [
-    [28.44961, 77.054527], // southwest
-    [28.598357, 77.099167], // northeast
+    [28.44961, 77.054527],
+    [28.598357, 77.099167],
   ];
 
   useEffect(() => {
-    if (!isValidCoordinates) return;
-
     import("leaflet").then((L) => {
       if (mapRef.current && !leafletMapRef.current) {
         leafletMapRef.current = L.map(mapRef.current, {
@@ -33,14 +35,7 @@ export default function MapDisplay() {
           minZoom: 15,
           maxZoom: 19,
           maxBounds: bounds,
-          maxBoundsViscosity: 1.0, // 1.0 = completely restrict movement beyond bounds
-        });
-
-        const customIcon = L.icon({
-          iconUrl: "/icons/drone.png",
-          iconSize: [40, 40],
-          iconAnchor: [20, 40],
-          popupAnchor: [0, -40],
+          maxBoundsViscosity: 1.0,
         });
 
         L.tileLayer("/tiles2/{z}/{x}/{y}.jpg", {
@@ -51,11 +46,6 @@ export default function MapDisplay() {
           errorTileUrl: "/placeholder.jpg",
         }).addTo(leafletMapRef.current);
 
-        L.marker([lat, lng], { icon: customIcon })
-          .addTo(leafletMapRef.current)
-          .bindPopup("Drone Location")
-          .openPopup();
-
         requestAnimationFrame(() => {
           leafletMapRef.current.invalidateSize();
         });
@@ -63,21 +53,15 @@ export default function MapDisplay() {
         leafletMapRef.current.setView([lat, lng], 15);
       }
     });
-  }, [lat, lng, isValidCoordinates]);
+  }, [lat, lng]);
 
   return (
     <div className="w-full h-full rounded-lg border shadow overflow-hidden">
-      {isValidCoordinates ? (
-        <div
-          ref={mapRef}
-          id="leaflet-map"
-          style={{ width: "100%", height: "100%" }}
-        />
-      ) : (
-        <p className="text-sm text-gray-500 text-center p-4">
-          Please update the map lat long in the settings.
-        </p>
-      )}
+      <div
+        ref={mapRef}
+        id="leaflet-map"
+        style={{ width: "100%", height: "100%" }}
+      />
     </div>
   );
 }
