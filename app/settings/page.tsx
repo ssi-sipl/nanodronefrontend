@@ -1,6 +1,7 @@
-import { AreaSettings } from "@/components/area-settings"
-import { DroneSettings } from "@/components/drone-settings"
-import { MapSettings } from "@/components/map-settings"
+import { AreaSettings } from "@/components/area-settings";
+import { DroneSettings } from "@/components/drone-settings";
+import { MapSettings } from "@/components/map-settings";
+import { SensorSettings } from "@/components/sensor-settings";
 
 export default function Settings() {
   return (
@@ -8,10 +9,11 @@ export default function Settings() {
       <h1 className="text-2xl font-bold mb-6">Settings</h1>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <SensorSettings />
         <DroneSettings />
         <MapSettings />
         <AreaSettings />
       </div>
     </div>
-  )
+  );
 }

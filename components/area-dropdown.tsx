@@ -18,11 +18,13 @@ type Area = {
 type AreaDropdownProps = {
   selectedAreaId: string | null;
   setSelectedAreaId: (value: string) => void;
+  disabled?: boolean;
 };
 
 export function AreaDropdown({
   selectedAreaId,
   setSelectedAreaId,
+  disabled = false,
 }: AreaDropdownProps) {
   const [areas, setAreas] = useState<Area[]>([]);
 
@@ -53,6 +55,7 @@ export function AreaDropdown({
       <Select
         value={selectedAreaId || ""}
         onValueChange={(value) => setSelectedAreaId(value)}
+        disabled={disabled}
       >
         <SelectTrigger className="w-full">
           <SelectValue placeholder="Select a Area" />

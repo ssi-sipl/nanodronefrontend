@@ -41,7 +41,7 @@ export default function MapDisplay() {
   }, [lat, lng, isValidCoordinates]);
 
   return (
-    <div className="w-full h-[400px] rounded-lg border shadow flex items-center justify-center">
+    <div className="w-full h-full rounded-lg border shadow flex items-center justify-center">
       {isValidCoordinates ? (
         <div ref={mapRef} className="w-full h-full rounded-lg" />
       ) : (
