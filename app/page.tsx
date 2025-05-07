@@ -1,3 +1,4 @@
+'use client";'
 import dynamic from "next/dynamic";
 
 // Import MapDisplay only on client-side
@@ -9,6 +10,7 @@ import { ConfigurationPanel } from "@/components/configuration-panel";
 import MapDisplay from "@/components/map-display";
 
 export default function Dashboard() {
+  
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <h1 className="text-2xl font-bold mb-6">Dashboard</h1>
