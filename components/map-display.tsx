@@ -38,7 +38,7 @@ export default function MapDisplay({ setCurrentSensor }: MapDisplayProps) {
         const res = await fetch(`${baseUrl}/sensors/`);
         const response = await res.json();
         if (response.status) {
-          if (response.data && response.data.length > 0) {
+          if (response.data) {
             const data = response.data;
             setSensors(data || []);
             console.log("Sensors fetched Successfully", data);
@@ -115,8 +115,6 @@ export default function MapDisplay({ setCurrentSensor }: MapDisplayProps) {
               }
               return;
             });
-
-            setSensors([]);
           }
         }
         // alert(response.message);
