@@ -62,7 +62,7 @@ export default function MapDisplay() {
   }, [lat, lng, isValidCoordinates]);
 
   return (
-    <div className="w-full h-[400px] rounded-lg border shadow overflow-hidden">
+    <div className="w-full h-full rounded-lg border shadow overflow-hidden">
       {isValidCoordinates ? (
         <div
           ref={mapRef}

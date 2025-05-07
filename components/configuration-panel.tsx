@@ -6,25 +6,25 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { baseUrl } from "@/lib/config";
+import { DroneDropdown } from "./drone-dropdown";
+import { Area } from "recharts";
+import { AreaDropdown } from "./area-dropdown";
 
 interface ConfigurationPanelProps {
   selectedDroneId: string;
 }
 
-export function ConfigurationPanel({
-  selectedDroneId: propSelectedDroneId,
-}: ConfigurationPanelProps) {
+export function ConfigurationPanel() {
   const [latitude, setLatitude] = useState("");
   const [longitude, setLongitude] = useState("");
   const [altitude, setAltitude] = useState("");
   const [areaId, setAreaId] = useState("");
+  const [selectedDroneId, setSelectedDroneId] = useState<string | undefined>();
 
   useEffect(() => {
     const fetchAreaByDroneId = async () => {
       try {
-        const res = await fetch(
-          `${baseUrl}/drones/drone/${propSelectedDroneId}`
-        );
+        const res = await fetch(`${baseUrl}/drones/drone/${selectedDroneId}`);
         const data = await res.json();
 
         if (!res.ok) throw new Error(data.message || "Failed to fetch area");
@@ -39,18 +39,18 @@ export function ConfigurationPanel({
     };
 
     fetchAreaByDroneId();
-  }, [propSelectedDroneId]);
+  }, [selectedDroneId]);
 
   const handleSendDrone = async () => {
     try {
-      if (latitude && longitude && altitude && propSelectedDroneId && areaId) {
+      if (latitude && longitude && altitude && selectedDroneId && areaId) {
         const res = await fetch(`${baseUrl}/drones/send`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            drone_id: propSelectedDroneId,
+            drone_id: selectedDroneId,
             area_id: areaId,
             latitude: Number(latitude),
             longitude: Number(longitude),
@@ -78,14 +78,14 @@ export function ConfigurationPanel({
 
   const handleDropPayload = async () => {
     try {
-      if (propSelectedDroneId && areaId) {
+      if (selectedDroneId && areaId) {
         const res = await fetch(`${baseUrl}/drones/dropPayload`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            drone_id: propSelectedDroneId,
+            drone_id: selectedDroneId,
             area_id: areaId,
           }),
         });
@@ -105,7 +105,7 @@ export function ConfigurationPanel({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Configuration</CardTitle>
+        <CardTitle>Deploy Drone</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
@@ -142,26 +142,40 @@ export function ConfigurationPanel({
             />
           </div>
 
+          <div className="grid gap-1">
+            <Label htmlFor="droneID">Drone ID</Label>
+            <DroneDropdown
+              selectedDroneId={selectedDroneId ?? null}
+              setSelectedDroneId={(id) => setSelectedDroneId(id)}
+            />
+          </div>
+
+          <div className="grid gap-1">
+            <Label className="text-gray-500" htmlFor="areaID">
+              Area ID (Auto)
+            </Label>
+
+            <AreaDropdown
+              selectedAreaId={areaId}
+              setSelectedAreaId={() => {}}
+              disabled={true}
+            />
+          </div>
+
           <Button
             className="w-full"
             onClick={handleSendDrone}
-            disabled={!propSelectedDroneId}
+            disabled={!selectedDroneId}
           >
             Send Drone{" "}
-            <h1 className="text-red-500">
-              {">>"} {propSelectedDroneId}
-            </h1>
           </Button>
 
           <Button
             className="w-full bg-green-500 hover:bg-green-600 transition-all ease-in-out"
             onClick={handleDropPayload}
-            disabled={!propSelectedDroneId}
+            disabled={!selectedDroneId}
           >
             Drop Payload{" "}
-            <h1 className="text-red-500">
-              {">>"} {propSelectedDroneId} {">>"} {areaId}
-            </h1>
           </Button>
         </div>
       </CardContent>
