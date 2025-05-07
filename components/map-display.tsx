@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import "leaflet/dist/leaflet.css";
 import { useDroneContext } from "./drone-context";
+import type { LatLngBoundsLiteral } from "leaflet";
 
 export default function MapDisplay() {
   const { area } = useDroneContext();
@@ -14,9 +15,12 @@ export default function MapDisplay() {
   const isValidCoordinates = !isNaN(lat) && !isNaN(lng);
 
   // Define bounds to limit the panning area (adjust based on your tile coverage)
-  const southWest = [28.449610, 77.054527]; // min lat, min lng
-  const northEast = [28.598357, 77.099167]; // max lat, max lng
-  const bounds = [southWest, northEast];
+  // const southWest = [28.44961, 77.054527]; // min lat, min lng
+  // const northEast = [28.598357, 77.099167]; // max lat, max lng
+  const bounds: LatLngBoundsLiteral = [
+    [28.44961, 77.054527], // southwest
+    [28.598357, 77.099167], // northeast
+  ];
 
   useEffect(() => {
     if (!isValidCoordinates) return;
