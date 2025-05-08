@@ -44,12 +44,21 @@ export default function MapDisplay({ setCurrentSensor }: MapDisplayProps) {
   const [sensorAddSuccess, setSensorAddSuccess] = useState(false);
   const [refreshSensorList, setRefreshSensorList] = useState(false);
 
-  const DEFAULT_LAT = 28.448;
-  const DEFAULT_LNG = 77.0406;
+  // Tiles1
+  // const DEFAULT_LAT = 28.448;
+  // const DEFAULT_LNG = 77.0406;
+
+  // const bounds: LatLngBoundsLiteral = [
+  //   [28.4479, 77.0397],
+  //   [28.4481, 77.0415],
+  // ];
+
+  const DEFAULT_LAT = 28.523798;
+  const DEFAULT_LNG = 77.076847;
 
   const bounds: LatLngBoundsLiteral = [
-    [28.4479, 77.0397],
-    [28.4481, 77.0415],
+    [28.44961, 77.054527],
+    [28.598357, 77.099167],
   ];
 
   // ✅ Define the icon globally so it works inside any scope
@@ -84,7 +93,7 @@ export default function MapDisplay({ setCurrentSensor }: MapDisplayProps) {
             });
 
             // Add the tile layer to the map
-            L.tileLayer("/tiles1/{z}/{x}/{y}.jpg", {
+            L.tileLayer("/tiles2/{z}/{x}/{y}.jpg", {
               tileSize: 256,
               noWrap: true,
               bounds: bounds,
