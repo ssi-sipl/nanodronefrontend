@@ -51,7 +51,7 @@ export function AreaDropdown({
   }, []);
 
   return (
-    <div className="mt-4">
+    <div className="mt-4 z-50">
       <Select
         value={selectedAreaId || ""}
         onValueChange={(value) => setSelectedAreaId(value)}
@@ -60,7 +60,7 @@ export function AreaDropdown({
         <SelectTrigger className="w-full">
           <SelectValue placeholder="Select a Area" />
         </SelectTrigger>
-        <SelectContent>
+        <SelectContent className="z-50">
           {areas.length > 0 ? (
             areas.map((drone) => (
               <SelectItem key={drone.name} value={drone.area_id}>
