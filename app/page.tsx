@@ -1,13 +1,12 @@
 "use client";
-// import dynamic from "next/dynamic";
+import dynamic from "next/dynamic";
 
 // Import MapDisplay only on client-side
-// const MapDisplay = dynamic(() => import("@/components/map-display"), {
-//   ssr: false,
-// });
-
+const MapDisplay = dynamic(() => import("@/components/map-display"), {
+  ssr: false,
+});
 import { ConfigurationPanel } from "@/components/configuration-panel";
-import MapDisplay from "@/components/map-display";
+// import MapDisplay from "@/components/map-display";
 import { useState } from "react";
 
 interface Sensor {
