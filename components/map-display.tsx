@@ -44,12 +44,12 @@ export default function MapDisplay({ setCurrentSensor }: MapDisplayProps) {
   const [sensorAddSuccess, setSensorAddSuccess] = useState(false);
   const [refreshSensorList, setRefreshSensorList] = useState(false);
 
-  const DEFAULT_LAT = 28.523798;
-  const DEFAULT_LNG = 77.076847;
+  const DEFAULT_LAT = 28.448;
+  const DEFAULT_LNG = 77.0406;
 
   const bounds: LatLngBoundsLiteral = [
-    [28.44961, 77.054527],
-    [28.598357, 77.099167],
+    [28.4479, 77.0397],
+    [28.4481, 77.0415],
   ];
 
   // ✅ Define the icon globally so it works inside any scope
@@ -59,91 +59,6 @@ export default function MapDisplay({ setCurrentSensor }: MapDisplayProps) {
     iconAnchor: [20, 40],
     popupAnchor: [0, -40],
   });
-
-  // useEffect(() => {
-  //   const fetchSensors = async () => {
-  //     try {
-  //       console.log("Sensor Refresh Triggered");
-  //       const res = await fetch(`${baseUrl}/sensors/`);
-  //       const response = await res.json();
-
-  //       if (response.status && response.data) {
-  //         const data = response.data;
-  //         setSensors(data || []);
-  //         console.log("Sensors fetched Successfully", data);
-
-  //         if (mapRef.current && !leafletMapRef.current) {
-  //           leafletMapRef.current = L.map(mapRef.current, {
-  //             center: [DEFAULT_LAT, DEFAULT_LNG],
-  //             zoom: 15,
-  //             minZoom: 15,
-  //             maxZoom: 19,
-  //             maxBounds: bounds,
-  //             maxBoundsViscosity: 1.0,
-  //           });
-
-  //           L.tileLayer("/tiles2/{z}/{x}/{y}.jpg", {
-  //             tileSize: 256,
-  //             noWrap: true,
-  //             bounds: bounds,
-  //             attribution: "Offline Tiles",
-  //             errorTileUrl: "/placeholder.jpg",
-  //           }).addTo(leafletMapRef.current);
-
-  //           data.forEach((sensor: Sensor) => {
-  //             if (!isNaN(sensor.latitude) && !isNaN(sensor.longitude)) {
-  //               const marker = L.marker([sensor.latitude, sensor.longitude], {
-  //                 icon: sensorIcon,
-  //               })
-  //                 .addTo(leafletMapRef.current)
-  //                 .bindPopup(sensor.name);
-
-  //               marker.on("click", () => {
-  //                 console.log("Sensor clicked:", sensor);
-  //                 setCurrentSensor(sensor);
-  //               });
-  //             }
-  //           });
-
-  //           // ✅ Add click event listener on the map
-  //           leafletMapRef.current.on("click", (e: any) => {
-  //             if (clickModeRef.current) {
-  //               console.log("Clicked LatLng:", e.latlng.lat, e.latlng.lng);
-  //               console.log("clickAddSensor: ", clickAddSensor);
-  //               if (clickAddSensorRef.current) {
-  //                 setAddSensorLat(e.latlng.lat);
-  //                 setAddSensorLng(e.latlng.lng);
-  //               } else {
-  //                 setCurrentSensor({
-  //                   __v: 0,
-  //                   _id: "",
-  //                   area_id: "",
-  //                   latitude: e.latlng.lat,
-  //                   longitude: e.latlng.lng,
-  //                   name: "New Sensor",
-  //                   sensor_id: "",
-  //                 });
-  //               }
-
-  //               // ✅ Marker will now correctly appear
-  //               L.marker([e.latlng.lat, e.latlng.lng], {
-  //                 icon: sensorIcon,
-  //               }).addTo(leafletMapRef.current);
-  //             }
-  //           });
-
-  //           requestAnimationFrame(() => {
-  //             leafletMapRef.current.invalidateSize();
-  //           });
-  //         }
-  //       }
-  //     } catch (error) {
-  //       console.error("Failed to fetch areas:", error);
-  //     }
-  //   };
-
-  //   fetchSensors();
-  // }, [refreshSensorList]);
 
   useEffect(() => {
     const fetchSensors = async () => {
@@ -163,13 +78,13 @@ export default function MapDisplay({ setCurrentSensor }: MapDisplayProps) {
               center: [DEFAULT_LAT, DEFAULT_LNG],
               zoom: 15,
               minZoom: 15,
-              maxZoom: 19,
+              maxZoom: 20,
               maxBounds: bounds,
               maxBoundsViscosity: 1.0,
             });
 
             // Add the tile layer to the map
-            L.tileLayer("/tiles2/{z}/{x}/{y}.jpg", {
+            L.tileLayer("/tiles1/{z}/{x}/{y}.jpg", {
               tileSize: 256,
               noWrap: true,
               bounds: bounds,
