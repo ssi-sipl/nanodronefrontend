@@ -38,6 +38,17 @@ export function NavBar() {
               >
                 Settings
               </Link>
+              <Link
+                href="/area"
+                className={cn(
+                  "px-3 py-2 rounded-md text-sm font-medium",
+                  pathname === "/area"
+                    ? "bg-gray-900 text-white"
+                    : "text-gray-700 hover:bg-gray-100"
+                )}
+              >
+                Area
+              </Link>
             </div>
           </div>
         </div>
