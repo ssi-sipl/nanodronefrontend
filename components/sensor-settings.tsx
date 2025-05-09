@@ -27,10 +27,10 @@ export function SensorSettings({
   disableLatLng = false,
   setSensorAddSuccess,
 }: {
-  addSensorLat: number;
-  addSensorLng: number;
+  addSensorLat?: number;
+  addSensorLng?: number;
   disableLatLng?: boolean;
-  setSensorAddSuccess: (success: boolean) => void;
+  setSensorAddSuccess?: (success: boolean) => void;
 }) {
   const [sensorId, setSensorId] = useState("");
   const [sensorName, setSensorName] = useState("");
@@ -74,7 +74,9 @@ export function SensorSettings({
       setLatitude("");
       setLongitude("");
       setSelectedAreaId(null);
-      setSensorAddSuccess(true);
+      if (setSensorAddSuccess) {
+        setSensorAddSuccess(true);
+      }
     } else {
       alert("Please fill in all fields");
     }
