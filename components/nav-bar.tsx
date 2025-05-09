@@ -1,11 +1,11 @@
-"use client"
+"use client";
 
-import Link from "next/link"
-import { usePathname } from "next/navigation"
-import { cn } from "@/lib/utils"
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { cn } from "@/lib/utils";
 
 export function NavBar() {
-  const pathname = usePathname()
+  const pathname = usePathname();
 
   return (
     <nav className="border-b">
@@ -20,7 +20,9 @@ export function NavBar() {
                 href="/"
                 className={cn(
                   "px-3 py-2 rounded-md text-sm font-medium",
-                  pathname === "/" ? "bg-gray-900 text-white" : "text-gray-700 hover:bg-gray-100",
+                  pathname === "/"
+                    ? "bg-gray-900 text-white"
+                    : "text-gray-700 hover:bg-gray-100"
                 )}
               >
                 Dashboard
@@ -29,7 +31,9 @@ export function NavBar() {
                 href="/settings"
                 className={cn(
                   "px-3 py-2 rounded-md text-sm font-medium",
-                  pathname === "/settings" ? "bg-gray-900 text-white" : "text-gray-700 hover:bg-gray-100",
+                  pathname === "/settings"
+                    ? "bg-gray-900 text-white"
+                    : "text-gray-700 hover:bg-gray-100"
                 )}
               >
                 Settings
@@ -39,5 +43,5 @@ export function NavBar() {
         </div>
       </div>
     </nav>
-  )
+  );
 }
