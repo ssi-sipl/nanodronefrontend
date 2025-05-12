@@ -62,9 +62,9 @@ export function AreaDropdown({
         </SelectTrigger>
         <SelectContent className="z-50">
           {areas.length > 0 ? (
-            areas.map((drone) => (
-              <SelectItem key={drone.name} value={drone.area_id}>
-                {drone.name}
+            areas.map((area) => (
+              <SelectItem key={area.name} value={area.area_id}>
+                {area.name}
               </SelectItem>
             ))
           ) : (
