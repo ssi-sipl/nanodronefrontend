@@ -12,7 +12,11 @@ interface Drone {
 
 export default function DroneManagement() {
   const [drones, setDrones] = useState<Drone[]>([]);
-  const [newDrone, setNewDrone] = useState({ name: "", drone_id: "", area: "" });
+  const [newDrone, setNewDrone] = useState({
+    name: "",
+    drone_id: "",
+    area: "",
+  });
   const [editingDrone, setEditingDrone] = useState<Drone | null>(null);
 
   useEffect(() => {
@@ -83,7 +87,9 @@ export default function DroneManagement() {
           placeholder="Drone ID"
           className="border p-2"
           value={newDrone.drone_id}
-          onChange={(e) => setNewDrone({ ...newDrone, drone_id: e.target.value })}
+          onChange={(e) =>
+            setNewDrone({ ...newDrone, drone_id: e.target.value })
+          }
         />
         <input
           type="text"
@@ -92,14 +98,17 @@ export default function DroneManagement() {
           value={newDrone.area}
           onChange={(e) => setNewDrone({ ...newDrone, area: e.target.value })}
         />
-        <button className="bg-blue-500 text-white px-4 py-2" onClick={handleCreate}>
+        <button
+          className="bg-blue-500 text-white px-4 py-2"
+          onClick={handleCreate}
+        >
           Add
         </button>
       </div>
 
       <table className="min-w-full border border-gray-300">
         <thead>
-          <tr>
+          <tr className="bg-gray-100">
             <th className="border px-4 py-2">Name</th>
             <th className="border px-4 py-2">Drone ID</th>
             <th className="border px-4 py-2">Area</th>
@@ -129,7 +138,10 @@ export default function DroneManagement() {
                     type="text"
                     value={editingDrone.drone_id}
                     onChange={(e) =>
-                      setEditingDrone({ ...editingDrone, drone_id: e.target.value })
+                      setEditingDrone({
+                        ...editingDrone,
+                        drone_id: e.target.value,
+                      })
                     }
                     className="border p-1"
                   />

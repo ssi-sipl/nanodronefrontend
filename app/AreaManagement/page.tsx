@@ -2,16 +2,12 @@
 
 import { useEffect, useState } from "react";
 import axios from "axios";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Trash2, Pencil } from "lucide-react";
+import { baseUrl } from "@/lib/config";
 
 export default function AreaManagement() {
   const [areas, setAreas] = useState([]);
@@ -21,7 +17,7 @@ export default function AreaManagement() {
 
   const fetchAreas = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/area");
+      const res = await axios.get(`${baseUrl}/areas`);
       setAreas(res.data.data);
     } catch (err) {
       console.error("Failed to fetch areas", err);
@@ -36,10 +32,17 @@ export default function AreaManagement() {
     if (!name || !areaId) return alert("Please enter both name and area ID");
     try {
       if (editId) {
-        await axios.put(`/api/area/${editId}`, { name, area_id: areaId });
+        await axios.post(`${baseUrl}/areas/update`, {
+          id: editId,
+          name,
+          area_id: areaId,
+        });
         setEditId(null);
       } else {
-        await axios.post("http://localhost:5000/api/area/create", { name, area_id: areaId });
+        await axios.post(`${baseUrl}/areas/create`, {
+          name,
+          area_id: areaId,
+        });
       }
       setName("");
       setAreaId("");
@@ -57,7 +60,8 @@ export default function AreaManagement() {
 
   const handleDelete = async (id: string) => {
     try {
-      await axios.delete(`/api/area/${id}`);
+      console.log("Deleting area with ID:", typeof id);
+      await axios.post(`${baseUrl}/areas/delete/${id}`);
       fetchAreas();
     } catch (err) {
       console.error("Error deleting area", err);
@@ -89,7 +93,9 @@ export default function AreaManagement() {
               />
             </div>
           </div>
-          <Button onClick={handleSubmit}>{editId ? "Update" : "Create"} Area</Button>
+          <Button onClick={handleSubmit}>
+            {editId ? "Update" : "Create"} Area
+          </Button>
         </CardContent>
       </Card>
 

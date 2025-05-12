@@ -35,11 +35,9 @@ export function NavBar() {
                     ? "bg-gray-900 text-white"
                     : "text-gray-700 hover:bg-gray-100"
                 )}
-              
               >
-                settings
-
-                  </Link>
+                Settings
+              </Link>
               <Link
                 href="/AreaManagement"
                 className={cn(
@@ -49,11 +47,10 @@ export function NavBar() {
                     : "text-gray-700 hover:bg-gray-100"
                 )}
               >
-                AreaManagement
-              
+                Area
               </Link>
-              <Link href="/DroneManagement">Drone Management</Link>
-              <Link href="/SensorManagement">Sensor Management</Link>
+              <Link href="/DroneManagement">Drone </Link>
+              <Link href="/SensorManagement">Sensor </Link>
             </div>
           </div>
         </div>
