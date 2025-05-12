@@ -219,6 +219,7 @@ export default function SensorManagement() {
                 {editingSensor?._id === sensor._id ? (
                   <input
                     type="text"
+                    disabled={true}
                     value={editingSensor.sensor_id}
                     onChange={(e) =>
                       setEditingSensor({
@@ -236,6 +237,7 @@ export default function SensorManagement() {
                 {editingSensor?._id === sensor._id ? (
                   <input
                     type="text"
+                    disabled={true}
                     value={editingSensor.area_id}
                     onChange={(e) =>
                       setEditingSensor({

@@ -2,13 +2,27 @@
 
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { baseUrl } from "@/lib/config";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface Drone {
   _id: string;
   name: string;
   drone_id: string;
+  area_id: string;
   area: string;
 }
+
+type Area = {
+  name: string;
+  area_id: string;
+};
 
 export default function DroneManagement() {
   const [drones, setDrones] = useState<Drone[]>([]);
@@ -18,14 +32,34 @@ export default function DroneManagement() {
     area: "",
   });
   const [editingDrone, setEditingDrone] = useState<Drone | null>(null);
+  const [areas, setAreas] = useState<Area[]>([]);
 
   useEffect(() => {
     fetchDrones();
+    fetchAreas();
   }, []);
+
+  const fetchAreas = async () => {
+    try {
+      const res = await fetch(`${baseUrl}/areas`);
+      const response = await res.json();
+      if (response.status) {
+        if (response.data) {
+          const data = response.data;
+          setAreas(data || []);
+          console.log("Areas fetched successfully:", data);
+          return;
+        }
+      }
+      // alert(response.message);
+    } catch (error) {
+      console.error("Failed to fetch areas:", error);
+    }
+  };
 
   const fetchDrones = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/drone");
+      const res = await axios.get(`${baseUrl}/drones/`);
       setDrones(res.data.data);
     } catch (err) {
       console.error("Failed to fetch drones", err);
@@ -34,7 +68,7 @@ export default function DroneManagement() {
 
   const handleCreate = async () => {
     try {
-      await axios.post("http://localhost:5000/api/drone/create", {
+      await axios.post(`${baseUrl}/drones/create`, {
         name: newDrone.name,
         drone_id: newDrone.drone_id,
         area_id: newDrone.area,
@@ -48,11 +82,13 @@ export default function DroneManagement() {
 
   const handleUpdate = async () => {
     if (!editingDrone) return;
+    console.log("Updating drone:", typeof editingDrone._id);
+    console.log("Editing drone:", editingDrone);
     try {
-      await axios.put(`/api/drone/${editingDrone._id}`, {
+      await axios.post(`${baseUrl}/drones/update/${editingDrone._id}`, {
         name: editingDrone.name,
         drone_id: editingDrone.drone_id,
-        area_id: editingDrone.area,
+        area_id: editingDrone.area_id,
       });
       setEditingDrone(null);
       fetchDrones();
@@ -63,7 +99,7 @@ export default function DroneManagement() {
 
   const handleDelete = async (id: string) => {
     try {
-      await axios.delete(`/api/drone/${id}`);
+      await axios.post(`${baseUrl}/drones/delete/${id}`);
       fetchDrones();
     } catch (err) {
       console.error("Failed to delete drone", err);
@@ -91,13 +127,35 @@ export default function DroneManagement() {
             setNewDrone({ ...newDrone, drone_id: e.target.value })
           }
         />
-        <input
+        {/* <input
           type="text"
           placeholder="Area ID"
           className="border p-2"
           value={newDrone.area}
           onChange={(e) => setNewDrone({ ...newDrone, area: e.target.value })}
-        />
+        /> */}
+
+        <Select
+          value={newDrone.area || ""}
+          onValueChange={(value) => setNewDrone({ ...newDrone, area: value })}
+        >
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder="Select a Area" />
+          </SelectTrigger>
+          <SelectContent className="z-50">
+            {areas.length > 0 ? (
+              areas.map((area) => (
+                <SelectItem key={area.name} value={area.area_id}>
+                  {area.name}
+                </SelectItem>
+              ))
+            ) : (
+              <SelectItem value="none" disabled>
+                No areas available
+              </SelectItem>
+            )}
+          </SelectContent>
+        </Select>
         <button
           className="bg-blue-500 text-white px-4 py-2"
           onClick={handleCreate}
@@ -137,6 +195,7 @@ export default function DroneManagement() {
                   <input
                     type="text"
                     value={editingDrone.drone_id}
+                    disabled={true}
                     onChange={(e) =>
                       setEditingDrone({
                         ...editingDrone,
@@ -153,16 +212,18 @@ export default function DroneManagement() {
                 {editingDrone?._id === drone._id ? (
                   <input
                     type="text"
-                    value={editingDrone.area}
+                    value={editingDrone.area_id}
+                    disabled={true}
                     onChange={(e) =>
                       setEditingDrone({ ...editingDrone, area: e.target.value })
                     }
                     className="border p-1"
                   />
                 ) : (
-                  drone.area
+                  drone.area_id
                 )}
               </td>
+
               <td className="border px-4 py-2 flex gap-2">
                 {editingDrone?._id === drone._id ? (
                   <>

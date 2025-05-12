@@ -88,6 +88,7 @@ export default function AreaManagement() {
               <Label htmlFor="areaId">Area ID</Label>
               <Input
                 id="areaId"
+                disabled={editId ? true : false}
                 value={areaId}
                 onChange={(e) => setAreaId(e.target.value)}
               />
@@ -109,6 +110,7 @@ export default function AreaManagement() {
               <tr className="bg-gray-100">
                 <th className="p-2">Name</th>
                 <th className="p-2">Area ID</th>
+                <th className="p-2">Drones</th>
                 <th className="p-2">Actions</th>
               </tr>
             </thead>
@@ -117,6 +119,9 @@ export default function AreaManagement() {
                 <tr key={area._id} className="border-t">
                   <td className="p-2">{area.name}</td>
                   <td className="p-2">{area.area_id}</td>
+                  <td className="p-2">
+                    {area.drones ? area.drones.length : 0}
+                  </td>
                   <td className="p-2 space-x-2">
                     <Button
                       size="sm"
