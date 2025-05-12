@@ -35,9 +35,25 @@ export function NavBar() {
                     ? "bg-gray-900 text-white"
                     : "text-gray-700 hover:bg-gray-100"
                 )}
+              
               >
-                Settings
+                settings
+
+                  </Link>
+              <Link
+                href="/AreaManagement"
+                className={cn(
+                  "px-3 py-2 rounded-md text-sm font-medium",
+                  pathname === "/Area-Management"
+                    ? "bg-gray-900 text-white"
+                    : "text-gray-700 hover:bg-gray-100"
+                )}
+              >
+                AreaManagement
+              
               </Link>
+              <Link href="/DroneManagement">Drone Management</Link>
+              <Link href="/SensorManagement">Sensor Management</Link>
             </div>
           </div>
         </div>
