@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -14,6 +14,7 @@ export default function AreaManagement() {
   const [name, setName] = useState("");
   const [areaId, setAreaId] = useState("");
   const [editId, setEditId] = useState<string | null>(null);
+  const [editValues, setEditValues] = useState<{ [key: string]: { name: string; area_id: string } }>({});
 
   const fetchAreas = async () => {
     try {
@@ -31,36 +32,60 @@ export default function AreaManagement() {
   const handleSubmit = async () => {
     if (!name || !areaId) return alert("Please enter both name and area ID");
     try {
-      if (editId) {
-        await axios.post(`${baseUrl}/areas/update`, {
-          id: editId,
-          name,
-          area_id: areaId,
-        });
-        setEditId(null);
-      } else {
-        await axios.post(`${baseUrl}/areas/create`, {
-          name,
-          area_id: areaId,
-        });
-      }
+      await axios.post(`${baseUrl}/areas/create`, {
+        name,
+        area_id: areaId,
+      });
       setName("");
       setAreaId("");
       fetchAreas();
     } catch (err) {
-      console.error("Error submitting area", err);
+      console.error("Error creating area", err);
     }
   };
 
-  const handleEdit = (area: any) => {
-    setName(area.name);
-    setAreaId(area.area_id);
+  const handleEditClick = (area: any) => {
     setEditId(area._id);
+    setEditValues({
+      ...editValues,
+      [area._id]: {
+        name: area.name,
+        area_id: area.area_id,
+      },
+    });
+  };
+
+  const handleEditChange = (id: string, field: "name" | "area_id", value: string) => {
+    setEditValues((prev) => ({
+      ...prev,
+      [id]: {
+        ...prev[id],
+        [field]: value,
+      },
+    }));
+  };
+
+  const handleEditSave = async (id: string) => {
+    try {
+      const { name, area_id } = editValues[id];
+      await axios.post(`${baseUrl}/areas/update`, {
+        id,
+        name,
+        area_id,
+      });
+      setEditId(null);
+      fetchAreas();
+    } catch (err) {
+      console.error("Error updating area", err);
+    }
+  };
+
+  const handleEditCancel = () => {
+    setEditId(null);
   };
 
   const handleDelete = async (id: string) => {
     try {
-      console.log("Deleting area with ID:", typeof id);
       await axios.post(`${baseUrl}/areas/delete/${id}`);
       fetchAreas();
     } catch (err) {
@@ -69,81 +94,116 @@ export default function AreaManagement() {
   };
 
   return (
-    <div className="p-6 space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>Area Management</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="name">Name</Label>
+    <div className="max-w-4xl mx-auto px-4 py-6 space-y-8">
+      <h1 className="text-2xl font-bold text-center">Area Management</h1>
+
+      {/* Add Area Form */}
+      <Card className="border-none shadow-none px-0 ml-0">
+        <CardContent className="py-6 border-none shadow-none px-0 ml-0">
+          {/* <div className=""> */}
+            <div className="text-xl font-semibold text-left mb-4 ">Add Area</div>
+            <div className="flex flex-col md:flex-row items-center justify-center gap-6">
+
+            <div className="flex flex-col flex-1 items-start gap-1">
+              {/* <Label htmlFor="name">Name</Label> */}
               <Input
                 id="name"
+                className="w-full h-10"
                 value={name}
+                placeholder="Enter Area Name"
+
                 onChange={(e) => setName(e.target.value)}
               />
             </div>
-            <div>
-              <Label htmlFor="areaId">Area ID</Label>
+
+            <div className="flex flex-col flex-1 items-start gap-1">
+              {/* <Label htmlFor="areaId">Area ID</Label> */}
               <Input
                 id="areaId"
-                disabled={editId ? true : false}
+                className="w-full h-10"
                 value={areaId}
+                placeholder="Enter Area Id"
                 onChange={(e) => setAreaId(e.target.value)}
               />
             </div>
+
+            <div className=" flex-1">
+              <Button className="w-full" onClick={handleSubmit}>Create Area</Button>
+            </div>
           </div>
-          <Button onClick={handleSubmit}>
-            {editId ? "Update" : "Create"} Area
-          </Button>
+
+          {/* </div> */}
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>All Areas</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <table className="w-full text-left border border-gray-200">
-            <thead>
-              <tr className="bg-gray-100">
-                <th className="p-2">Name</th>
-                <th className="p-2">Area ID</th>
-                <th className="p-2">Drones</th>
-                <th className="p-2">Actions</th>
+      {/* All Areas Table with Curved Border */}
+      <div>
+        <h2 className="text-xl font-semibold text-left mb-4">All Areas</h2>
+        <div className="overflow-x-auto rounded-lg border border-gray-300 shadow-sm">
+          <table className="min-w-full text-left border-collapse overflow-hidden rounded-lg">
+            <thead className="bg-gray-100">
+              <tr>
+                <th className="p-3 border border-gray-300">Name</th>
+                <th className="p-3 border border-gray-300">Area ID</th>
+                <th className="p-3 border border-gray-300">Drones</th>
+                <th className="p-3 border border-gray-300">Actions</th>
               </tr>
             </thead>
             <tbody>
               {areas.map((area: any) => (
-                <tr key={area._id} className="border-t">
-                  <td className="p-2">{area.name}</td>
-                  <td className="p-2">{area.area_id}</td>
-                  <td className="p-2">
+                <tr key={area._id}>
+                  <td className="p-3 border border-gray-200">
+                    {editId === area._id ? (
+                      <Input
+                        className="h-9"
+                        value={editValues[area._id]?.name || ""}
+                        onChange={(e) => handleEditChange(area._id, "name", e.target.value)}
+                      />
+                    ) : (
+                      area.name
+                    )}
+                  </td>
+                  <td className="p-3 border border-gray-200">
+                    {editId === area._id ? (
+                      <Input
+                        className="h-9"
+                        value={editValues[area._id]?.area_id || ""}
+                        onChange={(e) => handleEditChange(area._id, "area_id", e.target.value)}
+                      />
+                    ) : (
+                      area.area_id
+                    )}
+                  </td>
+                  <td className="p-3 border border-gray-200">
                     {area.drones ? area.drones.length : 0}
                   </td>
-                  <td className="p-2 space-x-2">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => handleEdit(area)}
-                    >
-                      <Pencil className="w-4 h-4" />
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="destructive"
-                      onClick={() => handleDelete(area._id)}
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
+                  <td className="p-3 border border-gray-200 space-x-2">
+                    {editId === area._id ? (
+                      <>
+                        <Button size="sm" variant="outline" onClick={() => handleEditSave(area._id)}>
+                          Save
+                        </Button>
+                        <Button size="sm" variant="outline" onClick={handleEditCancel}>
+                          Cancel
+                        </Button>
+                      </>
+                    ) : (
+                      <>
+                        <Button size="sm" variant="outline" onClick={() => handleEditClick(area)}>
+                          <Pencil className="w-4 h-4" />
+                        </Button>
+                        <Button size="sm" variant="destructive" onClick={() => handleDelete(area._id)}>
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </>
+                    )}
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }
