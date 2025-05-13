@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { baseUrl } from "@/lib/config";
-import { Card, CardContent } from "@/components/ui/card";
 import {
   Select,
   SelectContent,
@@ -11,6 +10,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Pencil, Trash2 } from "lucide-react";
 
 interface Sensor {
   _id: string;
@@ -48,7 +51,7 @@ export default function SensorManagement() {
       const res = await fetch(`${baseUrl}/areas`);
       const response = await res.json();
       if (response.status && response.data) {
-        setAreas(response.data);
+        setAreas(response.data || []);
       }
     } catch (error) {
       console.error("Failed to fetch areas:", error);
@@ -104,42 +107,43 @@ export default function SensorManagement() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto p-4">
-      <h1 className="text-2xl font-bold text-center mb-6">
+    <div className="p-4 md:p-6 space-y-4 md:space-y-6 max-w-4xl mx-auto">
+      <h1 className="text-xl md:text-2xl font-bold text-center">
         Sensor Management
       </h1>
 
-      <Card className="mb-6 shadow-lg rounded-2xl">
-        <CardContent className="p-6">
-          <div className="flex flex-wrap gap-4">
-            <input
-              type="text"
-              placeholder="Name"
-              className="border p-2 rounded w-40"
+      <Card className="border-none shadow-none px-0 ml-0">
+        <CardContent className="py-6 border-none shadow-none px-0 ml-0">
+          <div className="text-lg md:text-xl font-semibold text-left mb-4">
+            Add Sensor
+          </div>
+          <div className="flex flex-col md:flex-row items-start justify-between gap-4 md:gap-6">
+            <Input
+              placeholder="Sensor Name"
               value={newSensor.name}
               onChange={(e) =>
                 setNewSensor({ ...newSensor, name: e.target.value })
               }
+              className="h-10 w-full"
             />
-            <input
-              type="text"
+            <Input
               placeholder="Sensor ID"
-              className="border p-2 rounded w-40"
               value={newSensor.sensor_id}
               onChange={(e) =>
                 setNewSensor({ ...newSensor, sensor_id: e.target.value })
               }
+              className="h-10 w-full"
             />
             <Select
-              value={newSensor.area_id || ""}
+              value={newSensor.area_id}
               onValueChange={(value) =>
                 setNewSensor({ ...newSensor, area_id: value })
               }
             >
-              <SelectTrigger className="w-40">
+              <SelectTrigger className="h-10 w-full">
                 <SelectValue placeholder="Select Area" />
               </SelectTrigger>
-              <SelectContent className="z-50">
+              <SelectContent>
                 {areas.length > 0 ? (
                   areas.map((area) => (
                     <SelectItem key={area.area_id} value={area.area_id}>
@@ -153,177 +157,172 @@ export default function SensorManagement() {
                 )}
               </SelectContent>
             </Select>
-            <input
+            <Input
               type="number"
               placeholder="Latitude"
-              className="border p-2 rounded w-32"
-              value={newSensor.latitude}
+              value={newSensor.latitude == 0 ? "" : newSensor.latitude}
               onChange={(e) =>
                 setNewSensor({
                   ...newSensor,
-                  latitude: parseFloat(e.target.value),
+                  latitude: Number.parseFloat(e.target.value),
                 })
               }
+              className="h-10 w-full"
             />
-            <input
+            <Input
               type="number"
               placeholder="Longitude"
-              className="border p-2 rounded w-32"
-              value={newSensor.longitude}
+              value={newSensor.longitude == 0 ? "" : newSensor.longitude}
               onChange={(e) =>
                 setNewSensor({
                   ...newSensor,
-                  longitude: parseFloat(e.target.value),
+                  longitude: Number.parseFloat(e.target.value),
                 })
               }
+              className="h-10 w-full"
             />
-            <button
-              className="bg-blue-600 text-white px-4 py-2 rounded"
+            <Button
+              className="bg-black text-white hover:bg-gray-800 h-10 w-full md:w-auto"
               onClick={handleCreate}
             >
-              Add
-            </button>
+              Add Sensor
+            </Button>
           </div>
         </CardContent>
       </Card>
 
-      <Card className="shadow-lg rounded-2xl">
-        <CardContent className="p-6">
-          <h2 className="text-xl font-semibold text-center mb-4">
-            All Sensors
-          </h2>
-          <div className="overflow-x-auto">
-            <table className="min-w-full text-sm border border-gray-300">
-              <thead className="bg-gray-100">
-                <tr>
-                  <th className="border px-3 py-2">Name</th>
-                  <th className="border px-3 py-2">Sensor ID</th>
-                  <th className="border px-3 py-2">Area ID</th>
-                  <th className="border px-3 py-2">Latitude</th>
-                  <th className="border px-3 py-2">Longitude</th>
-                  <th className="border px-3 py-2">Actions</th>
+      <div>
+        <h2 className="text-lg md:text-xl font-semibold text-left mb-4">
+          All Sensors
+        </h2>
+        <div className="overflow-x-auto rounded-lg border border-gray-300 shadow-sm">
+          <table className="min-w-full text-left border-collapse overflow-hidden rounded-lg">
+            <thead className="bg-gray-100">
+              <tr>
+                <th className="p-2 md:p-3 border border-gray-300">Name</th>
+                <th className="p-2 md:p-3 border border-gray-300">Sensor ID</th>
+                <th className="p-2 md:p-3 border border-gray-300">Area ID</th>
+                <th className="p-2 md:p-3 border border-gray-300">Latitude</th>
+                <th className="p-2 md:p-3 border border-gray-300">Longitude</th>
+                <th className="p-2 md:p-3 border border-gray-300">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {sensors.map((sensor) => (
+                <tr key={sensor._id}>
+                  <td className="p-2 md:p-3 border border-gray-200">
+                    {editingSensor?._id === sensor._id ? (
+                      <Input
+                        value={editingSensor.name}
+                        onChange={(e) =>
+                          setEditingSensor({
+                            ...editingSensor,
+                            name: e.target.value,
+                          })
+                        }
+                        className="h-9"
+                      />
+                    ) : (
+                      sensor.name
+                    )}
+                  </td>
+                  <td className="p-2 md:p-3 border border-gray-200">
+                    {editingSensor?._id === sensor._id ? (
+                      <Input
+                        value={editingSensor.sensor_id}
+                        disabled
+                        className="h-9"
+                      />
+                    ) : (
+                      sensor.sensor_id
+                    )}
+                  </td>
+                  <td className="p-2 md:p-3 border border-gray-200">
+                    {editingSensor?._id === sensor._id ? (
+                      <Input
+                        value={editingSensor.area_id}
+                        disabled
+                        className="h-9"
+                      />
+                    ) : (
+                      sensor.area_id
+                    )}
+                  </td>
+                  <td className="p-2 md:p-3 border border-gray-200">
+                    {editingSensor?._id === sensor._id ? (
+                      <Input
+                        type="number"
+                        value={editingSensor.latitude}
+                        onChange={(e) =>
+                          setEditingSensor({
+                            ...editingSensor,
+                            latitude: Number.parseFloat(e.target.value),
+                          })
+                        }
+                        className="h-9"
+                      />
+                    ) : (
+                      sensor.latitude
+                    )}
+                  </td>
+                  <td className="p-2 md:p-3 border border-gray-200">
+                    {editingSensor?._id === sensor._id ? (
+                      <Input
+                        type="number"
+                        value={editingSensor.longitude}
+                        onChange={(e) =>
+                          setEditingSensor({
+                            ...editingSensor,
+                            longitude: Number.parseFloat(e.target.value),
+                          })
+                        }
+                        className="h-9"
+                      />
+                    ) : (
+                      sensor.longitude
+                    )}
+                  </td>
+                  <td className="p-2 md:p-3 border border-gray-200">
+                    <div className="flex flex-wrap gap-2">
+                      {editingSensor?._id === sensor._id ? (
+                        <>
+                          <Button size="sm" onClick={handleUpdate}>
+                            Save
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => setEditingSensor(null)}
+                          >
+                            Cancel
+                          </Button>
+                        </>
+                      ) : (
+                        <>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => setEditingSensor(sensor)}
+                          >
+                            <Pencil className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            onClick={() => handleDelete(sensor._id)}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </>
+                      )}
+                    </div>
+                  </td>
                 </tr>
-              </thead>
-              <tbody>
-                {sensors.map((sensor) => (
-                  <tr key={sensor._id}>
-                    <td className="border px-3 py-2">
-                      {editingSensor?._id === sensor._id ? (
-                        <input
-                          type="text"
-                          value={editingSensor.name}
-                          onChange={(e) =>
-                            setEditingSensor({
-                              ...editingSensor,
-                              name: e.target.value,
-                            })
-                          }
-                          className="border p-1 rounded"
-                        />
-                      ) : (
-                        sensor.name
-                      )}
-                    </td>
-                    <td className="border px-3 py-2">
-                      {editingSensor?._id === sensor._id ? (
-                        <input
-                          type="text"
-                          disabled
-                          value={editingSensor.sensor_id}
-                          className="border p-1 rounded"
-                        />
-                      ) : (
-                        sensor.sensor_id
-                      )}
-                    </td>
-                    <td className="border px-3 py-2">
-                      {editingSensor?._id === sensor._id ? (
-                        <input
-                          type="text"
-                          disabled
-                          value={editingSensor.area_id}
-                          className="border p-1 rounded"
-                        />
-                      ) : (
-                        sensor.area_id
-                      )}
-                    </td>
-                    <td className="border px-3 py-2">
-                      {editingSensor?._id === sensor._id ? (
-                        <input
-                          type="number"
-                          value={editingSensor.latitude}
-                          onChange={(e) =>
-                            setEditingSensor({
-                              ...editingSensor,
-                              latitude: parseFloat(e.target.value),
-                            })
-                          }
-                          className="border p-1 rounded"
-                        />
-                      ) : (
-                        sensor.latitude
-                      )}
-                    </td>
-                    <td className="border px-3 py-2">
-                      {editingSensor?._id === sensor._id ? (
-                        <input
-                          type="number"
-                          value={editingSensor.longitude}
-                          onChange={(e) =>
-                            setEditingSensor({
-                              ...editingSensor,
-                              longitude: parseFloat(e.target.value),
-                            })
-                          }
-                          className="border p-1 rounded"
-                        />
-                      ) : (
-                        sensor.longitude
-                      )}
-                    </td>
-                    <td className="border px-3 py-2">
-                      <div className="flex gap-2">
-                        {editingSensor?._id === sensor._id ? (
-                          <>
-                            <button
-                              className="bg-green-600 text-white px-2 py-1 rounded"
-                              onClick={handleUpdate}
-                            >
-                              Save
-                            </button>
-                            <button
-                              className="bg-gray-500 text-white px-2 py-1 rounded"
-                              onClick={() => setEditingSensor(null)}
-                            >
-                              Cancel
-                            </button>
-                          </>
-                        ) : (
-                          <>
-                            <button
-                              className="bg-yellow-500 text-white px-2 py-1 rounded"
-                              onClick={() => setEditingSensor(sensor)}
-                            >
-                              Edit
-                            </button>
-                            <button
-                              className="bg-red-600 text-white px-2 py-1 rounded"
-                              onClick={() => handleDelete(sensor._id)}
-                            >
-                              Delete
-                            </button>
-                          </>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </CardContent>
-      </Card>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   );
 }

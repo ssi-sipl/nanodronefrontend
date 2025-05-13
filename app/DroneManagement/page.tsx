@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Pencil, Trash2 } from "lucide-react";
 
 interface Drone {
@@ -103,31 +103,42 @@ export default function DroneManagement() {
   };
 
   return (
-    <div className="p-6 space-y-6 max-w-5xl mx-auto">
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-center">Drone Management</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <div className="p-4 md:p-6 space-y-4 md:space-y-6 max-w-4xl mx-auto">
+      <h1 className="text-xl md:text-2xl font-bold text-center">
+        Drone Management
+      </h1>
+
+      <Card className="border-none shadow-none px-0 ml-0">
+        <CardContent className="py-6 border-none shadow-none px-0 ml-0">
+          <div className="text-lg md:text-xl font-semibold text-left mb-4">
+            Add Drone
+          </div>
+          <div className="flex flex-col md:flex-row items-start justify-between gap-4 md:gap-6">
+            {/* <div className="flex flex-col md:flex-row w-full md:w-3/4 items-start gap-3"> */}
             <Input
-              placeholder="Name"
+              placeholder="Enter Drone Name"
               value={newDrone.name}
-              onChange={(e) => setNewDrone({ ...newDrone, name: e.target.value })}
-              className="h-9 text-sm"
+              onChange={(e) =>
+                setNewDrone({ ...newDrone, name: e.target.value })
+              }
+              className="h-10 w-full "
             />
             <Input
-              placeholder="Drone ID"
+              placeholder="Enter Drone ID"
               value={newDrone.drone_id}
-              onChange={(e) => setNewDrone({ ...newDrone, drone_id: e.target.value })}
-              className="h-9 text-sm"
+              onChange={(e) =>
+                setNewDrone({ ...newDrone, drone_id: e.target.value })
+              }
+              className="h-10 w-full "
             />
             <Select
               value={newDrone.area}
-              onValueChange={(value) => setNewDrone({ ...newDrone, area: value })}
+              onValueChange={(value) =>
+                setNewDrone({ ...newDrone, area: value })
+              }
             >
-              <SelectTrigger className="h-9 text-sm">
-                <SelectValue placeholder="Select Area" />
+              <SelectTrigger className="h-10 w-full">
+                <SelectValue placeholder="Select Drone Area" />
               </SelectTrigger>
               <SelectContent>
                 {areas.length > 0 ? (
@@ -143,115 +154,122 @@ export default function DroneManagement() {
                 )}
               </SelectContent>
             </Select>
-          </div>
-
-          <div className="flex justify-center">
             <Button
-              className="bg-black text-white text-xs px-4 py-1 mt-2 hover:bg-gray-800 h-8"
+              className="bg-black text-white hover:bg-gray-800 h-10 w-full md:w-auto"
               onClick={handleCreate}
             >
               Add Drone
             </Button>
+            {/* </div> */}
+
+            {/* <div className="w-full md:w-1/4 flex items-end justify-start md:justify-end h-full">
+              <Button
+                className="bg-black text-white hover:bg-gray-800 h-10 w-full md:w-auto"
+                onClick={handleCreate}
+              >
+                Add Drone
+              </Button>
+            </div> */}
           </div>
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-center">All Drones</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <table className="w-full text-left border border-gray-200">
-            <thead>
-              <tr className="bg-gray-100 text-sm">
-                <th className="p-2 border-r">Name</th>
-                <th className="p-2 border-r">Drone ID</th>
-                <th className="p-2 border-r">Area</th>
-                <th className="p-2">Actions</th>
+      <div>
+        <h2 className="text-lg md:text-xl font-semibold text-left mb-4">
+          All Drones
+        </h2>
+        <div className="overflow-x-auto rounded-lg border border-gray-300 shadow-sm">
+          <table className="min-w-full text-left border-collapse overflow-hidden rounded-lg">
+            <thead className="bg-gray-100">
+              <tr>
+                <th className="p-2 md:p-3 border border-gray-300">Name</th>
+                <th className="p-2 md:p-3 border border-gray-300">Drone ID</th>
+                <th className="p-2 md:p-3 border border-gray-300">Area</th>
+                <th className="p-2 md:p-3 border border-gray-300">Actions</th>
               </tr>
             </thead>
             <tbody>
               {drones.map((drone) => (
-                <tr key={drone._id} className="border-t text-sm">
-                  <td className="p-2 border-r">
+                <tr key={drone._id}>
+                  <td className="p-2 md:p-3 border border-gray-200">
                     {editingDrone?._id === drone._id ? (
                       <Input
                         value={editingDrone.name}
                         onChange={(e) =>
-                          setEditingDrone({ ...editingDrone, name: e.target.value })
+                          setEditingDrone({
+                            ...editingDrone,
+                            name: e.target.value,
+                          })
                         }
-                        className="h-8 text-sm"
+                        className="h-9"
                       />
                     ) : (
                       drone.name
                     )}
                   </td>
-                  <td className="p-2 border-r">
+                  <td className="p-2 md:p-3 border border-gray-200">
                     {editingDrone?._id === drone._id ? (
                       <Input
                         value={editingDrone.drone_id}
                         disabled
-                        className="h-8 text-sm"
+                        className="h-9"
                       />
                     ) : (
                       drone.drone_id
                     )}
                   </td>
-                  <td className="p-2 border-r">
+                  <td className="p-2 md:p-3 border border-gray-200">
                     {editingDrone?._id === drone._id ? (
                       <Input
                         value={editingDrone.area_id}
                         disabled
-                        className="h-8 text-sm"
+                        className="h-9"
                       />
                     ) : (
                       drone.area_id
                     )}
                   </td>
-                  <td className="p-2 space-x-2">
-                    {editingDrone?._id === drone._id ? (
-                      <>
-                        <Button
-                          size="sm"
-                          className="text-xs"
-                          onClick={handleUpdate}
-                        >
-                          Save
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="text-xs"
-                          onClick={() => setEditingDrone(null)}
-                        >
-                          Cancel
-                        </Button>
-                      </>
-                    ) : (
-                      <>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => setEditingDrone(drone)}
-                        >
-                          <Pencil className="w-4 h-4" />
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="destructive"
-                          onClick={() => handleDelete(drone._id)}
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </>
-                    )}
+                  <td className="p-2 md:p-3 border border-gray-200 space-x-2">
+                    <div className="flex flex-wrap gap-2">
+                      {editingDrone?._id === drone._id ? (
+                        <>
+                          <Button size="sm" onClick={handleUpdate}>
+                            Save
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => setEditingDrone(null)}
+                          >
+                            Cancel
+                          </Button>
+                        </>
+                      ) : (
+                        <>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => setEditingDrone(drone)}
+                          >
+                            <Pencil className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            onClick={() => handleDelete(drone._id)}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }
