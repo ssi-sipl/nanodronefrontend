@@ -16,7 +16,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Pencil, Trash2 } from "lucide-react";
 
 interface Drone {
-  _id: string;
+  id: string;
   name: string;
   drone_id: string;
   area_id: string;
@@ -81,7 +81,7 @@ export default function DroneManagement() {
   const handleUpdate = async () => {
     if (!editingDrone) return;
     try {
-      await axios.post(`${baseUrl}/drones/update/${editingDrone._id}`, {
+      await axios.post(`${baseUrl}/drones/update/${editingDrone.id}`, {
         name: editingDrone.name,
         drone_id: editingDrone.drone_id,
         area_id: editingDrone.area_id,
@@ -190,11 +190,11 @@ export default function DroneManagement() {
             </thead>
             <tbody>
               {drones.map((drone) => (
-                <tr key={drone._id}>
+                <tr key={drone.id}>
                   <td className="p-2 md:p-3 border border-gray-200">
-                    {editingDrone?._id === drone._id ? (
+                    {editingDrone?.id === drone.id ? (
                       <Input
-                        value={editingDrone.name}
+                        value={editingDrone?.name}
                         onChange={(e) =>
                           setEditingDrone({
                             ...editingDrone,
@@ -208,7 +208,7 @@ export default function DroneManagement() {
                     )}
                   </td>
                   <td className="p-2 md:p-3 border border-gray-200">
-                    {editingDrone?._id === drone._id ? (
+                    {editingDrone?.id === drone.id ? (
                       <Input
                         value={editingDrone.drone_id}
                         disabled
@@ -219,7 +219,7 @@ export default function DroneManagement() {
                     )}
                   </td>
                   <td className="p-2 md:p-3 border border-gray-200">
-                    {editingDrone?._id === drone._id ? (
+                    {editingDrone?.id === drone.id ? (
                       <Input
                         value={editingDrone.area_id}
                         disabled
@@ -231,7 +231,7 @@ export default function DroneManagement() {
                   </td>
                   <td className="p-2 md:p-3 border border-gray-200 space-x-2">
                     <div className="flex flex-wrap gap-2">
-                      {editingDrone?._id === drone._id ? (
+                      {editingDrone?.id === drone.id ? (
                         <>
                           <Button size="sm" onClick={handleUpdate}>
                             Save
@@ -256,7 +256,7 @@ export default function DroneManagement() {
                           <Button
                             size="sm"
                             variant="destructive"
-                            onClick={() => handleDelete(drone._id)}
+                            onClick={() => handleDelete(drone.id)}
                           >
                             <Trash2 className="w-4 h-4" />
                           </Button>

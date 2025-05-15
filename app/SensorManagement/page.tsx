@@ -16,7 +16,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Pencil, Trash2 } from "lucide-react";
 
 interface Sensor {
-  _id: string;
+  id: string;
   name: string;
   sensor_id: string;
   area_id: string;
@@ -87,7 +87,7 @@ export default function SensorManagement() {
     if (!editingSensor) return;
     try {
       await axios.post(
-        `${baseUrl}/sensors/update/${editingSensor._id}`,
+        `${baseUrl}/sensors/update/${editingSensor.id}`,
         editingSensor
       );
       setEditingSensor(null);
@@ -209,9 +209,9 @@ export default function SensorManagement() {
             </thead>
             <tbody>
               {sensors.map((sensor) => (
-                <tr key={sensor._id}>
+                <tr key={sensor.id}>
                   <td className="p-2 md:p-3 border border-gray-200">
-                    {editingSensor?._id === sensor._id ? (
+                    {editingSensor?.id === sensor.id ? (
                       <Input
                         value={editingSensor.name}
                         onChange={(e) =>
@@ -227,7 +227,7 @@ export default function SensorManagement() {
                     )}
                   </td>
                   <td className="p-2 md:p-3 border border-gray-200">
-                    {editingSensor?._id === sensor._id ? (
+                    {editingSensor?.id === sensor.id ? (
                       <Input
                         value={editingSensor.sensor_id}
                         disabled
@@ -238,7 +238,7 @@ export default function SensorManagement() {
                     )}
                   </td>
                   <td className="p-2 md:p-3 border border-gray-200">
-                    {editingSensor?._id === sensor._id ? (
+                    {editingSensor?.id === sensor.id ? (
                       <Input
                         value={editingSensor.area_id}
                         disabled
@@ -249,7 +249,7 @@ export default function SensorManagement() {
                     )}
                   </td>
                   <td className="p-2 md:p-3 border border-gray-200">
-                    {editingSensor?._id === sensor._id ? (
+                    {editingSensor?.id === sensor.id ? (
                       <Input
                         type="number"
                         value={editingSensor.latitude}
@@ -266,7 +266,7 @@ export default function SensorManagement() {
                     )}
                   </td>
                   <td className="p-2 md:p-3 border border-gray-200">
-                    {editingSensor?._id === sensor._id ? (
+                    {editingSensor?.id === sensor.id ? (
                       <Input
                         type="number"
                         value={editingSensor.longitude}
@@ -284,7 +284,7 @@ export default function SensorManagement() {
                   </td>
                   <td className="p-2 md:p-3 border border-gray-200">
                     <div className="flex flex-wrap gap-2">
-                      {editingSensor?._id === sensor._id ? (
+                      {editingSensor?.id === sensor.id ? (
                         <>
                           <Button size="sm" onClick={handleUpdate}>
                             Save
@@ -309,7 +309,7 @@ export default function SensorManagement() {
                           <Button
                             size="sm"
                             variant="destructive"
-                            onClick={() => handleDelete(sensor._id)}
+                            onClick={() => handleDelete(sensor.id)}
                           >
                             <Trash2 className="w-4 h-4" />
                           </Button>

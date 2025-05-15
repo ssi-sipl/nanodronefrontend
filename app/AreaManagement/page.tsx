@@ -157,7 +157,7 @@ export default function AreaManagement() {
             </thead>
             <tbody>
               {areas.map((area: any) => (
-                <tr key={area._id}>
+                <tr key={area.id}>
                   <td className="p-2 md:p-3 border border-gray-200">
                     {editId === area._id ? (
                       <Input
