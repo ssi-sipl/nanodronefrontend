@@ -34,8 +34,8 @@ export function ConfigurationPanel({ currentSensor }: ConfigurationPanelProps) {
 
   useEffect(() => {
     if (!currentSensor) return;
-    setLatitude(currentSensor?.latitude.toString() ?? "");
-    setLongitude(currentSensor?.longitude.toString() ?? "");
+    setLatitude(currentSensor?.latitude.toFixed(8).toString() ?? "");
+    setLongitude(currentSensor?.longitude.toFixed(8).toString() ?? "");
   }, [currentSensor]);
   useEffect(() => {
     const fetchAreaByDroneId = async () => {
@@ -82,7 +82,7 @@ export function ConfigurationPanel({ currentSensor }: ConfigurationPanelProps) {
 
         setLatitude("");
         setLongitude("");
-        setAltitude("");
+        setAltitude("10");
       } else {
         alert("Please fill in all fields");
       }

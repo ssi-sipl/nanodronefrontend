@@ -72,7 +72,8 @@ export default function MapDisplay({ setCurrentSensor }: MapDisplayProps) {
 
   // ✅ Define the icon globally so it works inside any scope
   const sensorIcon = L.icon({
-    iconUrl: "/icons/application_green.png",
+    iconUrl: "/icons/sensor_icon2.png",
+
     iconSize: [40, 40],
     iconAnchor: [20, 40],
     popupAnchor: [0, -40],
@@ -129,7 +130,8 @@ export default function MapDisplay({ setCurrentSensor }: MapDisplayProps) {
 
               marker.on("click", () => {
                 console.log("Sensor clicked:", sensor);
-                setCurrentSensor(sensor);
+                // setCurrentSensor(sensor);
+                setCurrentSensor({ ...sensor });
               });
             }
           });
