@@ -72,7 +72,7 @@ export default function MapDisplay({ setCurrentSensor }: MapDisplayProps) {
 
   // ✅ Define the icon globally so it works inside any scope
   const sensorIcon = L.icon({
-    iconUrl: "/icons/sensor_icon2.png",
+    iconUrl: "/icons/sensor_icon3.png",
 
     iconSize: [40, 40],
     iconAnchor: [20, 40],
