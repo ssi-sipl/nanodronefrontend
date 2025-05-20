@@ -31,6 +31,7 @@ export function ConfigurationPanel({ currentSensor }: ConfigurationPanelProps) {
   const [altitude, setAltitude] = useState("10");
   const [areaId, setAreaId] = useState("");
   const [selectedDroneId, setSelectedDroneId] = useState<string | undefined>();
+  const [usbAddress, setUsbAddress] = useState("");
 
   useEffect(() => {
     if (!currentSensor) return;
@@ -59,7 +60,14 @@ export function ConfigurationPanel({ currentSensor }: ConfigurationPanelProps) {
 
   const handleSendDrone = async () => {
     try {
-      if (latitude && longitude && altitude && selectedDroneId && areaId) {
+      if (
+        latitude &&
+        longitude &&
+        altitude &&
+        selectedDroneId &&
+        areaId &&
+        usbAddress
+      ) {
         const res = await fetch(`${baseUrl}/drones/send`, {
           method: "POST",
           headers: {
@@ -71,6 +79,7 @@ export function ConfigurationPanel({ currentSensor }: ConfigurationPanelProps) {
             latitude: Number(latitude),
             longitude: Number(longitude),
             altitude: Number(altitude),
+            usb_address: usbAddress,
           }),
         });
 
@@ -83,6 +92,7 @@ export function ConfigurationPanel({ currentSensor }: ConfigurationPanelProps) {
         setLatitude("");
         setLongitude("");
         setAltitude("10");
+        setUsbAddress("");
       } else {
         alert("Please fill in all fields");
       }
@@ -163,6 +173,17 @@ export function ConfigurationPanel({ currentSensor }: ConfigurationPanelProps) {
             <DroneDropdown
               selectedDroneId={selectedDroneId ?? null}
               setSelectedDroneId={(id) => setSelectedDroneId(id)}
+            />
+          </div>
+
+          <div className="grid gap-2">
+            <Label htmlFor="usb_address">USB Address</Label>
+            <Input
+              id="usb_address"
+              type="text"
+              value={usbAddress}
+              onChange={(e) => setUsbAddress(e.target.value)}
+              placeholder="Enter USB address"
             />
           </div>
 
