@@ -62,6 +62,25 @@ export default function MapDisplay({ setCurrentSensor }: MapDisplayProps) {
   //   [28.598357, 77.099167],
   // ];
 
+  const Center_Position = {
+    "plot 93": {
+      lat: 28.44920097252899,
+      lng: 77.03902458008703,
+      bounds: [
+        [28.451235968630048, 77.03347643073973],
+        [28.447165976427932, 77.04457272943434],
+      ],
+    },
+    "chattarpur demo site": {
+      lat: 28.425123,
+      lng: 77.216237,
+      bounds: [
+        [28.470173, 77.216237],
+        [28.380073, 77.216237],
+      ],
+    },
+  };
+
   const DEFAULT_LAT = 28.44920097252899;
   const DEFAULT_LNG = 77.03902458008703;
 
