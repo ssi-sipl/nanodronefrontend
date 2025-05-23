@@ -66,15 +66,24 @@ export default function DroneManagement() {
 
   const handleCreate = async () => {
     try {
-      await axios.post(`${baseUrl}/drones/create`, {
+      const res = await axios.post(`${baseUrl}/drones/create`, {
         name: newDrone.name,
         drone_id: newDrone.drone_id,
         area_id: newDrone.area,
       });
+      alert(res.data.message);
       setNewDrone({ name: "", drone_id: "", area: "" });
       fetchDrones();
     } catch (err) {
-      console.error("Failed to create drone", err);
+      if (axios.isAxiosError(err)) {
+        if (err.response?.data?.message) {
+          alert(err.response.data.message);
+        } else {
+          alert("An unexpected error occurred.");
+        }
+      } else {
+        alert("Something went wrong.");
+      }
     }
   };
 

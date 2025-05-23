@@ -33,15 +33,27 @@ export default function AreaManagement() {
   const handleSubmit = async () => {
     if (!name || !areaId) return alert("Please enter both name and area ID");
     try {
-      await axios.post(`${baseUrl}/areas/create`, {
+      const res = await axios.post(`${baseUrl}/areas/create`, {
         name,
         area_id: areaId,
       });
+
+      alert(res.data.message);
+
       setName("");
       setAreaId("");
       fetchAreas();
     } catch (err) {
-      console.error("Error creating area", err);
+      // console.error("Error creating area", err);
+      if (axios.isAxiosError(err)) {
+        if (err.response?.data?.message) {
+          alert(err.response.data.message);
+        } else {
+          alert("An unexpected error occurred.");
+        }
+      } else {
+        alert("Something went wrong.");
+      }
     }
   };
 

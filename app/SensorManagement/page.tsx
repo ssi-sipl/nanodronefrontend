@@ -69,7 +69,8 @@ export default function SensorManagement() {
 
   const handleCreate = async () => {
     try {
-      await axios.post(`${baseUrl}/sensors/create`, newSensor);
+      const res = await axios.post(`${baseUrl}/sensors/create`, newSensor);
+      alert(res.data.message);
       setNewSensor({
         name: "",
         sensor_id: "",
@@ -79,7 +80,15 @@ export default function SensorManagement() {
       });
       fetchSensors();
     } catch (err) {
-      console.error("Failed to create sensor", err);
+      if (axios.isAxiosError(err)) {
+        if (err.response?.data?.message) {
+          alert(err.response.data.message);
+        } else {
+          alert("An unexpected error occurred.");
+        }
+      } else {
+        alert("Something went wrong.");
+      }
     }
   };
 
