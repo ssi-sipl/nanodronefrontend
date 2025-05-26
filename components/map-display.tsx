@@ -81,12 +81,12 @@ export default function MapDisplay({ setCurrentSensor }: MapDisplayProps) {
     },
   };
 
-  const DEFAULT_LAT = 28.44920097252899;
-  const DEFAULT_LNG = 77.03902458008703;
+  const DEFAULT_LAT = 25.244991455141024;
+  const DEFAULT_LNG = 78.4679457080173;
 
   const bounds: LatLngBoundsLiteral = [
-    [28.451235968630048, 77.03347643073973],
-    [28.447165976427932, 77.04457272943434],
+    [25.26335105506797, 78.46445308103547],
+    [25.226631855214077, 78.47143833499914],
   ];
 
   // ✅ Define the icon globally so it works inside any scope
@@ -122,7 +122,7 @@ export default function MapDisplay({ setCurrentSensor }: MapDisplayProps) {
             });
 
             // Add the tile layer to the map
-            L.tileLayer("/tiles3/{z}/{x}/{y}.jpg", {
+            L.tileLayer("/babina1/{z}/{x}/{y}.jpg", {
               tileSize: 256,
               noWrap: true,
               bounds: bounds,
