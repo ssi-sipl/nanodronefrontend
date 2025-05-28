@@ -128,6 +128,14 @@ export function ConfigurationPanel({ currentSensor }: ConfigurationPanelProps) {
     }
   };
 
+  const handleDroneView = async () => {
+    if (typeof window !== "undefined") {
+      const mediaMtxHost = "http://localhost:8889/"; // replace with your IP/domain
+      const streamUrl = `${mediaMtxHost}${selectedDroneId}`;
+      window.open(streamUrl, "_blank", "width=800,height=600");
+    }
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -213,6 +221,13 @@ export function ConfigurationPanel({ currentSensor }: ConfigurationPanelProps) {
             disabled={!selectedDroneId}
           >
             Drop Payload{" "}
+          </Button>
+          <Button
+            className="w-full bg-cyan-500 hover:bg-cyan-600 transition-all ease-in-out"
+            onClick={handleDroneView}
+            disabled={!selectedDroneId}
+          >
+            Drone View
           </Button>
         </div>
       </CardContent>
