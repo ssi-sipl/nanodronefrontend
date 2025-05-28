@@ -8,6 +8,7 @@ const MapDisplay = dynamic(() => import("@/components/map-display"), {
 import { ConfigurationPanel } from "@/components/configuration-panel";
 // import MapDisplay from "@/components/map-display";
 import { useState } from "react";
+import TelemetryDashboard from "@/components/TelemetryDashboard";
 
 interface Sensor {
   __v: number;
@@ -31,6 +32,9 @@ export default function Dashboard() {
         <div className="lg:col-span-2 bg-gray-50 rounded-lg shadow-sm">
           <div className="h-[400px] sm:h-[500px] lg:h-[600px]">
             <MapDisplay setCurrentSensor={setCurrentSensor} />
+            <div className="w-full">
+              <TelemetryDashboard />
+            </div>
           </div>
         </div>
 

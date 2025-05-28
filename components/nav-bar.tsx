@@ -46,6 +46,7 @@ export function NavBar() {
     { href: "/AreaManagement", label: "Area" },
     { href: "/DroneManagement", label: "Drone" },
     { href: "/SensorManagement", label: "Sensor" },
+    { href: "/TelemetryDashboard", label: "Telemetry" },
   ];
 
   return (
