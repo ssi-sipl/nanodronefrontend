@@ -131,7 +131,7 @@ export function ConfigurationPanel({ currentSensor }: ConfigurationPanelProps) {
   const handleDroneView = async () => {
     if (typeof window !== "undefined") {
       const mediaMtxHost = "http://localhost:8889/"; // replace with your IP/domain
-      const streamUrl = `${mediaMtxHost}${selectedDroneId}`;
+      const streamUrl = `${baseUrl}/${selectedDroneId}`;
       window.open(streamUrl, "_blank", "width=800,height=600");
     }
   };
