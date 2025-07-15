@@ -1,15 +1,14 @@
 "use client";
 
-import { use, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { baseUrl } from "@/lib/config";
 import { DroneDropdown } from "./drone-dropdown";
-import { Area } from "recharts";
 import { AreaDropdown } from "./area-dropdown";
-import { set } from "date-fns";
+import { latLngToMGRS, mgrsToLatLng } from "@/lib/mgrs"; // ✅ import
 
 interface Sensor {
   __v: number;
@@ -32,12 +31,35 @@ export function ConfigurationPanel({ currentSensor }: ConfigurationPanelProps) {
   const [areaId, setAreaId] = useState("");
   const [selectedDroneId, setSelectedDroneId] = useState<string | undefined>();
   const [usbAddress, setUsbAddress] = useState("");
+  const [gridRef, setGridRef] = useState(""); // ✅ MGRS state
 
+  // Load sensor lat/lng if available
   useEffect(() => {
     if (!currentSensor) return;
-    setLatitude(currentSensor?.latitude.toFixed(8).toString() ?? "");
-    setLongitude(currentSensor?.longitude.toFixed(8).toString() ?? "");
+    const lat = currentSensor.latitude.toFixed(8);
+    const lng = currentSensor.longitude.toFixed(8);
+    setLatitude(lat);
+    setLongitude(lng);
   }, [currentSensor]);
+
+  // Update MGRS when lat/lng changes
+  useEffect(() => {
+    if (latitude && longitude) {
+      const mgrsStr = latLngToMGRS(parseFloat(latitude), parseFloat(longitude));
+      setGridRef(mgrsStr);
+    }
+  }, [latitude, longitude]);
+
+  // Handle manual MGRS input
+  const handleGridRefChange = (value: string) => {
+    setGridRef(value.toUpperCase().trim());
+    const point = mgrsToLatLng(value);
+    if (point) {
+      setLatitude(point.lat.toFixed(8));
+      setLongitude(point.lng.toFixed(8));
+    }
+  };
+
   useEffect(() => {
     const fetchAreaByDroneId = async () => {
       try {
@@ -48,14 +70,11 @@ export function ConfigurationPanel({ currentSensor }: ConfigurationPanelProps) {
 
         setAreaId(data.data.area_id);
       } catch (err) {
-        // alert("Failed to fetch area by drone ID");
         setAreaId("No Area");
-      } finally {
-        // setLoading(false);
       }
     };
 
-    fetchAreaByDroneId();
+    if (selectedDroneId) fetchAreaByDroneId();
   }, [selectedDroneId]);
 
   const handleSendDrone = async () => {
@@ -93,6 +112,7 @@ export function ConfigurationPanel({ currentSensor }: ConfigurationPanelProps) {
         setLongitude("");
         setAltitude("10");
         setUsbAddress("");
+        setGridRef("");
       } else {
         alert("Please fill in all fields");
       }
@@ -130,7 +150,7 @@ export function ConfigurationPanel({ currentSensor }: ConfigurationPanelProps) {
 
   const handleDroneView = async () => {
     if (typeof window !== "undefined") {
-      const mediaMtxHost = baseUrl.replace(":5000", ":8889"); // replace with your IP/domain
+      const mediaMtxHost = baseUrl.replace(":5000", ":8889");
       const streamUrl = `${mediaMtxHost}/${selectedDroneId}`;
       window.open(streamUrl, "_blank", "width=800,height=600");
     }
@@ -162,6 +182,17 @@ export function ConfigurationPanel({ currentSensor }: ConfigurationPanelProps) {
               value={longitude}
               onChange={(e) => setLongitude(e.target.value)}
               placeholder="Enter longitude"
+            />
+          </div>
+
+          <div className="grid gap-2">
+            <Label htmlFor="gridRef">Grid Reference (MGRS)</Label>
+            <Input
+              id="gridRef"
+              type="text"
+              value={gridRef}
+              onChange={(e) => handleGridRefChange(e.target.value)}
+              placeholder="e.g. 43QED1234567890"
             />
           </div>
 
@@ -212,7 +243,7 @@ export function ConfigurationPanel({ currentSensor }: ConfigurationPanelProps) {
             onClick={handleSendDrone}
             disabled={!selectedDroneId}
           >
-            Send Drone{" "}
+            Send Drone
           </Button>
 
           <Button
@@ -220,7 +251,7 @@ export function ConfigurationPanel({ currentSensor }: ConfigurationPanelProps) {
             onClick={handleDropPayload}
             disabled={!selectedDroneId}
           >
-            Drop Payload{" "}
+            Drop Payload
           </Button>
           <Button
             className="w-full bg-cyan-500 hover:bg-cyan-600 transition-all ease-in-out"
@@ -234,3 +265,5 @@ export function ConfigurationPanel({ currentSensor }: ConfigurationPanelProps) {
     </Card>
   );
 }
+
+

@@ -13,8 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Modal } from "./ui/ui-modal";
-import MapDisplay from "./map-display";
+import { latLngToMGRS, mgrsToLatLng } from "@/lib/mgrs"; // ✅ Import utility
 
 type Area = {
   name: string;
@@ -36,6 +35,7 @@ export function SensorSettings({
   const [sensorName, setSensorName] = useState("");
   const [latitude, setLatitude] = useState("");
   const [longitude, setLongitude] = useState("");
+  const [gridRef, setGridRef] = useState(""); // ✅ MGRS
 
   const [areas, setAreas] = useState<Area[]>([]);
   const [selectedAreaId, setSelectedAreaId] = useState<string | null>(null);
@@ -46,6 +46,24 @@ export function SensorSettings({
       setLongitude(addSensorLng.toString());
     }
   }, [addSensorLat, addSensorLng]);
+
+  // ✅ Update gridRef when lat/lng change
+  useEffect(() => {
+    if (latitude && longitude) {
+      const mgrsStr = latLngToMGRS(parseFloat(latitude), parseFloat(longitude));
+      setGridRef(mgrsStr);
+    }
+  }, [latitude, longitude]);
+
+  // ✅ Handle gridRef edit
+  const handleGridRefChange = (value: string) => {
+    setGridRef(value.toUpperCase().trim());
+    const point = mgrsToLatLng(value);
+    if (point) {
+      setLatitude(point.lat.toFixed(8));
+      setLongitude(point.lng.toFixed(8));
+    }
+  };
 
   const handleSave = async () => {
     if (sensorId && sensorName && selectedAreaId && latitude && longitude) {
@@ -73,6 +91,7 @@ export function SensorSettings({
       setSensorName("");
       setLatitude("");
       setLongitude("");
+      setGridRef(""); // ✅ clear grid
       setSelectedAreaId(null);
       if (setSensorAddSuccess) {
         setSensorAddSuccess(true);
@@ -87,15 +106,10 @@ export function SensorSettings({
       try {
         const res = await fetch(`${baseUrl}/areas`);
         const response = await res.json();
-        if (response.status) {
-          if (response.data) {
-            const data = response.data;
-            setAreas(data || []);
-            console.log("Areas fetched successfully: ", data);
-            return;
-          }
+        if (response.status && response.data) {
+          setAreas(response.data || []);
+          console.log("Areas fetched successfully: ", response.data);
         }
-        // alert(response.message);
       } catch (error) {
         console.error("Failed to fetch areas:", error);
       }
@@ -139,7 +153,7 @@ export function SensorSettings({
                 disabled={disableLatLng}
                 value={latitude}
                 onChange={(e) => setLatitude(e.target.value)}
-                placeholder="Enter sensor laitude"
+                placeholder="Enter sensor latitude"
               />
             </div>
 
@@ -154,16 +168,27 @@ export function SensorSettings({
               />
             </div>
 
+            <div className="grid gap-2">
+              <Label htmlFor="gridRef">Grid Reference (MGRS)</Label>
+              <Input
+                id="gridRef"
+                type="text"
+                value={gridRef}
+                onChange={(e) => handleGridRefChange(e.target.value)}
+                placeholder="e.g. 43QED1234567890"
+              />
+            </div>
+
             <div className="grid gap-2 z-5000">
               <Select
                 value={selectedAreaId || ""}
                 onValueChange={(value) => setSelectedAreaId(value)}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select a Area" />
+                  <SelectValue placeholder="Select an Area" />
                 </SelectTrigger>
                 <SelectContent
-                  position="popper" // important
+                  position="popper"
                   side="bottom"
                   align="start"
                   className="z-[1100]"
@@ -190,3 +215,4 @@ export function SensorSettings({
     </div>
   );
 }
+
