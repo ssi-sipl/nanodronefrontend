@@ -253,17 +253,15 @@ export function ConfigurationPanel({ currentSensor }: ConfigurationPanelProps) {
           >
             Drop Payload
           </Button>
-          <Button
+          {/* <Button
             className="w-full bg-cyan-500 hover:bg-cyan-600 transition-all ease-in-out"
             onClick={handleDroneView}
             disabled={!selectedDroneId}
           >
             Drone View
-          </Button>
+          </Button> */}
         </div>
       </CardContent>
     </Card>
   );
 }
-
-
