@@ -81,12 +81,20 @@ export default function MapDisplay({ setCurrentSensor }: MapDisplayProps) {
     },
   };
 
-  const DEFAULT_LAT = 25.244991455141024;
-  const DEFAULT_LNG = 78.4679457080173;
+  // const DEFAULT_LAT = 25.244991455141024;
+  // const DEFAULT_LNG = 78.4679457080173;
+
+  // const bounds: LatLngBoundsLiteral = [
+  //   [25.26335105506797, 78.46445308103547],
+  //   [25.226631855214077, 78.47143833499914],
+  // ];
+
+  const DEFAULT_LAT = 32.7976667;
+  const DEFAULT_LNG = 74.9077222;
 
   const bounds: LatLngBoundsLiteral = [
-    [25.26335105506797, 78.46445308103547],
-    [25.226631855214077, 78.47143833499914],
+    [32.808829, 74.890582],
+    [32.770696, 74.928948],
   ];
 
   // ✅ Define the icon globally so it works inside any scope
@@ -122,7 +130,7 @@ export default function MapDisplay({ setCurrentSensor }: MapDisplayProps) {
             });
 
             // Add the tile layer to the map
-            L.tileLayer("/babina1/{z}/{x}/{y}.jpg", {
+            L.tileLayer("/jammu/{z}/{x}/{y}.jpg", {
               tileSize: 256,
               noWrap: true,
               bounds: bounds,
