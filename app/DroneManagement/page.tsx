@@ -70,6 +70,7 @@ export default function DroneManagement() {
         name: newDrone.name,
         drone_id: newDrone.drone_id,
         area_id: newDrone.area,
+        cameraFeed: "", // Placeholder, replace as needed
       });
       alert(res.data.message);
       setNewDrone({ name: "", drone_id: "", area: "" });
