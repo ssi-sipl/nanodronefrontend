@@ -1,0 +1,47 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Area {
+  id      Int     @id @default(autoincrement())
+  name    String
+  area_id String  @unique
+  drones  Drone[] // 1-to-many relationship with Drone
+}
+
+model Drone {
+  id       Int     @id @default(autoincrement())
+  name     String
+  drone_id String  @unique
+  area_id  String
+  areaRef  Int
+  cameraFeed String @default("rtsp://<user>:<admin>@<ip>:554/{stream url}")
+  area     Area    @relation(fields: [areaRef], references: [id])
+}
+
+model Sensor {
+  id        Int     @id @default(autoincrement())
+  name      String
+  area_id   String
+  sensor_id String  @unique
+  latitude  Float
+  longitude Float
+}
+
+model User {
+  id       Int    @id @default(autoincrement())
+  email    String @unique
+  password String
+}
