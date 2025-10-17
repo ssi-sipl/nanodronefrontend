@@ -1,8 +1,8 @@
 import prisma from "@/lib/prisma"; // adjust path as needed
 import { NextResponse } from "next/server";
 import fs from "fs/promises";
-import yaml from "js-yaml";
-import { mediamtxPath, restartMediaMTXContainer } from "@/lib/mediamtx"; // adjust these imports
+// import yaml from "js-yaml";
+// import { mediamtxPath, restartMediaMTXContainer } from "@/lib/mediamtx"; // adjust these imports
 
 export async function POST(request: Request) {
   try {
@@ -95,19 +95,19 @@ export async function POST(request: Request) {
       },
     });
 
-    // Update YAML config
-    const fileContents = await fs.readFile(mediamtxPath, "utf8");
-    const config = yaml.load(fileContents) || {};
+    // // Update YAML config
+    // const fileContents = await fs.readFile(mediamtxPath, "utf8");
+    // const config = yaml.load(fileContents) || {};
 
-    if (!config.paths) config.paths = {};
-    config.paths[drone_id] = {
-      source: cameraFeed || "rtsp://user:pass@ip:554/snl/live/1/1/3",
-      sourceOnDemand: true,
-    };
+    // if (!config.paths) config.paths = {};
+    // config.paths[drone_id] = {
+    //   source: cameraFeed || "rtsp://user:pass@ip:554/snl/live/1/1/3",
+    //   sourceOnDemand: true,
+    // };
 
-    await fs.writeFile(mediamtxPath, yaml.dump(config), "utf8");
+    // await fs.writeFile(mediamtxPath, yaml.dump(config), "utf8");
 
-    await restartMediaMTXContainer();
+    // await restartMediaMTXContainer();
 
     return NextResponse.json(
       { status: true, message: "Drone added successfully", data: drone },

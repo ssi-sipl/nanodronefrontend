@@ -1,8 +1,8 @@
 import prisma from "@/lib/prisma"; // adjust path as needed
 import { NextResponse } from "next/server";
-import mqtt from "mqtt";
+import { getMqttClient } from "@/lib/mqtt";
 
-const client = mqtt.connect(process.env.MQTT_BROKER_URL as string);
+const client = getMqttClient();
 
 export async function POST(request: Request) {
   try {
