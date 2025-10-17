@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma"; // adjust path as needed
 
-export async function PATCH(request: Request) {
+export async function POST(request: Request) {
   try {
     const body = await request.json();
     const { id, name, area_id } = body;

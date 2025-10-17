@@ -1,7 +1,7 @@
 import prisma from "@/lib/prisma"; // adjust path as needed
 import { NextResponse } from "next/server";
 
-export async function DELETE(
+export async function POST(
   request: Request,
   { params }: { params: { id: string } }
 ) {
