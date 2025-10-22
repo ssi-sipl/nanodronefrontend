@@ -15,12 +15,12 @@ export async function POST(
       );
     }
 
-    const { id } = params;
+    const { id } = await params;
     const { name, area_id, sensor_id, latitude, longitude } = body;
 
     // Validate ID
-    const sensorId = parseInt(id, 10);
-    if (!sensorId || isNaN(sensorId)) {
+    const sensorId = id;
+    if (!sensorId || typeof sensorId !== "string") {
       return NextResponse.json(
         { status: false, message: "Invalid ID format." },
         { status: 400 }

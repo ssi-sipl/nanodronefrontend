@@ -6,7 +6,7 @@ export async function GET(
   { params }: { params: { name: string } }
 ) {
   try {
-    const { name } = params;
+    const { name } = await params;
 
     console.log("Fetching drone ID for name:", name);
 

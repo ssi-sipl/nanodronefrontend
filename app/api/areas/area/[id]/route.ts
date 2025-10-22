@@ -6,10 +6,10 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const { id } = params;
+    const { id } = await params;
 
     const area = await prisma.area.findUnique({
-      where: { id: parseInt(id) },
+      where: { id: id },
       include: {
         drones: true, // populating drones
       },

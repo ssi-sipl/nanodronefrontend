@@ -6,11 +6,11 @@ export async function POST(
   { params }: { params: { id: string } }
 ) {
   try {
-    const { id } = params;
+    const { id } = await params;
 
     // Validate ID
-    const droneId = parseInt(id, 10);
-    if (!droneId || isNaN(droneId)) {
+    const droneId = id;
+    if (!droneId || typeof droneId !== "string") {
       return NextResponse.json(
         { status: false, message: "Invalid drone ID format." },
         { status: 400 }

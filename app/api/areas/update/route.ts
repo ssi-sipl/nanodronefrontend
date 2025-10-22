@@ -6,7 +6,7 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { id, name, area_id } = body;
 
-    if (!id || isNaN(parseInt(id))) {
+    if (!id || typeof id !== "string") {
       return NextResponse.json(
         { status: false, message: "Invalid area ID format." },
         { status: 400 }
@@ -14,7 +14,7 @@ export async function POST(request: Request) {
     }
 
     const existingArea = await prisma.area.findUnique({
-      where: { id: parseInt(id) },
+      where: { id: id },
     });
 
     if (!existingArea) {
@@ -26,7 +26,7 @@ export async function POST(request: Request) {
 
     const conflict = await prisma.area.findFirst({
       where: {
-        id: { not: parseInt(id) },
+        id: { not: id },
         OR: [{ name }, { area_id }],
       },
     });
@@ -42,7 +42,7 @@ export async function POST(request: Request) {
     }
 
     const updated = await prisma.area.update({
-      where: { id: parseInt(id) },
+      where: { id: id },
       data: {
         name,
         area_id,

@@ -6,16 +6,16 @@ export async function POST(
   { params }: { params: { id: string } }
 ) {
   try {
-    const { id } = params;
+    const { id } = await params;
 
-    if (!id || isNaN(parseInt(id))) {
+    if (!id || typeof id !== "string") {
       return NextResponse.json(
         { status: false, message: "Invalid area ID format." },
         { status: 400 }
       );
     }
 
-    const area = await prisma.area.findUnique({ where: { id: parseInt(id) } });
+    const area = await prisma.area.findUnique({ where: { id: id } });
     if (!area) {
       return NextResponse.json(
         { status: false, message: "Area not found." },
@@ -24,10 +24,10 @@ export async function POST(
     }
 
     // Delete drones linked to the area
-    await prisma.drone.deleteMany({ where: { areaRef: parseInt(id) } });
+    await prisma.drone.deleteMany({ where: { areaRef: id } });
 
     // Then delete the area
-    await prisma.area.delete({ where: { id: parseInt(id) } });
+    await prisma.area.delete({ where: { id: id } });
 
     return NextResponse.json(
       {
