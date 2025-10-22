@@ -9,7 +9,6 @@ import { baseUrl } from "@/lib/config";
 import { DroneDropdown } from "./drone-dropdown";
 import { AreaDropdown } from "./area-dropdown";
 import { latLngToMGRS, mgrsToLatLng } from "@/lib/mgrs"; // ✅ import
-import SpeechToText from "./SpeechToText";
 import { supabase } from "@/lib/supabaseClient";
 
 interface Sensor {
@@ -24,6 +23,8 @@ interface Sensor {
 
 interface ConfigurationPanelProps {
   currentSensor: Sensor | null;
+  setIsLoading?: (value: boolean) => void;
+  setLoadingStatus?: (value: string) => void;
 }
 
 export function ConfigurationPanel({ currentSensor }: ConfigurationPanelProps) {
@@ -37,6 +38,10 @@ export function ConfigurationPanel({ currentSensor }: ConfigurationPanelProps) {
   const [isRecording, setIsRecording] = useState(false);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [loadingStatus, setLoadingStatus] = useState(
+    "Processing voice command..."
+  );
 
   // Load sensor lat/lng if available
   useEffect(() => {
@@ -221,6 +226,9 @@ export function ConfigurationPanel({ currentSensor }: ConfigurationPanelProps) {
 
           const result = await res.json();
 
+          setIsLoading?.(false);
+          setLoadingStatus?.("Processing complete!");
+
           alert(result.message);
 
           console.log(result);
@@ -240,6 +248,9 @@ export function ConfigurationPanel({ currentSensor }: ConfigurationPanelProps) {
     };
 
     mediaRecorder.onstop = async () => {
+      setIsLoading?.(true);
+      setLoadingStatus?.("Uploading audio to server...");
+
       const audioBlob = new Blob(audioChunksRef.current, {
         type: "audio/webm",
       });
@@ -268,6 +279,7 @@ export function ConfigurationPanel({ currentSensor }: ConfigurationPanelProps) {
       }
 
       console.log("Uploaded audio URL:", publicUrlData.publicUrl);
+      setLoadingStatus?.("Transcribing Audio...");
 
       // Send URL to AssemblyAI
       const res = await fetch("/api/transcribe", {
@@ -280,6 +292,8 @@ export function ConfigurationPanel({ currentSensor }: ConfigurationPanelProps) {
       console.log("Transcript:", result.transcript);
 
       const transcript = (result.transcript as string) || "";
+
+      setLoadingStatus?.("Processing command and sending drone...");
 
       const regex = /send\s+(.+?)\s+to\s+([^.?!]+)/i;
       const match = transcript.match(regex);
@@ -324,11 +338,17 @@ export function ConfigurationPanel({ currentSensor }: ConfigurationPanelProps) {
 
         const result = await res.json();
 
+        setIsLoading?.(false);
+        setLoadingStatus?.("Processing complete!");
+
         alert(result.message);
 
         console.log(result);
       }
     } catch (error) {
+      setIsLoading?.(false);
+      setLoadingStatus?.("Failed to process command.");
+
       console.error("Error dropping payload:", error);
       alert("Failed to drop payload. Please try again.");
     }
@@ -343,120 +363,129 @@ export function ConfigurationPanel({ currentSensor }: ConfigurationPanelProps) {
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Deploy Drone</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
-          <div className="grid gap-2">
-            <Label htmlFor="latitude">Latitude</Label>
-            <Input
-              id="latitude"
-              type="number"
-              value={latitude}
-              onChange={(e) => setLatitude(e.target.value)}
-              placeholder="Enter latitude"
-            />
-          </div>
+    <>
+      {isLoading && (
+        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black bg-opacity-80 text-white">
+          <div className="animate-spin rounded-full h-20 w-20 border-4 border-t-transparent border-purple-500 mb-6"></div>
+          <p className="text-lg font-medium animate-pulse">{loadingStatus}</p>
+        </div>
+      )}
 
-          <div className="grid gap-2">
-            <Label htmlFor="longitude">Longitude</Label>
-            <Input
-              id="longitude"
-              type="number"
-              value={longitude}
-              onChange={(e) => setLongitude(e.target.value)}
-              placeholder="Enter longitude"
-            />
-          </div>
+      <Card>
+        <CardHeader>
+          <CardTitle>Deploy Drone</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <div className="grid gap-2">
+              <Label htmlFor="latitude">Latitude</Label>
+              <Input
+                id="latitude"
+                type="number"
+                value={latitude}
+                onChange={(e) => setLatitude(e.target.value)}
+                placeholder="Enter latitude"
+              />
+            </div>
 
-          <div className="grid gap-2">
-            <Label htmlFor="gridRef">Grid Reference (MGRS)</Label>
-            <Input
-              id="gridRef"
-              type="text"
-              value={gridRef}
-              onChange={(e) => handleGridRefChange(e.target.value)}
-              placeholder="e.g. 43QED1234567890"
-            />
-          </div>
+            <div className="grid gap-2">
+              <Label htmlFor="longitude">Longitude</Label>
+              <Input
+                id="longitude"
+                type="number"
+                value={longitude}
+                onChange={(e) => setLongitude(e.target.value)}
+                placeholder="Enter longitude"
+              />
+            </div>
 
-          <div className="grid gap-2">
-            <Label htmlFor="altitude">Altitude</Label>
-            <Input
-              id="altitude"
-              type="number"
-              value={altitude}
-              onChange={(e) => setAltitude(e.target.value)}
-              placeholder="Enter altitude"
-            />
-          </div>
+            <div className="grid gap-2">
+              <Label htmlFor="gridRef">Grid Reference (MGRS)</Label>
+              <Input
+                id="gridRef"
+                type="text"
+                value={gridRef}
+                onChange={(e) => handleGridRefChange(e.target.value)}
+                placeholder="e.g. 43QED1234567890"
+              />
+            </div>
 
-          <div className="grid gap-1">
-            <Label htmlFor="droneID">Drone ID</Label>
-            <DroneDropdown
-              selectedDroneId={selectedDroneId ?? null}
-              setSelectedDroneId={(id) => setSelectedDroneId(id)}
-            />
-          </div>
+            <div className="grid gap-2">
+              <Label htmlFor="altitude">Altitude</Label>
+              <Input
+                id="altitude"
+                type="number"
+                value={altitude}
+                onChange={(e) => setAltitude(e.target.value)}
+                placeholder="Enter altitude"
+              />
+            </div>
 
-          <div className="grid gap-2">
-            <Label htmlFor="usb_address">USB Address</Label>
-            <Input
-              id="usb_address"
-              type="text"
-              value={usbAddress}
-              onChange={(e) => setUsbAddress(e.target.value)}
-              placeholder="Enter USB address"
-            />
-          </div>
+            <div className="grid gap-1">
+              <Label htmlFor="droneID">Drone ID</Label>
+              <DroneDropdown
+                selectedDroneId={selectedDroneId ?? null}
+                setSelectedDroneId={(id) => setSelectedDroneId(id)}
+              />
+            </div>
 
-          <div className="grid gap-1">
-            <Label className="text-gray-500" htmlFor="areaID">
-              Area ID (Auto)
-            </Label>
+            <div className="grid gap-2">
+              <Label htmlFor="usb_address">USB Address</Label>
+              <Input
+                id="usb_address"
+                type="text"
+                value={usbAddress}
+                onChange={(e) => setUsbAddress(e.target.value)}
+                placeholder="Enter USB address"
+              />
+            </div>
 
-            <AreaDropdown
-              selectedAreaId={areaId}
-              setSelectedAreaId={() => {}}
-              disabled={true}
-            />
-          </div>
+            <div className="grid gap-1">
+              <Label className="text-gray-500" htmlFor="areaID">
+                Area ID (Auto)
+              </Label>
 
-          <Button
-            onClick={isRecording ? stopRecording : startRecording}
-            className={`px-4 py-2 rounded-md text-white ${
-              isRecording ? "bg-red-600" : "bg-green-600"
-            }`}
-          >
-            {isRecording ? "Stop Recording" : "Start Recording"}
-          </Button>
+              <AreaDropdown
+                selectedAreaId={areaId}
+                setSelectedAreaId={() => {}}
+                disabled={true}
+              />
+            </div>
 
-          <Button
-            className="w-full"
-            onClick={handleSendDrone}
-            disabled={!selectedDroneId}
-          >
-            Send Drone
-          </Button>
+            <Button
+              onClick={isRecording ? stopRecording : startRecording}
+              className={`px-4 py-2 rounded-md text-white ${
+                isRecording ? "bg-red-600" : "bg-green-600"
+              }`}
+            >
+              {isRecording ? "Stop Recording" : "Start Recording"}
+            </Button>
 
-          <Button
-            className="w-full bg-green-500 hover:bg-green-600 transition-all ease-in-out"
-            onClick={handleDropPayload}
-            disabled={!selectedDroneId}
-          >
-            Drop Payload
-          </Button>
-          {/* <Button
+            <Button
+              className="w-full"
+              onClick={handleSendDrone}
+              disabled={!selectedDroneId}
+            >
+              Send Drone
+            </Button>
+
+            <Button
+              className="w-full bg-green-500 hover:bg-green-600 transition-all ease-in-out"
+              onClick={handleDropPayload}
+              disabled={!selectedDroneId}
+            >
+              Drop Payload
+            </Button>
+            {/* <Button
             className="w-full bg-cyan-500 hover:bg-cyan-600 transition-all ease-in-out"
             onClick={handleDroneView}
             disabled={!selectedDroneId}
           >
             Drone View
           </Button> */}
-        </div>
-      </CardContent>
-    </Card>
+          </div>
+        </CardContent>
+      </Card>
+    </>
   );
 }
