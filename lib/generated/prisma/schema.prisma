@@ -1,0 +1,41 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model Area {
+  id      String  @id @default(auto()) @map("_id") @db.ObjectId
+  name    String
+  area_id String  @unique
+  drones  Drone[]
+}
+
+model Drone {
+  id         String  @id @default(auto()) @map("_id") @db.ObjectId
+  name       String
+  drone_id   String  @unique
+  area_id    String
+  areaRef    String  @db.ObjectId
+  cameraFeed String? @default("rtsp://<user>:<admin>@<ip>:554/{stream url}")
+  area       Area?   @relation(fields: [areaRef], references: [id])
+}
+
+model Sensor {
+  id        String @id @default(auto()) @map("_id") @db.ObjectId
+  name      String
+  area_id   String
+  sensor_id String @unique
+  latitude  Float
+  longitude Float
+}
+
+model User {
+  id       String @id @default(auto()) @map("_id") @db.ObjectId
+  email    String @unique
+  password String
+}
