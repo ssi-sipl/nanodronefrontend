@@ -315,6 +315,9 @@ export function ConfigurationPanel({ currentSensor }: ConfigurationPanelProps) {
         await processCommand("test-drone", "sensor alpha");
       } else {
         console.log("No command detected in transcript.");
+        setIsLoading?.(false);
+        setLoadingStatus?.("No valid command detected in audio.");
+        alert("No valid command detected in audio.");
       }
     };
 
