@@ -162,6 +162,8 @@ export function ConfigurationPanel({ currentSensor }: ConfigurationPanelProps) {
 
         if (!droneData.status) {
           alert(droneData.message || "Failed to find drone");
+          setIsLoading?.(false);
+          setLoadingStatus?.("Failed to find drone.");
           return;
         }
 
@@ -183,6 +185,8 @@ export function ConfigurationPanel({ currentSensor }: ConfigurationPanelProps) {
 
         if (!sensorData.status) {
           alert(sensorData.message || "Failed to find sensor");
+          setIsLoading?.(false);
+          setLoadingStatus?.("Failed to find sensor.");
           return;
         }
         console.log("Sensor Data:", sensorData);
