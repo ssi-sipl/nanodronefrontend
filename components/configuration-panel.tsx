@@ -318,6 +318,7 @@ export function ConfigurationPanel({ currentSensor }: ConfigurationPanelProps) {
         setIsLoading?.(false);
         setLoadingStatus?.("No valid command detected in audio.");
         alert("No valid command detected in audio.");
+        return;
       }
     };
 
