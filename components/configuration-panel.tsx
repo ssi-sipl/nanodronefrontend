@@ -10,6 +10,7 @@ import { DroneDropdown } from "./drone-dropdown";
 import { AreaDropdown } from "./area-dropdown";
 import { latLngToMGRS, mgrsToLatLng } from "@/lib/mgrs"; // ✅ import
 import { supabase } from "@/lib/supabaseClient";
+import { set } from "date-fns";
 
 interface Sensor {
   __v: number;
@@ -41,6 +42,9 @@ export function ConfigurationPanel({ currentSensor }: ConfigurationPanelProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [loadingStatus, setLoadingStatus] = useState(
     "Processing voice command..."
+  );
+  const [transcribedAudio, setTranscribedAudio] = useState(
+    "Transcript will appear here"
   );
 
   // Load sensor lat/lng if available
@@ -290,6 +294,7 @@ export function ConfigurationPanel({ currentSensor }: ConfigurationPanelProps) {
 
       const result = await res.json();
       console.log("Transcript:", result.transcript);
+      setTranscribedAudio(result.transcript);
 
       const transcript = (result.transcript as string) || "";
 
@@ -460,6 +465,16 @@ export function ConfigurationPanel({ currentSensor }: ConfigurationPanelProps) {
             >
               {isRecording ? "Stop Recording" : "Start Recording"}
             </Button>
+            {transcribedAudio && (
+              <h1
+                onClick={isRecording ? stopRecording : startRecording}
+                className={`px-4 py-2 rounded-md text-white ${
+                  isRecording ? "bg-red-600" : "bg-green-600"
+                }`}
+              >
+                {transcribedAudio}
+              </h1>
+            )}
 
             <Button
               className="w-full"
