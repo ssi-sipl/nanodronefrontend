@@ -253,68 +253,29 @@ export function ConfigurationPanel({ currentSensor }: ConfigurationPanelProps) {
 
     mediaRecorder.onstop = async () => {
       setIsLoading?.(true);
-      setLoadingStatus?.("Uploading audio to server...");
+      setLoadingStatus?.("Transcribing audio...");
 
       const audioBlob = new Blob(audioChunksRef.current, {
         type: "audio/webm",
       });
-      const fileName = `recording_${Date.now()}.webm`;
+      const formData = new FormData();
+      formData.append("file", audioBlob, "command.webm");
 
-      // Upload to Supabase
-      const { data, error } = await supabase.storage
-        .from("audio-uploads")
-        .upload(fileName, audioBlob, { cacheControl: "3600", upsert: true });
-
-      if (error) {
-        console.error("Supabase upload error:", error);
-        return;
-      }
-
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-
-      // Get public URL
-      const { data: publicUrlData } = supabase.storage
-        .from("audio-uploads")
-        .getPublicUrl(fileName);
-
-      if (!publicUrlData || !publicUrlData.publicUrl) {
-        console.error("❌ Failed to get public URL");
-        return;
-      }
-
-      console.log("Uploaded audio URL:", publicUrlData.publicUrl);
-      setLoadingStatus?.("Transcribing Audio...");
-
-      // Send URL to AssemblyAI
-      const res = await fetch("/api/transcribe", {
+      // Send directly to your new API route
+      const res = await fetch("/api/voice-command", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ audioUrl: publicUrlData.publicUrl }),
+        body: formData,
       });
 
       const result = await res.json();
-      console.log("Transcript:", result.transcript);
-      setTranscribedAudio(result.transcript);
+      console.log("Voice Command Result:", result);
 
-      const transcript = (result.transcript as string) || "";
+      setTranscribedAudio(result.command);
 
-      setLoadingStatus?.("Processing command and sending drone...");
-
-      const regex = /send\s+(.+?)\s+to\s+([^.?!]+)/i;
-      const match = transcript.match(regex);
-
-      if (match) {
-        const droneName = match[1].trim();
-        const sensorName = match[2].trim();
-        await processCommand(droneName, sensorName);
-      } else if (transcript.trim().toLowerCase().startsWith("send")) {
-        // If transcript starts with "send" but no explicit names parsed, use defaults
-        console.log(
-          "Transcript starts with 'send' but no names detected. Using defaults."
-        );
-        await processCommand("test-drone", "sensor alpha");
+      if (result.drone && result.sensor) {
+        setLoadingStatus?.("Processing command and sending drone...");
+        await processCommand(result.drone, result.sensor);
       } else {
-        console.log("No command detected in transcript.");
         setIsLoading?.(false);
         setLoadingStatus?.("No valid command detected in audio.");
         alert("No valid command detected in audio.");
