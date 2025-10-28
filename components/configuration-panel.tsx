@@ -11,6 +11,7 @@ import { AreaDropdown } from "./area-dropdown";
 import { latLngToMGRS, mgrsToLatLng } from "@/lib/mgrs"; // ✅ import
 import { supabase } from "@/lib/supabaseClient";
 import { set } from "date-fns";
+import { Buffer } from "buffer";
 
 interface Sensor {
   __v: number;
@@ -146,6 +147,7 @@ export function ConfigurationPanel({ currentSensor }: ConfigurationPanelProps) {
 
     const processCommand = async (droneName: string, sensorName: string) => {
       try {
+        setLoadingStatus?.("Processing Transcription..");
         console.log("Drone Name:", droneName);
         console.log("Sensor Name:", sensorName);
 
@@ -257,75 +259,50 @@ export function ConfigurationPanel({ currentSensor }: ConfigurationPanelProps) {
 
     mediaRecorder.onstop = async () => {
       setIsLoading?.(true);
-      setLoadingStatus?.("Uploading audio to server...");
+      setLoadingStatus?.("Processing audio...");
 
       const audioBlob = new Blob(audioChunksRef.current, {
         type: "audio/webm",
       });
-      const fileName = `recording_${Date.now()}.webm`;
+      const arrayBuffer = await audioBlob.arrayBuffer();
+      const base64Audio = Buffer.from(arrayBuffer).toString("base64");
 
-      // Upload to Supabase
-      const { data, error } = await supabase.storage
-        .from("audio-uploads")
-        .upload(fileName, audioBlob, { cacheControl: "3600", upsert: true });
+      setLoadingStatus?.("Sending Audio..");
 
-      if (error) {
-        console.error("Supabase upload error:", error);
-        return;
-      }
-
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-
-      // Get public URL
-      const { data: publicUrlData } = supabase.storage
-        .from("audio-uploads")
-        .getPublicUrl(fileName);
-
-      if (!publicUrlData || !publicUrlData.publicUrl) {
-        console.error("❌ Failed to get public URL");
-        return;
-      }
-
-      console.log("Uploaded audio URL:", publicUrlData.publicUrl);
-      setLoadingStatus?.("Transcribing Audio...");
-
+      console.log("Base64 audio length:", base64Audio.length);
+      console.log(
+        "Sending body:",
+        JSON.stringify({ audioData: base64Audio }).slice(0, 100) + "..."
+      );
+      setLoadingStatus?.("Transcribing Audio..");
       const res = await fetch("/api/transcribe", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ audioUrl: publicUrlData.publicUrl }),
+        body: JSON.stringify({ audioData: base64Audio }), // ✅ send base64 directly
       });
 
       const result = await res.json();
+      console.log("Gemini Transcription Result:", result);
 
-      console.log("Output: ", result);
+      const transcript = result.transcript || "No transcript";
+      setTranscribedAudio(transcript);
 
-      const command = result.command || "";
+      const droneName = result.droneName;
+      const areaName = result.areaName;
 
-      // Show the transcript text in UI
-      setTranscribedAudio(command || "No transcript received");
-      setLoadingStatus?.("Processing command and sending drone...");
-
-      // Use Gemini’s extracted fields (if available)
-      const droneName = result.drone;
-      const sensorName = result.sensor;
-
-      // Fallback: If Gemini didn’t extract names, use regex-based extraction
-      if (!droneName || !sensorName) {
-        if (command.toLowerCase().includes("send")) {
-          console.log("Send command detected");
-          await processCommand("camera drone", "sensor alpha");
-        }
-        console.log(
-          "No command detected falling back to defaults and sending the drone"
-        );
-        setIsLoading?.(false);
-        setLoadingStatus?.("No valid command detected in audio.");
-        alert("No valid command detected in audio.");
+      if (droneName && areaName) {
+        await processCommand(droneName, areaName);
       } else {
-        await processCommand(droneName, sensorName);
-
-        return;
+        if (transcript.toLowerCase().includes("send")) {
+          await processCommand("camera drone", "alpha");
+          return;
+        }
+        console.log("No valid command detected");
+        setLoadingStatus?.("No valid command detected.");
+        alert("No valid command detected in audio.");
       }
+
+      setIsLoading?.(false);
     };
 
     mediaRecorder.start();

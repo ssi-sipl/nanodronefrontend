@@ -5,28 +5,24 @@ const apiKey = process.env.GEMINI_API_KEY;
 if (!apiKey) {
   throw new Error("Missing GEMINI_API_KEY environment variable");
 }
+
 const genAI = new GoogleGenerativeAI(apiKey);
 
 export async function POST(req: NextRequest) {
   try {
-    const { audioUrl } = await req.json();
-    console.log("Received audio URL:", audioUrl);
+    // ✅ Accept base64 audio data directly from frontend
+    const { audioData } = await req.json();
 
-    if (!audioUrl) {
+    if (!audioData) {
       return NextResponse.json(
-        { error: "No audio URL provided" },
+        { error: "No audio data provided" },
         { status: 400 }
       );
     }
 
-    // Fetch audio data from Supabase public URL
-    const audioResponse = await fetch(audioUrl);
-    const arrayBuffer = await audioResponse.arrayBuffer();
-    const base64Audio = Buffer.from(arrayBuffer).toString("base64");
-
-    // Initialize Gemini model
+    // ✅ Initialize Gemini model
     const model = genAI.getGenerativeModel({
-      model: "gemini-2.5-flash",
+      model: "gemini-2.5-flash", // or gemini-2.0-flash if available
     });
 
     const prompt = `
@@ -34,20 +30,20 @@ export async function POST(req: NextRequest) {
       - The audio may be in Hindi, English, or Hinglish.
       - First, transcribe the spoken audio in English script.
       - Then extract two fields:
-        1. drone: drone name mentioned (e.g., "Falcon", "NanoDrone")
-        2. sensor: target area or sensor name mentioned (e.g., "Alpha", "Sector 5")
+        1. droneName: drone name mentioned (e.g., "Falcon", "NanoDrone")
+        2. areaName: target area or sensor name mentioned (e.g., "Alpha", "Sector 5")
 
-      Respond *only* in valid JSON (without any markdown, code blocks, or explanations).  
+      Respond *only* in valid JSON (without markdown or code blocks).
       Example output:
-      {"command": "Send Falcon to Alpha", "drone": "Falcon", "sensor": "Alpha"}
+      {"transcript": "Send Falcon to Alpha", "droneName": "Falcon", "areaName": "Alpha"}
     `;
 
-    // Send audio + prompt to Gemini
+    // ✅ Send the audio data + instruction to Gemini
     const result = await model.generateContent([
       {
         inlineData: {
-          mimeType: "audio/webm", // or "audio/mp3" if you change your recorder
-          data: base64Audio,
+          mimeType: "audio/webm",
+          data: audioData, // direct base64 from frontend
         },
       },
       { text: prompt },
@@ -56,15 +52,15 @@ export async function POST(req: NextRequest) {
     let output = result.response.text().trim();
     console.log("Gemini raw output:", output);
 
-    // 🧹 Clean up ```json fences if Gemini adds them
+    // 🧹 Clean ```json fences if Gemini adds them
     output = output.replace(/```json|```/g, "").trim();
 
-    // ✅ Parse the cleaned JSON
+    // ✅ Parse JSON safely
     let jsonOutput;
     try {
       jsonOutput = JSON.parse(output);
     } catch (err) {
-      console.error("❌ JSON parse failed, returning raw text:", err);
+      console.error("JSON parse failed:", err);
       jsonOutput = { transcript: output };
     }
 
