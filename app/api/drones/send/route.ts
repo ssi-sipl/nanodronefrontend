@@ -105,9 +105,18 @@ export async function POST(request: Request) {
       );
     }
 
+    // const droneData = {
+    //   droneid: drone_id.toString(),
+    //   areaid: area_id.toString(),
+    //   latitude: latitude.toString(),
+    //   longitude: longitude.toString(),
+    //   targetAltitude: altitude.toString(),
+    //   usbAddress: usb_address.toString(),
+    // };
+
     const droneData = {
-      droneid: drone_id.toString(),
-      areaid: area_id.toString(),
+      droneid: "DR001",
+      areaid: "A001",
       latitude: latitude.toString(),
       longitude: longitude.toString(),
       targetAltitude: altitude.toString(),
