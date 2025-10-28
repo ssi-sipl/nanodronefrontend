@@ -289,7 +289,6 @@ export function ConfigurationPanel({ currentSensor }: ConfigurationPanelProps) {
       console.log("Uploaded audio URL:", publicUrlData.publicUrl);
       setLoadingStatus?.("Transcribing Audio...");
 
-      // Send URL to AssemblyAI
       const res = await fetch("/api/transcribe", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -297,31 +296,34 @@ export function ConfigurationPanel({ currentSensor }: ConfigurationPanelProps) {
       });
 
       const result = await res.json();
-      console.log("Transcript:", result.transcript);
-      setTranscribedAudio(result.transcript);
 
-      const transcript = (result.transcript as string) || "";
+      console.log("Output: ", result);
 
+      const command = result.command || "";
+
+      // Show the transcript text in UI
+      setTranscribedAudio(command || "No transcript received");
       setLoadingStatus?.("Processing command and sending drone...");
 
-      const regex = /send\s+(.+?)\s+to\s+([^.?!]+)/i;
-      const match = transcript.toLowerCase().match(regex);
+      // Use Gemini’s extracted fields (if available)
+      const droneName = result.drone;
+      const sensorName = result.sensor;
 
-      if (match) {
-        const droneName = match[1].trim();
-        const sensorName = match[2].trim();
-        await processCommand(droneName, sensorName);
-      } else if (transcript.trim().toLowerCase().startsWith("send")) {
-        // If transcript starts with "send" but no explicit names parsed, use defaults
+      // Fallback: If Gemini didn’t extract names, use regex-based extraction
+      if (!droneName || !sensorName) {
+        if (command.toLowerCase().includes("send")) {
+          console.log("Send command detected");
+          await processCommand("camera drone", "sensor alpha");
+        }
         console.log(
-          "Transcript starts with 'send' but no names detected. Using defaults."
+          "No command detected falling back to defaults and sending the drone"
         );
-        await processCommand("camera drone", "sensor alpha");
-      } else {
-        console.log("No command detected in transcript.");
         setIsLoading?.(false);
         setLoadingStatus?.("No valid command detected in audio.");
         alert("No valid command detected in audio.");
+      } else {
+        await processCommand(droneName, sensorName);
+
         return;
       }
     };
