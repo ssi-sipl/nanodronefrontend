@@ -305,7 +305,7 @@ export function ConfigurationPanel({ currentSensor }: ConfigurationPanelProps) {
       setLoadingStatus?.("Processing command and sending drone...");
 
       const regex = /send\s+(.+?)\s+to\s+([^.?!]+)/i;
-      const match = transcript.match(regex);
+      const match = transcript.toLowerCase().match(regex);
 
       if (match) {
         const droneName = match[1].trim();
@@ -316,7 +316,7 @@ export function ConfigurationPanel({ currentSensor }: ConfigurationPanelProps) {
         console.log(
           "Transcript starts with 'send' but no names detected. Using defaults."
         );
-        await processCommand("test-drone", "sensor alpha");
+        await processCommand("camera drone", "sensor alpha");
       } else {
         console.log("No command detected in transcript.");
         setIsLoading?.(false);

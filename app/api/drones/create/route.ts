@@ -61,7 +61,9 @@ export async function POST(request: Request) {
     }
 
     // Find area by area_id
-    const area = await prisma.area.findUnique({ where: { area_id } });
+    const area = await prisma.area.findUnique({
+      where: { area_id: area_id.toLocaleLowerCase().trim() },
+    });
     if (!area) {
       return NextResponse.json(
         { status: false, message: "Area with the provided ID does not exist." },
@@ -71,7 +73,12 @@ export async function POST(request: Request) {
 
     // Check if drone with same ID or name exists
     const droneExists = await prisma.drone.findFirst({
-      where: { OR: [{ drone_id }, { name }] },
+      where: {
+        OR: [
+          { drone_id: drone_id.toLocaleLowerCase().trim() },
+          { name: name.toLocaleLowerCase().trim() },
+        ],
+      },
     });
 
     if (droneExists) {
@@ -87,11 +94,13 @@ export async function POST(request: Request) {
     // Create new drone
     const drone = await prisma.drone.create({
       data: {
-        name,
-        drone_id,
-        area_id,
+        name: name.toLocaleLowerCase().trim(),
+        drone_id: drone_id.toLocaleLowerCase().trim(),
+        area_id: area_id.toLocaleLowerCase().trim(),
         areaRef: area.id,
-        cameraFeed: cameraFeed || "rtsp://user:pass@ip:554/snl/live/1/1/3",
+        cameraFeed:
+          cameraFeed.toLocaleLowerCase().trim() ||
+          "rtsp://user:pass@ip:554/snl/live/1/1/3",
       },
     });
 

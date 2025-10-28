@@ -6,7 +6,7 @@ export async function GET(
   { params }: { params: { drone_id: string } }
 ) {
   try {
-    const { drone_id } = params;
+    const { drone_id } = await params;
 
     if (!drone_id || typeof drone_id !== "string") {
       return NextResponse.json(

@@ -38,7 +38,10 @@ export async function POST(request: Request) {
 
     const existingArea = await prisma.area.findFirst({
       where: {
-        OR: [{ name }, { area_id }],
+        OR: [
+          { name: name.toLocaleLowerCase().trim() },
+          { area_id: area_id.toLocaleLowerCase().trim() },
+        ],
       },
     });
 
@@ -54,8 +57,8 @@ export async function POST(request: Request) {
 
     const newArea = await prisma.area.create({
       data: {
-        name,
-        area_id,
+        name: name.toLocaleLowerCase().trim(),
+        area_id: area_id.toLocaleLowerCase().trim(),
       },
     });
 
