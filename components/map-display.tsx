@@ -244,7 +244,7 @@ export default function MapDisplay({ setCurrentSensor }: MapDisplayProps) {
           }}
           title={clickAddSensor ? "Disable Add Sensor" : "Enable Add Sensor"}
         >
-          Add Sensor
+          Video Feed
         </button>
         <button
           className=" bg-white p-2 rounded-full shadow hover:bg-gray-100 border border-gray-300"

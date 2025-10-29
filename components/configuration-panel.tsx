@@ -462,22 +462,20 @@ export function ConfigurationPanel({ currentSensor }: ConfigurationPanelProps) {
 
             <Button
               onClick={isRecording ? stopRecording : startRecording}
-              className={`px-4 py-2 rounded-md text-white ${
+              className={`px-4 py-2 rounded-md w-full text-white ${
                 isRecording ? "bg-red-600" : "bg-green-600"
               }`}
             >
-              {isRecording ? "Stop Recording" : "Start Recording"}
+              {isRecording ? "Stop Recording" : "Voice Command"}
             </Button>
-            {transcribedAudio && (
+            {/* {transcribedAudio && (
               <h1
                 onClick={isRecording ? stopRecording : startRecording}
-                className={`px-4 py-2 rounded-md text-white ${
-                  isRecording ? "bg-red-600" : "bg-green-600"
-                }`}
+                className={`px-4 py-2 rounded-md `}
               >
                 {transcribedAudio}
               </h1>
-            )}
+            )} */}
 
             <Button
               className="w-full"
