@@ -8,6 +8,10 @@ if (!apiKey) {
 
 const genAI = new GoogleGenerativeAI(apiKey);
 
+const model = genAI.getGenerativeModel({
+  model: "gemini-2.5-flash", // or gemini-2.0-flash if available
+});
+
 export async function POST(req: NextRequest) {
   try {
     // ✅ Accept base64 audio data directly from frontend
@@ -21,9 +25,6 @@ export async function POST(req: NextRequest) {
     }
 
     // ✅ Initialize Gemini model
-    const model = genAI.getGenerativeModel({
-      model: "gemini-2.5-flash", // or gemini-2.0-flash if available
-    });
 
     const prompt = `
       You are a command parser for a drone control system.
