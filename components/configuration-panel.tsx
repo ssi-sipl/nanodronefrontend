@@ -152,13 +152,29 @@ export function ConfigurationPanel({ currentSensor }: ConfigurationPanelProps) {
         console.log("Sensor Name:", sensorName);
 
         console.log("Fetching drone ID for:", droneName.trim().toLowerCase());
-        const droneRes = await fetch(
-          `${baseUrl}/drones/name/${encodeURIComponent(
-            droneName.trim().toLowerCase()
-          )}`
-        );
+
+        const [droneRes, sensorRes] = await Promise.all([
+          fetch(
+            `${baseUrl}/drones/name/${encodeURIComponent(
+              droneName.trim().toLowerCase()
+            )}`
+          ),
+          fetch(
+            `${baseUrl}/sensors/name/${encodeURIComponent(
+              sensorName.trim().toLowerCase()
+            )}`
+          ),
+        ]);
 
         const droneData = await droneRes.json();
+        const sensorData = await sensorRes.json();
+        // const droneRes = await fetch(
+        //   `${baseUrl}/drones/name/${encodeURIComponent(
+        //     droneName.trim().toLowerCase()
+        //   )}`
+        // );
+
+        // const droneData = await droneRes.json();
 
         console.log("Drone fetch response:", droneData);
 
@@ -175,13 +191,13 @@ export function ConfigurationPanel({ currentSensor }: ConfigurationPanelProps) {
 
         // Fetch sensor by name
         console.log("Fetching sensor for:", sensorName.trim().toLowerCase());
-        const sensorRes = await fetch(
-          `${baseUrl}/sensors/name/${encodeURIComponent(
-            sensorName.trim().toLowerCase()
-          )}`
-        );
+        // const sensorRes = await fetch(
+        //   `${baseUrl}/sensors/name/${encodeURIComponent(
+        //     sensorName.trim().toLowerCase()
+        //   )}`
+        // );
 
-        const sensorData = await sensorRes.json();
+        // const sensorData = await sensorRes.json();
 
         console.log("Sensor fetch response:", sensorData);
 
@@ -201,8 +217,8 @@ export function ConfigurationPanel({ currentSensor }: ConfigurationPanelProps) {
         setUsbAddress("Auto-filled");
 
         // wait 1 second for feeds to populate
-        await new Promise((resolve) => setTimeout(resolve, 2000));
-        console.log("Paused 1s to allow feeds to fill automatically");
+        // await new Promise((resolve) => setTimeout(resolve, 2000));
+        // console.log("Paused 1s to allow feeds to fill automatically");
 
         const latitudeLocal = fetchedSensor.latitude.toFixed(8);
         const longitudeLocal = fetchedSensor.longitude.toFixed(8);
