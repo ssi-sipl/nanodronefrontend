@@ -1,20 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { createClient } from "@deepgram/sdk";
 
-const apiKey = process.env.GEMINI_API_KEY;
-if (!apiKey) {
-  throw new Error("Missing GEMINI_API_KEY environment variable");
+const deepgramApiKey = process.env.DEEPGRAM_API_KEY;
+if (!deepgramApiKey) {
+  throw new Error("Missing DEEPGRAM_API_KEY environment variable");
 }
 
-const genAI = new GoogleGenerativeAI(apiKey);
-
-const model = genAI.getGenerativeModel({
-  model: "gemini-2.5-flash", // or gemini-2.0-flash if available
-});
+const deepgram = createClient(deepgramApiKey);
 
 export async function POST(req: NextRequest) {
   try {
-    // ✅ Accept base64 audio data directly from frontend
     const { audioData } = await req.json();
 
     if (!audioData) {
@@ -24,52 +19,55 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // ✅ Initialize Gemini model
+    // Convert base64 to Buffer
+    const audioBuffer = Buffer.from(audioData, "base64");
 
-    const prompt = `
-      You are a command parser for a drone control system.
-      - The audio may be in Hindi, English, or Hinglish.
-      - First, transcribe the spoken audio in English script.
-      - Then extract two fields:
-        1. droneName: drone name mentioned (e.g., "Falcon", "NanoDrone")
-        2. areaName: target area or sensor name mentioned (e.g., "Alpha", "Sector 5")
-
-      Respond *only* in valid JSON (without markdown or code blocks).
-      Example output:
-      {"transcript": "Send Falcon to Alpha", "droneName": "Falcon", "areaName": "Alpha"}
-    `;
-
-    // ✅ Send the audio data + instruction to Gemini
-    const result = await model.generateContent([
+    // 🎙️ Send to Deepgram for transcription
+    const { result, error } = await deepgram.listen.prerecorded.transcribeFile(
+      audioBuffer,
       {
-        inlineData: {
-          mimeType: "audio/webm",
-          data: audioData, // direct base64 from frontend
-        },
-      },
-      { text: prompt },
-    ]);
+        model: "nova-2",
+        language: "en-IN",
+        smart_format: true,
+      }
+    );
 
-    let output = result.response.text().trim();
-    console.log("Gemini raw output:", output);
+    if (error) throw error;
 
-    // 🧹 Clean ```json fences if Gemini adds them
-    output = output.replace(/```json|```/g, "").trim();
+    const transcript =
+      result.results?.channels[0]?.alternatives[0]?.transcript ||
+      "No transcript";
 
-    // ✅ Parse JSON safely
-    let jsonOutput;
-    try {
-      jsonOutput = JSON.parse(output);
-    } catch (err) {
-      console.error("JSON parse failed:", err);
-      jsonOutput = { transcript: output };
+    console.log("Deepgram transcript:", transcript);
+
+    // 🧠 Parse drone and area names from text using simple regex/keywords
+    const regex = /send\s+(\w+)\s+(?:to|towards)\s+(\w+)/i;
+    const match = transcript.match(regex);
+
+    let droneName = null;
+    let areaName = null;
+
+    if (match) {
+      droneName = match[1];
+      areaName = match[2];
+    } else {
+      // fallback: try to detect keywords
+      if (transcript.toLowerCase().includes("drone"))
+        droneName = "camera drone";
+      if (transcript.toLowerCase().includes("alpha")) areaName = "alpha";
     }
+
+    const jsonOutput = {
+      transcript,
+      droneName,
+      areaName,
+    };
 
     return NextResponse.json(jsonOutput);
   } catch (error) {
-    console.error("Gemini error:", error);
+    console.error("Deepgram error:", error);
     return NextResponse.json(
-      { error: "Failed to process audio with Gemini" },
+      { error: "Failed to process audio with Deepgram" },
       { status: 500 }
     );
   }

@@ -166,8 +166,13 @@ export function ConfigurationPanel({ currentSensor }: ConfigurationPanelProps) {
           ),
         ]);
 
-        const droneData = await droneRes.json();
-        const sensorData = await sensorRes.json();
+        const [droneData, sensorData] = await Promise.all([
+          droneRes.json(),
+          sensorRes.json(),
+        ]);
+
+        // const droneData = await droneRes.json();
+        // const sensorData = await sensorRes.json();
         // const droneRes = await fetch(
         //   `${baseUrl}/drones/name/${encodeURIComponent(
         //     droneName.trim().toLowerCase()
