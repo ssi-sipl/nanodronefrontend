@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
 const apiKey = process.env.GEMINI_API_KEY;
@@ -9,22 +9,23 @@ if (!apiKey) {
 const genAI = new GoogleGenerativeAI(apiKey);
 
 const model = genAI.getGenerativeModel({
-  model: "gemini-2.5-flash", // or gemini-2.0-flash if available
+  model: "gemini-2.5-flash",
 });
 
 export async function POST(req: NextRequest) {
   try {
-    // ✅ Accept base64 audio data directly from frontend
-    const { audioData } = await req.json();
+    const formData = await req.formData();
+    const audioFile = formData.get("audio") as File;
 
-    if (!audioData) {
+    if (!audioFile) {
       return NextResponse.json(
-        { error: "No audio data provided" },
+        { error: "No audio file provided" },
         { status: 400 }
       );
     }
 
-    // ✅ Initialize Gemini model
+    const arrayBuffer = await audioFile.arrayBuffer();
+    const base64Audio = Buffer.from(arrayBuffer).toString("base64");
 
     const prompt = `
       You are a command parser for a drone control system.
@@ -39,37 +40,40 @@ export async function POST(req: NextRequest) {
       {"transcript": "Send Falcon to Alpha", "droneName": "Falcon", "areaName": "Alpha"}
     `;
 
-    // ✅ Send the audio data + instruction to Gemini
     const result = await model.generateContent([
       {
         inlineData: {
           mimeType: "audio/webm",
-          data: audioData, // direct base64 from frontend
+          data: base64Audio,
         },
       },
       { text: prompt },
     ]);
 
     let output = result.response.text().trim();
-    console.log("Gemini raw output:", output);
 
-    // 🧹 Clean ```json fences if Gemini adds them
     output = output.replace(/```json|```/g, "").trim();
 
-    // ✅ Parse JSON safely
     let jsonOutput;
     try {
       jsonOutput = JSON.parse(output);
     } catch (err) {
-      console.error("JSON parse failed:", err);
-      jsonOutput = { transcript: output };
+      console.error("[v0] JSON parse failed, raw output:", output);
+      jsonOutput = {
+        transcript: output,
+        droneName: null,
+        sensorName: null,
+      };
     }
 
     return NextResponse.json(jsonOutput);
   } catch (error) {
-    console.error("Gemini error:", error);
+    console.error("[v0] Transcribe error:", error);
     return NextResponse.json(
-      { error: "Failed to process audio with Gemini" },
+      {
+        error: "Failed to process audio",
+        details: error instanceof Error ? error.message : String(error),
+      },
       { status: 500 }
     );
   }

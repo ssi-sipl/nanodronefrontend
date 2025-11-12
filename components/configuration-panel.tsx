@@ -8,10 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { baseUrl } from "@/lib/config";
 import { DroneDropdown } from "./drone-dropdown";
 import { AreaDropdown } from "./area-dropdown";
-import { latLngToMGRS, mgrsToLatLng } from "@/lib/mgrs"; // ✅ import
-import { supabase } from "@/lib/supabaseClient";
-import { set } from "date-fns";
-import { Buffer } from "buffer";
+import { latLngToMGRS, mgrsToLatLng } from "@/lib/mgrs";
 
 interface Sensor {
   __v: number;
@@ -36,7 +33,7 @@ export function ConfigurationPanel({ currentSensor }: ConfigurationPanelProps) {
   const [areaId, setAreaId] = useState("");
   const [selectedDroneId, setSelectedDroneId] = useState<string | undefined>();
   const [usbAddress, setUsbAddress] = useState("");
-  const [gridRef, setGridRef] = useState(""); // ✅ MGRS state
+  const [gridRef, setGridRef] = useState("");
   const [isRecording, setIsRecording] = useState(false);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
@@ -47,6 +44,8 @@ export function ConfigurationPanel({ currentSensor }: ConfigurationPanelProps) {
   const [transcribedAudio, setTranscribedAudio] = useState(
     "Transcript will appear here"
   );
+
+  const cacheRef = useRef<Map<string, any>>(new Map());
 
   // Load sensor lat/lng if available
   useEffect(() => {
@@ -60,7 +59,10 @@ export function ConfigurationPanel({ currentSensor }: ConfigurationPanelProps) {
   // Update MGRS when lat/lng changes
   useEffect(() => {
     if (latitude && longitude) {
-      const mgrsStr = latLngToMGRS(parseFloat(latitude), parseFloat(longitude));
+      const mgrsStr = latLngToMGRS(
+        Number.parseFloat(latitude),
+        Number.parseFloat(longitude)
+      );
       setGridRef(mgrsStr);
     }
   }, [latitude, longitude]);
@@ -121,8 +123,6 @@ export function ConfigurationPanel({ currentSensor }: ConfigurationPanelProps) {
 
         alert(result.message);
 
-        console.log(result);
-
         setLatitude("");
         setLongitude("");
         setAltitude("10");
@@ -137,6 +137,12 @@ export function ConfigurationPanel({ currentSensor }: ConfigurationPanelProps) {
     }
   };
 
+  const convertAudioBlobToFormData = (audioBlob: Blob): FormData => {
+    const formData = new FormData();
+    formData.append("audio", audioBlob, "audio.webm");
+    return formData;
+  };
+
   const startRecording = async () => {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
     const mediaRecorder = new MediaRecorder(stream);
@@ -147,12 +153,9 @@ export function ConfigurationPanel({ currentSensor }: ConfigurationPanelProps) {
 
     const processCommand = async (droneName: string, sensorName: string) => {
       try {
-        setLoadingStatus?.("Processing Transcription..");
-        console.log("Drone Name:", droneName);
-        console.log("Sensor Name:", sensorName);
+        setLoadingStatus("Processing command...");
 
-        console.log("Fetching drone ID for:", droneName.trim().toLowerCase());
-
+        // Parallelize drone and sensor fetches
         const [droneRes, sensorRes] = await Promise.all([
           fetch(
             `${baseUrl}/drones/name/${encodeURIComponent(
@@ -166,82 +169,54 @@ export function ConfigurationPanel({ currentSensor }: ConfigurationPanelProps) {
           ),
         ]);
 
-        const droneData = await droneRes.json();
-        const sensorData = await sensorRes.json();
-        // const droneRes = await fetch(
-        //   `${baseUrl}/drones/name/${encodeURIComponent(
-        //     droneName.trim().toLowerCase()
-        //   )}`
-        // );
-
-        // const droneData = await droneRes.json();
-
-        console.log("Drone fetch response:", droneData);
+        const [droneData, sensorData] = await Promise.all([
+          droneRes.json(),
+          sensorRes.json(),
+        ]);
 
         if (!droneData.status) {
+          setIsLoading(false);
           alert(droneData.message || "Failed to find drone");
-          setIsLoading?.(false);
-          setLoadingStatus?.("Failed to find drone.");
+          return;
+        }
+
+        if (!sensorData.status) {
+          setIsLoading(false);
+          alert(sensorData.message || "Failed to find sensor");
           return;
         }
 
         const fetchedDroneId = droneData.data.drone_id;
-        console.log("Fetched Drone ID:", fetchedDroneId);
-        setSelectedDroneId(fetchedDroneId);
-
-        // Fetch sensor by name
-        console.log("Fetching sensor for:", sensorName.trim().toLowerCase());
-        // const sensorRes = await fetch(
-        //   `${baseUrl}/sensors/name/${encodeURIComponent(
-        //     sensorName.trim().toLowerCase()
-        //   )}`
-        // );
-
-        // const sensorData = await sensorRes.json();
-
-        console.log("Sensor fetch response:", sensorData);
-
-        if (!sensorData.status) {
-          alert(sensorData.message || "Failed to find sensor");
-          setIsLoading?.(false);
-          setLoadingStatus?.("Failed to find sensor.");
-          return;
-        }
-        console.log("Sensor Data:", sensorData);
-
         const fetchedSensor = sensorData.data;
-        setLatitude(fetchedSensor.latitude.toFixed(8));
-        setLongitude(fetchedSensor.longitude.toFixed(8));
-        setAreaId(droneData.data.area_id);
-
-        setUsbAddress("Auto-filled");
-
-        // wait 1 second for feeds to populate
-        // await new Promise((resolve) => setTimeout(resolve, 2000));
-        // console.log("Paused 1s to allow feeds to fill automatically");
-
         const latitudeLocal = fetchedSensor.latitude.toFixed(8);
         const longitudeLocal = fetchedSensor.longitude.toFixed(8);
         const altitudeLocal = "10";
         const areaIdLocal = droneData.data.area_id;
-        const selectedDroneIdLocal = fetchedDroneId;
         const usbAddressLocal = "Auto-filled";
 
         if (
           latitudeLocal &&
           longitudeLocal &&
           altitudeLocal &&
-          selectedDroneIdLocal &&
+          fetchedDroneId &&
           areaIdLocal &&
           usbAddressLocal
         ) {
+          setSelectedDroneId(fetchedDroneId);
+          setLatitude(latitudeLocal);
+          setLongitude(longitudeLocal);
+          setAreaId(areaIdLocal);
+          setUsbAddress(usbAddressLocal);
+
+          setLoadingStatus("Sending drone...");
+
           const res = await fetch(`${baseUrl}/drones/send`, {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
             },
             body: JSON.stringify({
-              drone_id: selectedDroneIdLocal,
+              drone_id: fetchedDroneId,
               area_id: areaIdLocal,
               latitude: Number(latitudeLocal),
               longitude: Number(longitudeLocal),
@@ -252,73 +227,62 @@ export function ConfigurationPanel({ currentSensor }: ConfigurationPanelProps) {
 
           const result = await res.json();
 
-          setIsLoading?.(false);
-          setLoadingStatus?.("Processing complete!");
+          setIsLoading(false);
+          setLoadingStatus("Processing complete!");
 
           alert(result.message);
 
-          console.log(result);
-
+          // Clear fields
           setLatitude("");
           setLongitude("");
           setAltitude("10");
           setUsbAddress("");
           setGridRef("");
         } else {
+          setIsLoading(false);
           alert("Please fill in all fields");
         }
       } catch (err) {
-        console.error("Error processing command:", err);
+        setIsLoading(false);
         alert("Failed to process command. Please try again.");
       }
     };
 
     mediaRecorder.onstop = async () => {
-      setIsLoading?.(true);
-      setLoadingStatus?.("Processing audio...");
+      setIsLoading(true);
+      setLoadingStatus("Processing audio...");
 
       const audioBlob = new Blob(audioChunksRef.current, {
         type: "audio/webm",
       });
-      const arrayBuffer = await audioBlob.arrayBuffer();
-      const base64Audio = Buffer.from(arrayBuffer).toString("base64");
 
-      setLoadingStatus?.("Sending Audio..");
+      const formData = convertAudioBlobToFormData(audioBlob);
 
-      console.log("Base64 audio length:", base64Audio.length);
-      console.log(
-        "Sending body:",
-        JSON.stringify({ audioData: base64Audio }).slice(0, 100) + "..."
-      );
-      setLoadingStatus?.("Transcribing Audio..");
+      setLoadingStatus("Transcribing...");
       const res = await fetch("/api/transcribe", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ audioData: base64Audio }), // ✅ send base64 directly
+        body: formData,
       });
 
       const result = await res.json();
-      console.log("Gemini Transcription Result:", result);
 
       const transcript = result.transcript || "No transcript";
       setTranscribedAudio(transcript);
 
       const droneName = result.droneName;
-      const areaName = result.areaName;
+      const sensorName = result.sensorName;
 
-      if (droneName && areaName) {
-        await processCommand(droneName, areaName);
+      if (droneName && sensorName) {
+        await processCommand(droneName, sensorName);
       } else {
         if (transcript.toLowerCase().includes("send")) {
           await processCommand("camera drone", "alpha");
           return;
         }
-        console.log("No valid command detected");
-        setLoadingStatus?.("No valid command detected.");
+        setLoadingStatus("No valid command detected.");
+        setIsLoading(false);
         alert("No valid command detected in audio.");
       }
-
-      setIsLoading?.(false);
     };
 
     mediaRecorder.start();
@@ -346,16 +310,14 @@ export function ConfigurationPanel({ currentSensor }: ConfigurationPanelProps) {
 
         const result = await res.json();
 
-        setIsLoading?.(false);
-        setLoadingStatus?.("Processing complete!");
+        setIsLoading(false);
+        setLoadingStatus("Processing complete!");
 
         alert(result.message);
-
-        console.log(result);
       }
     } catch (error) {
-      setIsLoading?.(false);
-      setLoadingStatus?.("Failed to process command.");
+      setIsLoading(false);
+      setLoadingStatus("Failed to process command.");
 
       console.error("Error dropping payload:", error);
       alert("Failed to drop payload. Please try again.");
@@ -468,14 +430,6 @@ export function ConfigurationPanel({ currentSensor }: ConfigurationPanelProps) {
             >
               {isRecording ? "Stop Recording" : "Voice Command"}
             </Button>
-            {/* {transcribedAudio && (
-              <h1
-                onClick={isRecording ? stopRecording : startRecording}
-                className={`px-4 py-2 rounded-md `}
-              >
-                {transcribedAudio}
-              </h1>
-            )} */}
 
             <Button
               className="w-full"
@@ -492,13 +446,6 @@ export function ConfigurationPanel({ currentSensor }: ConfigurationPanelProps) {
             >
               Drop Payload
             </Button>
-            {/* <Button
-            className="w-full bg-cyan-500 hover:bg-cyan-600 transition-all ease-in-out"
-            onClick={handleDroneView}
-            disabled={!selectedDroneId}
-          >
-            Drone View
-          </Button> */}
           </div>
         </CardContent>
       </Card>
