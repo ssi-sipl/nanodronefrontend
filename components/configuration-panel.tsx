@@ -125,7 +125,7 @@ export function ConfigurationPanel({ currentSensor }: ConfigurationPanelProps) {
 
         setLatitude("");
         setLongitude("");
-        setAltitude("10");
+        setAltitude("30");
         setUsbAddress("");
         setGridRef("");
       } else {
