@@ -97,8 +97,27 @@ export default function MapDisplay({ setCurrentSensor }: MapDisplayProps) {
   //   [32.770696, 74.928948],
   // ];
 
+  // const DEFAULT_LAT = 29.009618;
+  // const DEFAULT_LNG = 77.660289;
+
+  // const bounds: LatLngBoundsLiteral = [
+  //   [29.01649, 77.660935],
+  //   [28.999513, 77.662653],
+  // ];
+
+  // // ✅ Define the icon globally so it works inside any scope
+  // const sensorIcon = L.icon({
+  //   iconUrl: "/icons/sensor_icon3.png",
+
+  //   iconSize: [40, 40],
+  //   iconAnchor: [20, 40],
+  //   popupAnchor: [0, -40],
+  // });
+
   const DEFAULT_LAT = 29.009618;
   const DEFAULT_LNG = 77.660289;
+
+  // 28.580137, 77.126682
 
   const bounds: LatLngBoundsLiteral = [
     [29.01649, 77.660935],
