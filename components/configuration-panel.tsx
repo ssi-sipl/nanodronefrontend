@@ -359,6 +359,80 @@ export function ConfigurationPanel({ currentSensor }: ConfigurationPanelProps) {
       }
     };
 
+    // Process "drop" command
+    const processDropCommand = async (droneName?: string) => {
+      try {
+        setLoadingStatus?.("Processing drop payload command...");
+
+        let droneIdToUse = selectedDroneId;
+        let areaIdToUse = areaId;
+
+        // If drone name is provided, fetch the drone details
+        if (droneName) {
+          console.log("Drop - Drone Name:", droneName);
+
+          const droneRes = await fetch(
+            `${baseUrl}/drones/name/${encodeURIComponent(
+              droneName.trim().toLowerCase()
+            )}`
+          );
+
+          const droneData = await droneRes.json();
+          console.log("Drone fetch response:", droneData);
+
+          if (!droneData.status) {
+            alert(droneData.message || "Failed to find drone");
+            setIsLoading?.(false);
+            setLoadingStatus?.("Failed to find drone.");
+            return;
+          }
+
+          droneIdToUse = droneData.data.drone_id;
+          areaIdToUse = droneData.data.area_id;
+
+          console.log("Fetched Drone ID:", droneIdToUse);
+          console.log("Fetched Area ID:", areaIdToUse);
+
+          setSelectedDroneId(droneIdToUse);
+          setAreaId(areaIdToUse);
+        }
+
+        // Validate we have the required IDs
+        if (!droneIdToUse || !areaIdToUse) {
+          alert(
+            "No drone selected. Please select a drone first or specify drone name in command."
+          );
+          setIsLoading?.(false);
+          return;
+        }
+
+        setLoadingStatus?.("Dropping payload...");
+
+        const res = await fetch(`${baseUrl}/drones/dropPayload`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            drone_id: droneIdToUse,
+            area_id: areaIdToUse,
+          }),
+        });
+
+        const result = await res.json();
+
+        setIsLoading?.(false);
+        setLoadingStatus?.("Payload dropped successfully!");
+
+        alert(result.message);
+        console.log(result);
+      } catch (err) {
+        console.error("Error processing drop command:", err);
+        alert("Failed to drop payload. Please try again.");
+        setIsLoading?.(false);
+      }
+    };
+
     mediaRecorder.onstop = async () => {
       setIsLoading?.(true);
       setLoadingStatus?.("Processing audio...");
@@ -408,6 +482,9 @@ export function ConfigurationPanel({ currentSensor }: ConfigurationPanelProps) {
           alert("Could not identify which drone to recall. Please try again.");
           setIsLoading?.(false);
         }
+      } else if (action === "drop") {
+        // Drop can work with or without a drone name
+        await processDropCommand(droneName || undefined);
       } else {
         console.log("Unknown or unrecognized command");
         setLoadingStatus?.("Command not recognized.");

@@ -69,8 +69,8 @@ export async function POST(req: NextRequest) {
 
     const dropData = {
       event: "release_gripper",
-      drone_id,
-      area_id,
+      droneid: "DR001",
+      areaid: "A001",
     };
 
     // Publish command to MQTT broker

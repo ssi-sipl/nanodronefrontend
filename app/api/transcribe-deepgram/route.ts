@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
       "No transcript";
 
     // ---------- NLU (intent + entities) ----------
-    let action: "send" | "recall" | "unknown" = "unknown";
+    let action: "send" | "recall" | "drop" | "unknown" = "unknown";
     let droneName: string | null = null;
     let sensorName: string | null = null; // Changed from areaName to sensorName
 
@@ -69,6 +69,16 @@ export async function POST(req: NextRequest) {
 
     const recallPattern2 =
       /(.+?)\s*(?:,?\s*)?(?:recall|return|come back|come home|land)\b/i;
+
+    // Drop payload patterns - flexible for multi-word drone names
+    // Examples: "drop payload", "drop the payload from camera drone", "camera drone drop payload", "release payload"
+    const dropPattern1 =
+      /\b(?:drop|release|deploy)\s+(?:the\s+)?payload\b\s*(?:from\s+)?(?:the\s+)?(.+?)(?:\.|$)/i;
+
+    const dropPattern2 =
+      /(.+?)\s+(?:drop|release|deploy)\s+(?:the\s+)?payload\b/i;
+
+    const dropPattern3 = /\b(?:drop|release|deploy)\s+(?:the\s+)?payload\b/i; // Just "drop payload" without drone name
 
     // Try send patterns first
     let sendMatch = transcript.match(sendPattern1);
@@ -107,6 +117,30 @@ export async function POST(req: NextRequest) {
         action = "recall";
         droneName = recallMatch2[1].trim().replace(/\s+/g, " ");
         console.log("Recall Pattern 2 matched:", { droneName });
+      }
+    }
+
+    // If no send or recall match, try drop payload patterns
+    if (action === "unknown") {
+      const dropMatch1 = transcript.match(dropPattern1);
+      const dropMatch2 = transcript.match(dropPattern2);
+      const dropMatch3 = transcript.match(dropPattern3);
+
+      if (dropMatch1 && dropMatch1[1]) {
+        action = "drop";
+        droneName = dropMatch1[1]
+          .trim()
+          .replace(/\s+/g, " ")
+          .replace(/\.$/, "");
+        console.log("Drop Pattern 1 matched:", { droneName });
+      } else if (dropMatch2 && dropMatch2[1]) {
+        action = "drop";
+        droneName = dropMatch2[1].trim().replace(/\s+/g, " ");
+        console.log("Drop Pattern 2 matched:", { droneName });
+      } else if (dropMatch3) {
+        action = "drop";
+        // No drone name specified in the command
+        console.log("Drop Pattern 3 matched: Generic drop payload command");
       }
     }
 
@@ -158,6 +192,28 @@ export async function POST(req: NextRequest) {
         }
 
         console.log("Fallback recall detection:", { droneName });
+      } else if (/\b(drop|release|deploy)\s+(?:the\s+)?payload\b/i.test(text)) {
+        action = "drop";
+
+        // Extract any noun phrase that could be a drone name
+        const words = text.split(/\s+/);
+        const actionWords = [
+          "drop",
+          "release",
+          "deploy",
+          "payload",
+          "the",
+          "from",
+        ];
+        const droneWords = words.filter(
+          (w) => !actionWords.includes(w.toLowerCase()) && w.length > 0
+        );
+
+        if (droneWords.length > 0) {
+          droneName = droneWords.join(" ").trim();
+        }
+
+        console.log("Fallback drop detection:", { droneName });
       }
     }
 
