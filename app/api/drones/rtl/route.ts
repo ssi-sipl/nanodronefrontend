@@ -15,8 +15,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const { drone_id, area_id, latitude, longitude, altitude, usb_address } =
-      body;
+    const { drone_id, area_id, usb_address } = body;
 
     if (!drone_id || typeof drone_id !== "string" || drone_id.trim() === "") {
       return NextResponse.json(
@@ -35,21 +34,6 @@ export async function POST(request: Request) {
           status: false,
           message:
             'Invalid input: "area_id" is required and must be a non-empty string.',
-        },
-        { status: 400 }
-      );
-    }
-
-    if (
-      latitude === undefined ||
-      longitude === undefined ||
-      altitude === undefined
-    ) {
-      return NextResponse.json(
-        {
-          status: false,
-          message:
-            'Invalid input: "latitude", "longitude", and "altitude" are required.',
         },
         { status: 400 }
       );
@@ -91,20 +75,6 @@ export async function POST(request: Request) {
       );
     }
 
-    if (
-      typeof latitude !== "number" ||
-      typeof longitude !== "number" ||
-      typeof altitude !== "number"
-    ) {
-      return NextResponse.json(
-        {
-          status: false,
-          message: "latitude, longitude, and altitude must all be numbers.",
-        },
-        { status: 400 }
-      );
-    }
-
     // const droneData = {
     //   droneid: drone_id.toString(),
     //   areaid: area_id.toString(),
@@ -117,9 +87,6 @@ export async function POST(request: Request) {
     const droneData = {
       droneid: "DR001",
       areaid: "A001",
-      latitude: "28.579989",
-      longitude: "77.127010",
-      targetAltitude: altitude.toString(),
       usbAddress: usb_address.toString(),
       event: "recall_drone",
     };
