@@ -117,8 +117,8 @@ export async function POST(request: Request) {
     const droneData = {
       droneid: "DR001",
       areaid: "A001",
-      latitude: "29.009812",
-      longitude: "77.660255",
+      latitude: "28.579989",
+      longitude: "77.127010",
       targetAltitude: altitude.toString(),
       usbAddress: usb_address.toString(),
       event: "send_drone",
