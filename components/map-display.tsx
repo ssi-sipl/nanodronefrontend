@@ -44,90 +44,19 @@ export default function MapDisplay({ setCurrentSensor }: MapDisplayProps) {
   const [sensorAddSuccess, setSensorAddSuccess] = useState(false);
   const [refreshSensorList, setRefreshSensorList] = useState(false);
 
-  // Tiles 1
-  // const DEFAULT_LAT = 28.448;
-  // const DEFAULT_LNG = 77.0406;
+  // ✅ Updated configuration to match tile download script
+  const DEFAULT_LAT = 28.580147;
+  const DEFAULT_LNG = 77.12672;
 
-  // const bounds: LatLngBoundsLiteral = [
-  //   [28.4479, 77.0397],
-  //   [28.4481, 77.0415],
-  // ];
-
-  // Tiles 2
-  // const DEFAULT_LAT = 28.523798;
-  // const DEFAULT_LNG = 77.076847;
-
-  // const bounds: LatLngBoundsLiteral = [
-  //   [28.44961, 77.054527],
-  //   [28.598357, 77.099167],
-  // ];
-
-  const Center_Position = {
-    "plot 93": {
-      lat: 28.44920097252899,
-      lng: 77.03902458008703,
-      bounds: [
-        [28.451235968630048, 77.03347643073973],
-        [28.447165976427932, 77.04457272943434],
-      ],
-    },
-    "chattarpur demo site": {
-      lat: 28.425123,
-      lng: 77.216237,
-      bounds: [
-        [28.470173, 77.216237],
-        [28.380073, 77.216237],
-      ],
-    },
-  };
-
-  // const DEFAULT_LAT = 25.244991455141024;
-  // const DEFAULT_LNG = 78.4679457080173;
-
-  // const bounds: LatLngBoundsLiteral = [
-  //   [25.26335105506797, 78.46445308103547],
-  //   [25.226631855214077, 78.47143833499914],
-  // ];
-
-  // const DEFAULT_LAT = 32.7976667;
-  // const DEFAULT_LNG = 74.9077222;
-
-  // const bounds: LatLngBoundsLiteral = [
-  //   [32.808829, 74.890582],
-  //   [32.770696, 74.928948],
-  // ];
-
-  // const DEFAULT_LAT = 29.009618;
-  // const DEFAULT_LNG = 77.660289;
-
-  // const bounds: LatLngBoundsLiteral = [
-  //   [29.01649, 77.660935],
-  //   [28.999513, 77.662653],
-  // ];
-
-  // // ✅ Define the icon globally so it works inside any scope
-  // const sensorIcon = L.icon({
-  //   iconUrl: "/icons/sensor_icon3.png",
-
-  //   iconSize: [40, 40],
-  //   iconAnchor: [20, 40],
-  //   popupAnchor: [0, -40],
-  // });
-
-  const DEFAULT_LAT = 29.009618;
-  const DEFAULT_LNG = 77.660289;
-
-  // 28.580137, 77.126682
-
+  // Bounds matching the downloaded tiles (NE to SW diagonal)
   const bounds: LatLngBoundsLiteral = [
-    [29.01649, 77.660935],
-    [28.999513, 77.662653],
+    [28.589, 77.135], // North-East corner
+    [28.571, 77.118], // South-West corner
   ];
 
-  // ✅ Define the icon globally so it works inside any scope
+  // ✅ Define the sensor icon
   const sensorIcon = L.icon({
     iconUrl: "/icons/sensor_icon3.png",
-
     iconSize: [40, 40],
     iconAnchor: [20, 40],
     popupAnchor: [0, -40],
@@ -151,17 +80,18 @@ export default function MapDisplay({ setCurrentSensor }: MapDisplayProps) {
               center: [DEFAULT_LAT, DEFAULT_LNG],
               zoom: 15,
               minZoom: 15,
-              maxZoom: 20,
+              maxZoom: 19,
               maxBounds: bounds,
               maxBoundsViscosity: 1.0,
             });
 
-            // Add the tile layer to the map
-            L.tileLayer("/merut/{z}/{x}/{y}.jpg", {
+            // Add the tile layer to the map with proper attribution
+            L.tileLayer("/paradeground/{z}/{x}/{y}.jpg", {
               tileSize: 256,
               noWrap: true,
               bounds: bounds,
-              attribution: "Offline Tiles",
+              attribution:
+                '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
               errorTileUrl: "/placeholder.jpg",
             }).addTo(leafletMapRef.current);
           }
@@ -184,7 +114,6 @@ export default function MapDisplay({ setCurrentSensor }: MapDisplayProps) {
 
               marker.on("click", () => {
                 console.log("Sensor clicked:", sensor);
-                // setCurrentSensor(sensor);
                 setCurrentSensor({ ...sensor });
               });
             }
@@ -227,7 +156,7 @@ export default function MapDisplay({ setCurrentSensor }: MapDisplayProps) {
     };
 
     fetchSensors();
-  }, [refreshSensorList]); // Dependency on refreshSensorList triggers a re-fetch
+  }, [refreshSensorList]);
 
   useEffect(() => {
     if (!leafletMapRef.current) return;
@@ -271,7 +200,7 @@ export default function MapDisplay({ setCurrentSensor }: MapDisplayProps) {
           }}
           title={clickAddSensor ? "Disable Add Sensor" : "Enable Add Sensor"}
         >
-          Video Feed
+          Add Sensor
         </button>
         <button
           className=" bg-white p-2 rounded-full shadow hover:bg-gray-100 border border-gray-300"
