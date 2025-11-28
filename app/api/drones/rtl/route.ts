@@ -87,7 +87,7 @@ export async function POST(request: Request) {
     const droneData = {
       droneid: "DR001",
       areaid: "A001",
-      usbAddress: usb_address.toString(),
+      usbAddress: "COM24",
       event: "recall_drone",
     };
 

@@ -45,13 +45,13 @@ export default function MapDisplay({ setCurrentSensor }: MapDisplayProps) {
   const [refreshSensorList, setRefreshSensorList] = useState(false);
 
   // ✅ Updated configuration to match tile download script
-  const DEFAULT_LAT = 28.580147;
-  const DEFAULT_LNG = 77.12672;
+  const DEFAULT_LAT = 28.44796;
+  const DEFAULT_LNG = 77.040915;
 
   // Bounds matching the downloaded tiles (NE to SW diagonal)
   const bounds: LatLngBoundsLiteral = [
-    [28.589, 77.135], // North-East corner
-    [28.571, 77.118], // South-West corner
+    [28.456969, 77.048835], // North-East corner
+    [28.438951, 77.033995], // South-West corner
   ];
 
   // ✅ Define the sensor icon
@@ -80,13 +80,13 @@ export default function MapDisplay({ setCurrentSensor }: MapDisplayProps) {
               center: [DEFAULT_LAT, DEFAULT_LNG],
               zoom: 15,
               minZoom: 15,
-              maxZoom: 19,
+              maxZoom: 20,
               maxBounds: bounds,
               maxBoundsViscosity: 1.0,
             });
 
             // Add the tile layer to the map with proper attribution
-            L.tileLayer("/paradeground/{z}/{x}/{y}.jpg", {
+            L.tileLayer("/sec32/{z}/{x}/{y}.jpg", {
               tileSize: 256,
               noWrap: true,
               bounds: bounds,
