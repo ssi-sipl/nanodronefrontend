@@ -44,14 +44,25 @@ export default function MapDisplay({ setCurrentSensor }: MapDisplayProps) {
   const [sensorAddSuccess, setSensorAddSuccess] = useState(false);
   const [refreshSensorList, setRefreshSensorList] = useState(false);
 
+  // Sector 32
+  // // ✅ Updated configuration to match tile download script
+  // const DEFAULT_LAT = 28.44796;
+  // const DEFAULT_LNG = 77.040915;
+
+  // // Bounds matching the downloaded tiles (NE to SW diagonal)
+  // const bounds: LatLngBoundsLiteral = [
+  //   [28.456969, 77.048835], // North-East corner
+  //   [28.438951, 77.033995], // South-West corner
+  // ];
+
   // ✅ Updated configuration to match tile download script
-  const DEFAULT_LAT = 28.44796;
-  const DEFAULT_LNG = 77.040915;
+  const DEFAULT_LAT = 28.587506;
+  const DEFAULT_LNG = 77.147572;
 
   // Bounds matching the downloaded tiles (NE to SW diagonal)
   const bounds: LatLngBoundsLiteral = [
-    [28.456969, 77.048835], // North-East corner
-    [28.438951, 77.033995], // South-West corner
+    [28.59648911174991, 77.15780231690938], // North-East corner
+    [28.57852288825009, 77.13734168309061], // South-West corner
   ];
 
   // ✅ Define the sensor icon
@@ -86,7 +97,7 @@ export default function MapDisplay({ setCurrentSensor }: MapDisplayProps) {
             });
 
             // Add the tile layer to the map with proper attribution
-            L.tileLayer("/sec32/{z}/{x}/{y}.jpg", {
+            L.tileLayer("/manekshaw/{z}/{x}/{y}.jpg", {
               tileSize: 256,
               noWrap: true,
               bounds: bounds,
