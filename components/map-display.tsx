@@ -55,14 +55,24 @@ export default function MapDisplay({ setCurrentSensor }: MapDisplayProps) {
   //   [28.438951, 77.033995], // South-West corner
   // ];
 
+  // Manekshaw
   // ✅ Updated configuration to match tile download script
-  const DEFAULT_LAT = 28.587506;
-  const DEFAULT_LNG = 77.147572;
+  // const DEFAULT_LAT = 28.587506;
+  // const DEFAULT_LNG = 77.147572;
+
+  // // Bounds matching the downloaded tiles (NE to SW diagonal)
+  // const bounds: LatLngBoundsLiteral = [
+  //   [28.59648911174991, 77.15780231690938], // North-East corner
+  //   [28.57852288825009, 77.13734168309061], // South-West corner
+  // ];
+
+  const DEFAULT_LAT = 28.58013;
+  const DEFAULT_LNG = 77.126719;
 
   // Bounds matching the downloaded tiles (NE to SW diagonal)
   const bounds: LatLngBoundsLiteral = [
-    [28.59648911174991, 77.15780231690938], // North-East corner
-    [28.57852288825009, 77.13734168309061], // South-West corner
+    [28.59821743465914, 77.14717819872533], // North-East corner
+    [28.56204256534086, 77.10625980127466], // South-West corner
   ];
 
   // ✅ Define the sensor icon
@@ -97,7 +107,7 @@ export default function MapDisplay({ setCurrentSensor }: MapDisplayProps) {
             });
 
             // Add the tile layer to the map with proper attribution
-            L.tileLayer("/manekshaw/{z}/{x}/{y}.jpg", {
+            L.tileLayer("/paradeground/{z}/{x}/{y}.jpg", {
               tileSize: 256,
               noWrap: true,
               bounds: bounds,
