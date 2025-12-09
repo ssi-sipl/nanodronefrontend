@@ -187,6 +187,7 @@ export function ConfigurationPanel({ currentSensor }: ConfigurationPanelProps) {
     ) => {
       try {
         setLoadingStatus?.("Processing send command...");
+        setIsLoading?.(true);
         console.log("Send - Drone Name:", droneName);
         console.log("Send - Sensor Name:", sensorName);
 
@@ -297,6 +298,7 @@ export function ConfigurationPanel({ currentSensor }: ConfigurationPanelProps) {
     const processRecallCommand = async (droneName: string) => {
       try {
         setLoadingStatus?.("Processing recall command...");
+        setIsLoading?.(true);
         console.log("Recall - Drone Name:", droneName);
 
         const droneRes = await fetch(
@@ -363,11 +365,11 @@ export function ConfigurationPanel({ currentSensor }: ConfigurationPanelProps) {
     const processDropCommand = async (droneName?: string) => {
       try {
         setLoadingStatus?.("Processing drop payload command...");
+        setIsLoading?.(true);
 
         let droneIdToUse = selectedDroneId;
         let areaIdToUse = areaId;
 
-        // If drone name is provided, fetch the drone details
         if (droneName) {
           console.log("Drop - Drone Name:", droneName);
 
@@ -397,7 +399,6 @@ export function ConfigurationPanel({ currentSensor }: ConfigurationPanelProps) {
           setAreaId(areaIdToUse);
         }
 
-        // Validate we have the required IDs
         if (!droneIdToUse || !areaIdToUse) {
           alert(
             "No drone selected. Please select a drone first or specify drone name in command."
@@ -430,6 +431,175 @@ export function ConfigurationPanel({ currentSensor }: ConfigurationPanelProps) {
         console.error("Error processing drop command:", err);
         alert("Failed to drop payload. Please try again.");
         setIsLoading?.(false);
+        setLoadingStatus?.("Failed to process drop command.");
+      }
+    };
+
+    // NEW: Process TAKEOFF command (separate from move)
+    const processTakeoffCommand = async (droneName?: string | null) => {
+      try {
+        setLoadingStatus?.("Processing takeoff command...");
+        setIsLoading?.(true);
+
+        let droneIdToUse = selectedDroneId;
+        let areaIdToUse = areaId;
+
+        if (droneName) {
+          console.log("Takeoff - Drone Name:", droneName);
+
+          const droneRes = await fetch(
+            `${baseUrl}/drones/name/${encodeURIComponent(
+              droneName.trim().toLowerCase()
+            )}`
+          );
+
+          const droneData = await droneRes.json();
+          console.log("Drone fetch response:", droneData);
+
+          if (!droneData.status) {
+            alert(droneData.message || "Failed to find drone");
+            setIsLoading?.(false);
+            setLoadingStatus?.("Failed to find drone.");
+            return;
+          }
+
+          droneIdToUse = droneData.data.drone_id;
+          areaIdToUse = droneData.data.area_id;
+
+          console.log("Fetched Drone ID:", droneIdToUse);
+          console.log("Fetched Area ID:", areaIdToUse);
+
+          setSelectedDroneId(droneIdToUse);
+          setAreaId(areaIdToUse);
+        }
+
+        if (!droneIdToUse || !areaIdToUse) {
+          alert(
+            "No drone selected. Please select a drone first or specify drone name in command."
+          );
+          setIsLoading?.(false);
+          return;
+        }
+
+        setLoadingStatus?.("Taking off drone...");
+
+        const res = await fetch(`${baseUrl}/drones/takeoff`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            drone_id: droneIdToUse,
+            area_id: areaIdToUse,
+          }),
+        });
+
+        const data = await res.json();
+        console.log("Takeoff response:", data);
+
+        setIsLoading?.(false);
+        setLoadingStatus?.("Takeoff command executed!");
+
+        alert(data.message || "Drone takeoff command sent.");
+      } catch (err) {
+        console.error("Error processing takeoff command:", err);
+        alert("Failed to take off drone. Please try again.");
+        setIsLoading?.(false);
+        setLoadingStatus?.("Failed to process takeoff command.");
+      }
+    };
+
+    // Process MOVE command (NO implicit takeoff)
+    const processMoveCommand = async (
+      moveAction: "move_forward" | "move_backward" | "move_left" | "move_right",
+      droneName?: string | null
+    ) => {
+      try {
+        setLoadingStatus?.("Processing movement command...");
+        setIsLoading?.(true);
+
+        let droneIdToUse = selectedDroneId;
+        let areaIdToUse = areaId;
+
+        if (droneName) {
+          console.log("Move - Drone Name:", droneName);
+
+          const droneRes = await fetch(
+            `${baseUrl}/drones/name/${encodeURIComponent(
+              droneName.trim().toLowerCase()
+            )}`
+          );
+          const droneData = await droneRes.json();
+          console.log("Drone fetch response:", droneData);
+
+          if (!droneData.status) {
+            alert(droneData.message || "Failed to find drone");
+            setIsLoading?.(false);
+            setLoadingStatus?.("Failed to find drone.");
+            return;
+          }
+
+          droneIdToUse = droneData.data.drone_id;
+          areaIdToUse = droneData.data.area_id;
+
+          console.log("Fetched Drone ID:", droneIdToUse);
+          console.log("Fetched Area ID:", areaIdToUse);
+
+          setSelectedDroneId(droneIdToUse);
+          setAreaId(areaIdToUse);
+        }
+
+        if (!droneIdToUse || !areaIdToUse) {
+          alert(
+            "No drone selected. Please select a drone first or specify drone name in command."
+          );
+          setIsLoading?.(false);
+          return;
+        }
+
+        let endpointSuffix = "";
+        let prettyDirection = "";
+
+        switch (moveAction) {
+          case "move_forward":
+            endpointSuffix = "/drones/move/forward";
+            prettyDirection = "forward";
+            break;
+          case "move_backward":
+            endpointSuffix = "/drones/move/backward";
+            prettyDirection = "backward";
+            break;
+          case "move_left":
+            endpointSuffix = "/drones/move/left";
+            prettyDirection = "left";
+            break;
+          case "move_right":
+            endpointSuffix = "/drones/move/right";
+            prettyDirection = "right";
+            break;
+        }
+
+        setLoadingStatus?.(`Moving drone ${prettyDirection}...`);
+
+        const moveRes = await fetch(`${baseUrl}${endpointSuffix}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            drone_id: droneIdToUse,
+            area_id: areaIdToUse,
+          }),
+        });
+
+        const moveData = await moveRes.json();
+        console.log("Move response:", moveData);
+
+        setIsLoading?.(false);
+        setLoadingStatus?.("Movement command executed!");
+
+        alert(moveData.message || "Movement command sent to drone.");
+      } catch (err) {
+        console.error("Error processing move command:", err);
+        alert("Failed to move drone. Please try again.");
+        setIsLoading?.(false);
+        setLoadingStatus?.("Failed to process movement command.");
       }
     };
 
@@ -463,7 +633,6 @@ export function ConfigurationPanel({ currentSensor }: ConfigurationPanelProps) {
 
       setTranscribedAudio(transcript);
 
-      // Handle different actions based on NLU result
       if (action === "send") {
         if (droneName && sensorName) {
           await processSendCommand(droneName, sensorName);
@@ -483,8 +652,16 @@ export function ConfigurationPanel({ currentSensor }: ConfigurationPanelProps) {
           setIsLoading?.(false);
         }
       } else if (action === "drop") {
-        // Drop can work with or without a drone name
         await processDropCommand(droneName || undefined);
+      } else if (action === "takeoff") {
+        await processTakeoffCommand(droneName ?? null);
+      } else if (
+        action === "move_forward" ||
+        action === "move_backward" ||
+        action === "move_left" ||
+        action === "move_right"
+      ) {
+        await processMoveCommand(action, droneName ?? null);
       } else {
         console.log("Unknown or unrecognized command");
         setLoadingStatus?.("Command not recognized.");
