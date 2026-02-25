@@ -66,13 +66,13 @@ export default function MapDisplay({ setCurrentSensor }: MapDisplayProps) {
   //   [28.57852288825009, 77.13734168309061], // South-West corner
   // ];
 
-  const DEFAULT_LAT = 28.58013;
-  const DEFAULT_LNG = 77.126719;
+  const DEFAULT_LAT = 28.61275;
+  const DEFAULT_LNG = 77.23;
 
   // Bounds matching the downloaded tiles (NE to SW diagonal)
   const bounds: LatLngBoundsLiteral = [
-    [28.59821743465914, 77.14717819872533], // North-East corner
-    [28.56204256534086, 77.10625980127466], // South-West corner
+    [28.6205, 77.24], // North-East corner
+    [28.605, 77.22], // South-West corner
   ];
 
   // ✅ Define the sensor icon
@@ -101,13 +101,13 @@ export default function MapDisplay({ setCurrentSensor }: MapDisplayProps) {
               center: [DEFAULT_LAT, DEFAULT_LNG],
               zoom: 15,
               minZoom: 15,
-              maxZoom: 20,
+              maxZoom: 18,
               maxBounds: bounds,
               maxBoundsViscosity: 1.0,
             });
 
             // Add the tile layer to the map with proper attribution
-            L.tileLayer("/paradeground/{z}/{x}/{y}.jpg", {
+            L.tileLayer("/india_gate/{z}/{x}/{y}.jpg", {
               tileSize: 256,
               noWrap: true,
               bounds: bounds,
