@@ -40,7 +40,7 @@ export async function POST(request: Request) {
       where: {
         OR: [
           { name: name.toLocaleLowerCase().trim() },
-          { area_id: area_id.toLocaleLowerCase().trim() },
+          { area_id: area_id.trim() },
         ],
       },
     });
