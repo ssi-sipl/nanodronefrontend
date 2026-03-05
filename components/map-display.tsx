@@ -75,13 +75,22 @@ export default function MapDisplay({ setCurrentSensor }: MapDisplayProps) {
   //   [28.605, 77.22], // South-West corner
   // ];
 
+  // const DEFAULT_LAT = 19.952194;
+  // const DEFAULT_LNG = 73.754219;
+
+  // // Bounds (NE to SW diagonal)
+  // const bounds: LatLngBoundsLiteral = [
+  //   [19.9702, 73.7732], // North-East corner
+  //   [19.9342, 73.7352], // South-West corner
+  // ];
+
   const DEFAULT_LAT = 19.952194;
   const DEFAULT_LNG = 73.754219;
 
   // Bounds (NE to SW diagonal)
   const bounds: LatLngBoundsLiteral = [
-    [19.9702, 73.7732], // North-East corner
-    [19.9342, 73.7352], // South-West corner
+    [19.970212, 73.773389], // North-East corner
+    [19.934176, 73.735049], // South-West corner
   ];
 
   // ✅ Define the sensor icon
@@ -116,7 +125,7 @@ export default function MapDisplay({ setCurrentSensor }: MapDisplayProps) {
             });
 
             // Add the tile layer to the map with proper attribution
-            L.tileLayer("/custom/{z}/{x}/{y}.jpg", {
+            L.tileLayer("/jaisalmer/{z}/{x}/{y}.jpg", {
               tileSize: 256,
               noWrap: true,
               bounds: bounds,
