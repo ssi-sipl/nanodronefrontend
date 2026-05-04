@@ -84,13 +84,12 @@ export default function MapDisplay({ setCurrentSensor }: MapDisplayProps) {
   //   [19.9342, 73.7352], // South-West corner
   // ];
 
-  const DEFAULT_LAT = 26.965994;
-  const DEFAULT_LNG = 71.01133;
+  const DEFAULT_LAT = 25.45995;
+  const DEFAULT_LNG = 81.812512;
 
-  // Bounds (NE to SW diagonal)
   const bounds: LatLngBoundsLiteral = [
-    [26.984012018018, 71.03154598438], // North-East corner
-    [26.947975981982, 70.99111401562], // South-West corner
+    [25.478, 81.8325], // North-East
+    [25.442, 81.7925], // South-West
   ];
 
   // North: 26.984012018018, South: 26.947975981982, West: 70.99111401562, East: 71.03154598438
@@ -127,7 +126,7 @@ export default function MapDisplay({ setCurrentSensor }: MapDisplayProps) {
             });
 
             // Add the tile layer to the map with proper attribution
-            L.tileLayer("/jaisalmer/{z}/{x}/{y}.jpg", {
+            L.tileLayer("/prayagraj_map/{z}/{x}/{y}.jpg", {
               tileSize: 256,
               noWrap: true,
               bounds: bounds,
