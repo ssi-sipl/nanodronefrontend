@@ -66,14 +66,34 @@ export default function MapDisplay({ setCurrentSensor }: MapDisplayProps) {
   //   [28.57852288825009, 77.13734168309061], // South-West corner
   // ];
 
-  const DEFAULT_LAT = 28.61275;
-  const DEFAULT_LNG = 77.23;
+  // const DEFAULT_LAT = 28.61275;
+  // const DEFAULT_LNG = 77.23;
 
-  // Bounds matching the downloaded tiles (NE to SW diagonal)
+  // // Bounds matching the downloaded tiles (NE to SW diagonal)
+  // const bounds: LatLngBoundsLiteral = [
+  //   [28.6205, 77.24], // North-East corner
+  //   [28.605, 77.22], // South-West corner
+  // ];
+
+  // const DEFAULT_LAT = 19.952194;
+  // const DEFAULT_LNG = 73.754219;
+
+  // // Bounds (NE to SW diagonal)
+  // const bounds: LatLngBoundsLiteral = [
+  //   [19.9702, 73.7732], // North-East corner
+  //   [19.9342, 73.7352], // South-West corner
+  // ];
+
+  const DEFAULT_LAT = 26.9659940;
+  const DEFAULT_LNG = 71.0113300;
+
+  // Bounds (NE to SW diagonal)
   const bounds: LatLngBoundsLiteral = [
-    [28.6205, 77.24], // North-East corner
-    [28.605, 77.22], // South-West corner
+    [26.984012018018, 71.03154598438], // North-East corner
+    [26.947975981982, 70.99111401562], // South-West corner
   ];
+
+  // North: 26.984012018018, South: 26.947975981982, West: 70.99111401562, East: 71.03154598438
 
   // ✅ Define the sensor icon
   const sensorIcon = L.icon({
@@ -107,7 +127,7 @@ export default function MapDisplay({ setCurrentSensor }: MapDisplayProps) {
             });
 
             // Add the tile layer to the map with proper attribution
-            L.tileLayer("/india_gate/{z}/{x}/{y}.jpg", {
+            L.tileLayer("/jaisalmer/{z}/{x}/{y}.jpg", {
               tileSize: 256,
               noWrap: true,
               bounds: bounds,

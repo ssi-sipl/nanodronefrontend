@@ -194,12 +194,12 @@ export function ConfigurationPanel({ currentSensor }: ConfigurationPanelProps) {
         const [droneRes, sensorRes] = await Promise.all([
           fetch(
             `${baseUrl}/drones/name/${encodeURIComponent(
-              droneName.trim().toLowerCase()
+              droneName.trim()
             )}`
           ),
           fetch(
             `${baseUrl}/sensors/name/${encodeURIComponent(
-              sensorName.trim().toLowerCase()
+              sensorName.trim()
             )}`
           ),
         ]);
@@ -804,16 +804,15 @@ export function ConfigurationPanel({ currentSensor }: ConfigurationPanelProps) {
 
               <AreaDropdown
                 selectedAreaId={areaId}
-                setSelectedAreaId={() => {}}
+                setSelectedAreaId={() => { }}
                 disabled={true}
               />
             </div>
 
             <Button
               onClick={isRecording ? stopRecording : startRecording}
-              className={`px-4 py-2 rounded-md w-full text-white ${
-                isRecording ? "bg-red-600" : "bg-green-600"
-              }`}
+              className={`px-4 py-2 rounded-md w-full text-white ${isRecording ? "bg-red-600" : "bg-green-600"
+                }`}
             >
               {isRecording ? "Stop Recording" : "Voice Command"}
             </Button>
