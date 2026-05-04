@@ -84,8 +84,8 @@ export default function MapDisplay({ setCurrentSensor }: MapDisplayProps) {
   //   [19.9342, 73.7352], // South-West corner
   // ];
 
-  const DEFAULT_LAT = 26.9659940;
-  const DEFAULT_LNG = 71.0113300;
+  const DEFAULT_LAT = 26.965994;
+  const DEFAULT_LNG = 71.01133;
 
   // Bounds (NE to SW diagonal)
   const bounds: LatLngBoundsLiteral = [
