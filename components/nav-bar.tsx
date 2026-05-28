@@ -43,11 +43,14 @@ export function NavBar() {
   const navLinks = [
     { href: "/", label: "Dashboard" },
     // { href: "/settings", label: "Settings" },
-    { href: "/AreaManagement", label: "Area" },
-    { href: "/DroneManagement", label: "Drone" },
-    { href: "/SensorManagement", label: "Sensor" },
+    { href: "/areas", label: "Area" },
+    { href: "/drones", label: "Drone" },
+    { href: "/sensors", label: "Sensor" },
     // { href: "/TelemetryDashboard", label: "Telemetry" },
   ];
+
+  const isActiveLink = (href: string) =>
+    href === "/" ? pathname === href : pathname.startsWith(href);
 
   return (
     <nav className="border-b bg-white z-[10000]">
@@ -66,7 +69,7 @@ export function NavBar() {
                   href={link.href}
                   className={cn(
                     "px-3 py-2 rounded-md text-sm font-medium transition-colors",
-                    pathname === link.href
+                    isActiveLink(link.href)
                       ? "bg-gray-900 text-white"
                       : "text-gray-700 hover:bg-gray-100"
                   )}
@@ -118,8 +121,7 @@ export function NavBar() {
               href={link.href}
               className={cn(
                 "block px-3 py-4 rounded-md text-base font-medium border-b border-gray-100",
-                pathname === link.href
-                  ? "bg-gray-900 text-white"
+                isActiveLink(link.href)                ? "bg-gray-900 text-white"
                   : "text-gray-700 hover:bg-gray-100"
               )}
             >
