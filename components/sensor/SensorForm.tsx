@@ -6,6 +6,7 @@ import toast, { Toaster } from "react-hot-toast";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -106,73 +107,108 @@ export function SensorForm({ mode, sensorId }: SensorFormProps) {
           ) : (
             <form
               onSubmit={handleSubmit}
-              className="flex flex-col md:flex-row items-start justify-between gap-4 md:gap-6"
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-[repeat(5,minmax(0,1fr))_auto] items-end gap-4 md:gap-6"
             >
-              <Input
-                placeholder="Sensor Name"
-                value={form.name}
-                onChange={(event) => setForm({ ...form, name: event.target.value })}
-                className="h-10 w-full"
-                required
-              />
-              <Input
-                placeholder="Sensor ID"
-                value={form.sensor_id}
-                onChange={(event) =>
-                  setForm({ ...form, sensor_id: event.target.value })
-                }
-                className="h-10 w-full"
-                required
-              />
-              <Select
-                value={form.area_id}
-                onValueChange={(value) => setForm({ ...form, area_id: value })}
-              >
-                <SelectTrigger className="h-10 w-full">
-                  <SelectValue placeholder="Select Area" />
-                </SelectTrigger>
-                <SelectContent>
-                  {areas.length > 0 ? (
-                    areas.map((area) => (
-                      <SelectItem key={area.area_id} value={area.area_id}>
-                        {area.name}
+              <div className="w-full space-y-2">
+                <Label htmlFor="sensor-name" className="text-sm font-semibold text-gray-700">
+                  Name
+                </Label>
+                <Input
+                  id="sensor-name"
+                  placeholder="Sensor Name"
+                  value={form.name}
+                  onChange={(event) => setForm({ ...form, name: event.target.value })}
+                  className="h-10 w-full"
+                  required
+                />
+              </div>
+              <div className="w-full space-y-2">
+                <Label htmlFor="sensor-id" className="text-sm font-semibold text-gray-700">
+                  Sensor ID
+                </Label>
+                <Input
+                  id="sensor-id"
+                  placeholder="Sensor ID"
+                  value={form.sensor_id}
+                  onChange={(event) =>
+                    setForm({ ...form, sensor_id: event.target.value })
+                  }
+                  className="h-10 w-full"
+                  required
+                />
+              </div>
+              <div className="w-full space-y-2">
+                <Label htmlFor="sensor-area" className="text-sm font-semibold text-gray-700">
+                  Area
+                </Label>
+                <Select
+                  value={form.area_id}
+                  onValueChange={(value) => setForm({ ...form, area_id: value })}
+                >
+                  <SelectTrigger id="sensor-area" className="h-10 w-full">
+                    <SelectValue placeholder="Select Area" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {areas.length > 0 ? (
+                      areas.map((area) => (
+                        <SelectItem key={area.area_id} value={area.area_id}>
+                          {area.name}
+                        </SelectItem>
+                      ))
+                    ) : (
+                      <SelectItem value="none" disabled>
+                        No areas available
                       </SelectItem>
-                    ))
-                  ) : (
-                    <SelectItem value="none" disabled>
-                      No areas available
-                    </SelectItem>
-                  )}
-                </SelectContent>
-              </Select>
-              <Input
-                type="number"
-                step="any"
-                placeholder="Latitude"
-                value={form.latitude === 0 ? "" : form.latitude}
-                onChange={(event) =>
-                  setForm({
-                    ...form,
-                    latitude: Number.parseFloat(event.target.value) || 0,
-                  })
-                }
-                className="h-10 w-full"
-                required
-              />
-              <Input
-                type="number"
-                step="any"
-                placeholder="Longitude"
-                value={form.longitude === 0 ? "" : form.longitude}
-                onChange={(event) =>
-                  setForm({
-                    ...form,
-                    longitude: Number.parseFloat(event.target.value) || 0,
-                  })
-                }
-                className="h-10 w-full"
-                required
-              />
+                    )}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="w-full space-y-2">
+                <Label
+                  htmlFor="sensor-latitude"
+                  className="text-sm font-semibold text-gray-700"
+                >
+                  Latitude
+                </Label>
+                <Input
+                  id="sensor-latitude"
+                  type="number"
+                  step="any"
+                  placeholder="Latitude"
+                  value={form.latitude === 0 ? "" : form.latitude}
+                  onChange={(event) =>
+                    setForm({
+                      ...form,
+                      latitude: Number.parseFloat(event.target.value) || 0,
+                    })
+                  }
+                  className="h-10 w-full"
+                  required
+                />
+              </div>
+              <div className="w-full space-y-2">
+                <Label
+                  htmlFor="sensor-longitude"
+                  className="text-sm font-semibold text-gray-700"
+                >
+                  Longitude
+                </Label>
+                <Input
+                  id="sensor-longitude"
+                  type="number"
+                  step="any"
+                  placeholder="Longitude"
+                  value={form.longitude === 0 ? "" : form.longitude}
+                  onChange={(event) =>
+                    setForm({
+                      ...form,
+                      longitude: Number.parseFloat(event.target.value) || 0,
+                    })
+                  }
+                  className="h-10 w-full"
+                  required
+                />
+              </div>
               <Button
                 type="submit"
                 disabled={saving}

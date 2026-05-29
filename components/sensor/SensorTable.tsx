@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Pencil, Plus, Trash2 } from "lucide-react";
 import toast, { Toaster } from "react-hot-toast";
 import { Button } from "@/components/ui/button";
@@ -13,6 +14,8 @@ type SensorTableProps = {
 };
 
 export function SensorTable({ sensors, loading, onDeleted }: SensorTableProps) {
+  const router = useRouter();
+
   const handleDelete = async (id: string) => {
     try {
       await deleteSensor(id);
@@ -71,10 +74,12 @@ export function SensorTable({ sensors, loading, onDeleted }: SensorTableProps) {
                   </td>
                   <td className="p-2 md:p-3 border border-gray-200">
                     <div className="flex flex-wrap gap-2">
-                      <Button asChild size="sm" variant="outline">
-                        <Link href={`/sensors/edit/${sensor.id}`}>
-                          <Pencil className="w-4 h-4" />
-                        </Link>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => router.push(`/sensors/edit/${sensor.id}`)}
+                      >
+                        <Pencil className="w-4 h-4" />
                       </Button>
                       <Button
                         size="sm"

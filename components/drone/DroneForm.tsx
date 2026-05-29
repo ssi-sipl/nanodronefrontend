@@ -6,6 +6,7 @@ import toast, { Toaster } from "react-hot-toast";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -103,45 +104,62 @@ export function DroneForm({ mode, droneId }: DroneFormProps) {
           ) : (
             <form
               onSubmit={handleSubmit}
-              className="flex flex-col md:flex-row items-start justify-between gap-4 md:gap-6"
+              className="grid grid-cols-1 md:grid-cols-[repeat(3,minmax(0,1fr))_auto] items-end gap-4 md:gap-6"
             >
-              <Input
-                placeholder="Enter Drone Name"
-                value={form.name}
-                onChange={(event) => setForm({ ...form, name: event.target.value })}
-                className="h-10 w-full"
-                required
-              />
-              <Input
-                placeholder="Enter Drone ID"
-                value={form.drone_id}
-                onChange={(event) =>
-                  setForm({ ...form, drone_id: event.target.value })
-                }
-                className="h-10 w-full"
-                required
-              />
-              <Select
-                value={form.area_id}
-                onValueChange={(value) => setForm({ ...form, area_id: value })}
-              >
-                <SelectTrigger className="h-10 w-full">
-                  <SelectValue placeholder="Select Drone Area" />
-                </SelectTrigger>
-                <SelectContent>
-                  {areas.length > 0 ? (
-                    areas.map((area) => (
-                      <SelectItem key={area.area_id} value={area.area_id}>
-                        {area.name}
+              <div className="w-full space-y-2">
+                <Label htmlFor="drone-name" className="text-sm font-semibold text-gray-700">
+                  Name
+                </Label>
+                <Input
+                  id="drone-name"
+                  placeholder="Enter Drone Name"
+                  value={form.name}
+                  onChange={(event) => setForm({ ...form, name: event.target.value })}
+                  className="h-10 w-full"
+                  required
+                />
+              </div>
+              <div className="w-full space-y-2">
+                <Label htmlFor="drone-id" className="text-sm font-semibold text-gray-700">
+                  Drone ID
+                </Label>
+                <Input
+                  id="drone-id"
+                  placeholder="Enter Drone ID"
+                  value={form.drone_id}
+                  onChange={(event) =>
+                    setForm({ ...form, drone_id: event.target.value })
+                  }
+                  className="h-10 w-full"
+                  required
+                />
+              </div>
+              <div className="w-full space-y-2">
+                <Label htmlFor="drone-area" className="text-sm font-semibold text-gray-700">
+                  Area
+                </Label>
+                <Select
+                  value={form.area_id}
+                  onValueChange={(value) => setForm({ ...form, area_id: value })}
+                >
+                  <SelectTrigger id="drone-area" className="h-10 w-full">
+                    <SelectValue placeholder="Select Drone Area" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {areas.length > 0 ? (
+                      areas.map((area) => (
+                        <SelectItem key={area.area_id} value={area.area_id}>
+                          {area.name}
+                        </SelectItem>
+                      ))
+                    ) : (
+                      <SelectItem value="none" disabled>
+                        No areas available
                       </SelectItem>
-                    ))
-                  ) : (
-                    <SelectItem value="none" disabled>
-                      No areas available
-                    </SelectItem>
-                  )}
-                </SelectContent>
-              </Select>
+                    )}
+                  </SelectContent>
+                </Select>
+              </div>
               <Button
                 type="submit"
                 disabled={saving}

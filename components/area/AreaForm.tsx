@@ -6,6 +6,7 @@ import toast, { Toaster } from "react-hot-toast";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   createArea,
   getArea,
@@ -85,10 +86,14 @@ export function AreaForm({ mode, areaId }: AreaFormProps) {
           ) : (
             <form
               onSubmit={handleSubmit}
-              className="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-6"
+              className="grid grid-cols-1 md:grid-cols-[repeat(2,minmax(0,1fr))_auto] items-end gap-4 md:gap-6"
             >
-              <div className="flex flex-col w-full flex-1 items-start gap-1">
+              <div className="w-full space-y-2">
+                <Label htmlFor="area-name" className="text-sm font-semibold text-gray-700">
+                  Area Name
+                </Label>
                 <Input
+                  id="area-name"
                   className="w-full h-10"
                   value={form.name}
                   placeholder="Enter Area Name"
@@ -98,8 +103,12 @@ export function AreaForm({ mode, areaId }: AreaFormProps) {
                   required
                 />
               </div>
-              <div className="flex flex-col w-full flex-1 items-start gap-1">
+              <div className="w-full space-y-2">
+                <Label htmlFor="area-id" className="text-sm font-semibold text-gray-700">
+                  Area ID
+                </Label>
                 <Input
+                  id="area-id"
                   className="w-full h-10"
                   value={form.area_id}
                   placeholder="Enter Area Id"
@@ -109,15 +118,13 @@ export function AreaForm({ mode, areaId }: AreaFormProps) {
                   required
                 />
               </div>
-              <div className="w-full flex-1">
-                <Button type="submit" disabled={saving} className="w-full">
-                  {saving
-                    ? "Saving..."
-                    : mode === "edit"
-                      ? "Save Area"
-                      : "Create Area"}
-                </Button>
-              </div>
+              <Button type="submit" disabled={saving} className="w-full md:w-auto">
+                {saving
+                  ? "Saving..."
+                  : mode === "edit"
+                    ? "Save Area"
+                    : "Create Area"}
+              </Button>
             </form>
           )}
         </CardContent>
