@@ -42,6 +42,7 @@ export function SensorForm({ mode, sensorId }: SensorFormProps) {
   const [areas, setAreas] = useState<Area[]>([]);
   const [loading, setLoading] = useState(mode === "edit");
   const [saving, setSaving] = useState(false);
+  const isCreateMode = mode === "create";
 
   useEffect(() => {
     async function loadFormData() {
@@ -107,7 +108,11 @@ export function SensorForm({ mode, sensorId }: SensorFormProps) {
           ) : (
             <form
               onSubmit={handleSubmit}
-              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-[repeat(5,minmax(0,1fr))_auto] items-end gap-4 md:gap-6"
+              className={
+                isCreateMode
+                  ? "mx-auto flex w-full max-w-md flex-col gap-5"
+                  : "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-[repeat(5,minmax(0,1fr))_auto] items-end gap-4 md:gap-6"
+              }
             >
               <div className="w-full space-y-2">
                 <Label htmlFor="sensor-name" className="text-sm font-semibold text-gray-700">
@@ -212,7 +217,9 @@ export function SensorForm({ mode, sensorId }: SensorFormProps) {
               <Button
                 type="submit"
                 disabled={saving}
-                className="bg-black text-white hover:bg-gray-800 h-10 w-full md:w-auto"
+                className={`bg-black text-white hover:bg-gray-800 h-10 w-full ${
+                  isCreateMode ? "" : "md:w-auto"
+                }`}
               >
                 {saving
                   ? "Saving..."

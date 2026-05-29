@@ -29,6 +29,7 @@ export function AreaForm({ mode, areaId }: AreaFormProps) {
   const [form, setForm] = useState<AreaPayload>(emptyForm);
   const [loading, setLoading] = useState(mode === "edit");
   const [saving, setSaving] = useState(false);
+  const isCreateMode = mode === "create";
 
   useEffect(() => {
     async function loadArea() {
@@ -86,7 +87,11 @@ export function AreaForm({ mode, areaId }: AreaFormProps) {
           ) : (
             <form
               onSubmit={handleSubmit}
-              className="grid grid-cols-1 md:grid-cols-[repeat(2,minmax(0,1fr))_auto] items-end gap-4 md:gap-6"
+              className={
+                isCreateMode
+                  ? "mx-auto flex w-full max-w-md flex-col gap-5"
+                  : "grid grid-cols-1 md:grid-cols-[repeat(2,minmax(0,1fr))_auto] items-end gap-4 md:gap-6"
+              }
             >
               <div className="w-full space-y-2">
                 <Label htmlFor="area-name" className="text-sm font-semibold text-gray-700">
@@ -118,7 +123,11 @@ export function AreaForm({ mode, areaId }: AreaFormProps) {
                   required
                 />
               </div>
-              <Button type="submit" disabled={saving} className="w-full md:w-auto">
+              <Button
+                type="submit"
+                disabled={saving}
+                className={`w-full ${isCreateMode ? "" : "md:w-auto"}`}
+              >
                 {saving
                   ? "Saving..."
                   : mode === "edit"
