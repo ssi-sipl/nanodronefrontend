@@ -1,7 +1,7 @@
 "use client";
 
+import { memo, useCallback, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { Pencil, Plus, Trash2 } from "lucide-react";
 import toast, { Toaster } from "react-hot-toast";
 import { Button } from "@/components/ui/button";
@@ -10,21 +10,28 @@ import { deleteDrone, type Drone } from "@/lib/api";
 type DroneTableProps = {
   drones: Drone[];
   loading: boolean;
-  onDeleted: () => void;
+  onDeleted: (id: string) => void;
 };
 
-export function DroneTable({ drones, loading, onDeleted }: DroneTableProps) {
-  const router = useRouter();
+export const DroneTable = memo(function DroneTable({
+  drones,
+  loading,
+  onDeleted,
+}: DroneTableProps) {
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = useCallback(async (id: string) => {
     try {
+      setDeletingId(id);
       await deleteDrone(id);
       toast.success("Drone deleted successfully");
-      onDeleted();
+      onDeleted(id);
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Failed to delete drone");
+    } finally {
+      setDeletingId(null);
     }
-  };
+  }, [onDeleted]);
 
   return (
     <div className="space-y-4">
@@ -67,15 +74,18 @@ export function DroneTable({ drones, loading, onDeleted }: DroneTableProps) {
                   <td className="p-2 md:p-3 border border-gray-200">
                     <div className="flex flex-wrap gap-2">
                       <Button
+                        asChild
                         size="sm"
                         variant="outline"
-                        onClick={() => router.push(`/drones/edit/${drone.id}`)}
                       >
-                        <Pencil className="w-4 h-4" />
+                        <Link href={`/drones/edit/${drone.id}`}>
+                          <Pencil className="w-4 h-4" />
+                        </Link>
                       </Button>
                       <Button
                         size="sm"
                         variant="destructive"
+                        disabled={deletingId === drone.id}
                         onClick={() => handleDelete(drone.id)}
                       >
                         <Trash2 className="w-4 h-4" />
@@ -96,4 +106,4 @@ export function DroneTable({ drones, loading, onDeleted }: DroneTableProps) {
       </div>
     </div>
   );
-}
+});

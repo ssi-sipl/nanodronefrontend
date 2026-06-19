@@ -1,7 +1,7 @@
 "use client";
 
+import { memo, useCallback, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { Pencil, Plus, Trash2 } from "lucide-react";
 import toast, { Toaster } from "react-hot-toast";
 import { Button } from "@/components/ui/button";
@@ -10,21 +10,28 @@ import { deleteSensor, type Sensor } from "@/lib/api";
 type SensorTableProps = {
   sensors: Sensor[];
   loading: boolean;
-  onDeleted: () => void;
+  onDeleted: (id: string) => void;
 };
 
-export function SensorTable({ sensors, loading, onDeleted }: SensorTableProps) {
-  const router = useRouter();
+export const SensorTable = memo(function SensorTable({
+  sensors,
+  loading,
+  onDeleted,
+}: SensorTableProps) {
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = useCallback(async (id: string) => {
     try {
+      setDeletingId(id);
       await deleteSensor(id);
       toast.success("Sensor deleted successfully");
-      onDeleted();
+      onDeleted(id);
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Failed to delete sensor");
+    } finally {
+      setDeletingId(null);
     }
-  };
+  }, [onDeleted]);
 
   return (
     <div className="space-y-4">
@@ -75,15 +82,18 @@ export function SensorTable({ sensors, loading, onDeleted }: SensorTableProps) {
                   <td className="p-2 md:p-3 border border-gray-200">
                     <div className="flex flex-wrap gap-2">
                       <Button
+                        asChild
                         size="sm"
                         variant="outline"
-                        onClick={() => router.push(`/sensors/edit/${sensor.id}`)}
                       >
-                        <Pencil className="w-4 h-4" />
+                        <Link href={`/sensors/edit/${sensor.id}`}>
+                          <Pencil className="w-4 h-4" />
+                        </Link>
                       </Button>
                       <Button
                         size="sm"
                         variant="destructive"
+                        disabled={deletingId === sensor.id}
                         onClick={() => handleDelete(sensor.id)}
                       >
                         <Trash2 className="w-4 h-4" />
@@ -104,4 +114,4 @@ export function SensorTable({ sensors, loading, onDeleted }: SensorTableProps) {
       </div>
     </div>
   );
-}
+});

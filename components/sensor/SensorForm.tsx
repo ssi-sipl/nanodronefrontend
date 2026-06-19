@@ -47,11 +47,17 @@ export function SensorForm({ mode, sensorId }: SensorFormProps) {
   useEffect(() => {
     async function loadFormData() {
       try {
-        setLoading(true);
-        setAreas(await getAreas());
+        if (mode === "edit") {
+          setLoading(true);
+        }
 
-        if (mode === "edit" && sensorId) {
-          const sensor = await getSensor(sensorId);
+        const [areaList, sensor] = await Promise.all([
+          getAreas(),
+          mode === "edit" && sensorId ? getSensor(sensorId) : Promise.resolve(null),
+        ]);
+        setAreas(areaList);
+
+        if (mode === "edit") {
           if (!sensor) {
             toast.error("Sensor not found");
             return;
@@ -74,6 +80,10 @@ export function SensorForm({ mode, sensorId }: SensorFormProps) {
     loadFormData();
   }, [mode, sensorId]);
 
+  useEffect(() => {
+    router.prefetch("/sensors");
+  }, [router]);
+
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setSaving(true);
@@ -86,7 +96,6 @@ export function SensorForm({ mode, sensorId }: SensorFormProps) {
 
       toast.success(response.message || "Sensor saved successfully");
       router.push("/sensors");
-      router.refresh();
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Failed to save sensor");
     } finally {

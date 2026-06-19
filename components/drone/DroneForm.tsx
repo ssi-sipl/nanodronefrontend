@@ -45,12 +45,17 @@ export function DroneForm({ mode, droneId }: DroneFormProps) {
   useEffect(() => {
     async function loadFormData() {
       try {
-        setLoading(true);
-        const areaList = await getAreas();
+        if (mode === "edit") {
+          setLoading(true);
+        }
+
+        const [areaList, drone] = await Promise.all([
+          getAreas(),
+          mode === "edit" && droneId ? getDrone(droneId) : Promise.resolve(null),
+        ]);
         setAreas(areaList);
 
-        if (mode === "edit" && droneId) {
-          const drone = await getDrone(droneId);
+        if (mode === "edit") {
           if (!drone) {
             toast.error("Drone not found");
             return;
@@ -71,6 +76,10 @@ export function DroneForm({ mode, droneId }: DroneFormProps) {
     loadFormData();
   }, [droneId, mode]);
 
+  useEffect(() => {
+    router.prefetch("/drones");
+  }, [router]);
+
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setSaving(true);
@@ -83,7 +92,6 @@ export function DroneForm({ mode, droneId }: DroneFormProps) {
 
       toast.success(response.message || "Drone saved successfully");
       router.push("/drones");
-      router.refresh();
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Failed to save drone");
     } finally {

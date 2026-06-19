@@ -53,6 +53,10 @@ export function AreaForm({ mode, areaId }: AreaFormProps) {
     loadArea();
   }, [areaId, mode]);
 
+  useEffect(() => {
+    router.prefetch("/areas");
+  }, [router]);
+
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setSaving(true);
@@ -65,7 +69,6 @@ export function AreaForm({ mode, areaId }: AreaFormProps) {
 
       toast.success(response.message || "Area saved successfully");
       router.push("/areas");
-      router.refresh();
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Failed to save area");
     } finally {

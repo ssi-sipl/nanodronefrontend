@@ -53,6 +53,7 @@ export type AreaPayload = {
 };
 
 const demoStorageKey = "nanodrone-crud-demo-state";
+const requestTimeoutMs = 2500;
 
 type DemoState = {
   areas: Area[];
@@ -169,13 +170,20 @@ async function request<T>(
   path: string,
   options?: RequestInit
 ): Promise<ApiResponse<T>> {
+  const controller = new AbortController();
+  const timeoutId = globalThis.setTimeout(
+    () => controller.abort(),
+    requestTimeoutMs
+  );
+
   const response = await fetch(`${baseUrl}${path}`, {
     ...options,
+    signal: options?.signal || controller.signal,
     headers: {
       "Content-Type": "application/json",
       ...options?.headers,
     },
-  });
+  }).finally(() => globalThis.clearTimeout(timeoutId));
 
   const body = (await response.json().catch(() => ({}))) as ApiResponse<T>;
 

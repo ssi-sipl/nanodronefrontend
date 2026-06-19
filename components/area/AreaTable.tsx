@@ -1,7 +1,7 @@
 "use client";
 
+import { memo, useCallback, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { Pencil, Plus, Trash2 } from "lucide-react";
 import toast, { Toaster } from "react-hot-toast";
 import { Button } from "@/components/ui/button";
@@ -10,21 +10,28 @@ import { deleteArea, type Area } from "@/lib/api";
 type AreaTableProps = {
   areas: Area[];
   loading: boolean;
-  onDeleted: () => void;
+  onDeleted: (id: string) => void;
 };
 
-export function AreaTable({ areas, loading, onDeleted }: AreaTableProps) {
-  const router = useRouter();
+export const AreaTable = memo(function AreaTable({
+  areas,
+  loading,
+  onDeleted,
+}: AreaTableProps) {
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = useCallback(async (id: string) => {
     try {
+      setDeletingId(id);
       await deleteArea(id);
       toast.success("Area deleted successfully");
-      onDeleted();
+      onDeleted(id);
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Failed to delete area");
+    } finally {
+      setDeletingId(null);
     }
-  };
+  }, [onDeleted]);
 
   return (
     <div className="space-y-4">
@@ -67,15 +74,18 @@ export function AreaTable({ areas, loading, onDeleted }: AreaTableProps) {
                   <td className="p-2 md:p-3 border border-gray-200">
                     <div className="flex flex-wrap gap-2">
                       <Button
+                        asChild
                         size="sm"
                         variant="outline"
-                        onClick={() => router.push(`/areas/edit/${area.id}`)}
                       >
-                        <Pencil className="w-4 h-4" />
+                        <Link href={`/areas/edit/${area.id}`}>
+                          <Pencil className="w-4 h-4" />
+                        </Link>
                       </Button>
                       <Button
                         size="sm"
                         variant="destructive"
+                        disabled={deletingId === area.id}
                         onClick={() => handleDelete(area.id)}
                       >
                         <Trash2 className="w-4 h-4" />
@@ -96,4 +106,4 @@ export function AreaTable({ areas, loading, onDeleted }: AreaTableProps) {
       </div>
     </div>
   );
-}
+});
