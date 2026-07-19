@@ -84,13 +84,13 @@ export default function MapDisplay({ setCurrentSensor }: MapDisplayProps) {
   //   [19.9342, 73.7352], // South-West corner
   // ];
 
-  const DEFAULT_LAT = 25.45995;
-  const DEFAULT_LNG = 81.812512;
+   const DEFAULT_LAT = 26.27784;
+   const DEFAULT_LNG = 73.06014;
 
-  const bounds: LatLngBoundsLiteral = [
-    [25.478, 81.8325], // North-East
-    [25.442, 81.7925], // South-West
-  ];
+  const bounds = [
+  [26.285, 73.07],   // North-East
+  [26.270, 73.05],   // South-West
+];
 
   // North: 26.984012018018, South: 26.947975981982, West: 70.99111401562, East: 71.03154598438
 
@@ -120,13 +120,13 @@ export default function MapDisplay({ setCurrentSensor }: MapDisplayProps) {
               center: [DEFAULT_LAT, DEFAULT_LNG],
               zoom: 15,
               minZoom: 15,
-              maxZoom: 18,
+              maxZoom: 17,
               maxBounds: bounds,
               maxBoundsViscosity: 1.0,
             });
 
             // Add the tile layer to the map with proper attribution
-            L.tileLayer("/prayagraj_map/{z}/{x}/{y}.jpg", {
+            L.tileLayer("/jodhpur_map/{z}/{x}/{y}.jpg", {
               tileSize: 256,
               noWrap: true,
               bounds: bounds,
