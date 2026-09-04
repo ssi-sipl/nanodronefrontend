@@ -11,8 +11,8 @@ export async function GET() {
 
     if (!drones || drones.length === 0) {
       return NextResponse.json(
-        { status: true, message: "No drones found" },
-        { status: 404 }
+        { status: true, message: "No drones found", data: [] },
+        { status: 200 }
       );
     }
 

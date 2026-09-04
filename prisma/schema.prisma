@@ -32,6 +32,7 @@ model Sensor {
   sensor_id  String  @unique
   latitude   Float
   longitude  Float
+  cameraFeed String?
 }
 
 model User {

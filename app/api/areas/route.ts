@@ -7,8 +7,8 @@ export async function GET() {
 
     if (!areas.length) {
       return NextResponse.json(
-        { status: true, message: "No areas found" },
-        { status: 404 }
+        { status: true, message: "No areas found", data: [] },
+        { status: 200 }
       );
     }
 

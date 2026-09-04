@@ -33,6 +33,7 @@ export function SensorSettings({
 }) {
   const [sensorId, setSensorId] = useState("");
   const [sensorName, setSensorName] = useState("");
+  const [cameraFeed, setCameraFeed] = useState("");
   const [latitude, setLatitude] = useState("");
   const [longitude, setLongitude] = useState("");
   const [gridRef, setGridRef] = useState(""); // ✅ MGRS
@@ -78,6 +79,7 @@ export function SensorSettings({
           sensor_id: sensorId,
           latitude: Number(latitude),
           longitude: Number(longitude),
+          cameraFeed,
         }),
       });
 
@@ -89,6 +91,7 @@ export function SensorSettings({
 
       setSensorId("");
       setSensorName("");
+      setCameraFeed("");
       setLatitude("");
       setLongitude("");
       setGridRef(""); // ✅ clear grid
@@ -143,6 +146,18 @@ export function SensorSettings({
                 value={sensorName}
                 onChange={(e) => setSensorName(e.target.value)}
                 placeholder="Enter sensor name"
+              />
+            </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="sensorRtsp">RTSP URL</Label>
+              <Input
+                id="sensorRtsp"
+                type="text"
+                inputMode="url"
+                value={cameraFeed}
+                onChange={(e) => setCameraFeed(e.target.value)}
+                placeholder="rtsp://camera-ip:554/stream"
               />
             </div>
 

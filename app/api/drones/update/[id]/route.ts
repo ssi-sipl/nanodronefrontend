@@ -16,7 +16,14 @@ export async function POST(
     }
 
     const { id } = await params;
-    const { name, drone_id, area_id } = body;
+    const { name, drone_id, area_id, cameraFeed } = body;
+
+    if (cameraFeed !== undefined && typeof cameraFeed !== "string") {
+      return NextResponse.json(
+        { status: false, message: 'Invalid input: "cameraFeed" must be a string.' },
+        { status: 400 }
+      );
+    }
 
     // Validate ID
     const droneId = id;
@@ -103,6 +110,7 @@ export async function POST(
         drone_id,
         area_id,
         areaRef: areaRef || existingDrone.areaRef,
+        ...(cameraFeed !== undefined ? { cameraFeed: cameraFeed.trim() || null } : {}),
       },
     });
 

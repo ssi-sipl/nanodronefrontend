@@ -27,14 +27,21 @@ interface ConfigurationPanelProps {
   currentSensor: Sensor | null;
   setIsLoading?: (value: boolean) => void;
   setLoadingStatus?: (value: string) => void;
+  selectedDroneId?: string;
+  onDroneChange?: (droneId: string) => void;
 }
 
-export function ConfigurationPanel({ currentSensor }: ConfigurationPanelProps) {
+export function ConfigurationPanel({
+  currentSensor,
+  selectedDroneId: controlledDroneId,
+  onDroneChange,
+}: ConfigurationPanelProps) {
   const [latitude, setLatitude] = useState("");
   const [longitude, setLongitude] = useState("");
   const [altitude, setAltitude] = useState("10");
   const [areaId, setAreaId] = useState("");
-  const [selectedDroneId, setSelectedDroneId] = useState<string | undefined>();
+  const [selectedDroneIdState, setSelectedDroneIdState] = useState<string | undefined>();
+  const selectedDroneId = controlledDroneId ?? selectedDroneIdState;
   const [usbAddress, setUsbAddress] = useState("");
   const [gridRef, setGridRef] = useState("");
   const [isRecording, setIsRecording] = useState(false);
@@ -47,6 +54,11 @@ export function ConfigurationPanel({ currentSensor }: ConfigurationPanelProps) {
   const [transcribedAudio, setTranscribedAudio] = useState(
     "Transcript will appear here"
   );
+
+  const handleDroneSelection = (droneId: string) => {
+    setSelectedDroneIdState(droneId);
+    onDroneChange?.(droneId);
+  };
 
   // Load sensor lat/lng if available
   useEffect(() => {
@@ -232,7 +244,7 @@ export function ConfigurationPanel({ currentSensor }: ConfigurationPanelProps) {
         console.log("Fetched Drone ID:", fetchedDroneId);
         console.log("Sensor Data:", fetchedSensor);
 
-        setSelectedDroneId(fetchedDroneId);
+        handleDroneSelection(fetchedDroneId);
         setLatitude(fetchedSensor.latitude.toFixed(8));
         setLongitude(fetchedSensor.longitude.toFixed(8));
         setAreaId(droneData.data.area_id);
@@ -323,7 +335,7 @@ export function ConfigurationPanel({ currentSensor }: ConfigurationPanelProps) {
         console.log("Fetched Drone ID:", fetchedDroneId);
         console.log("Fetched Area ID:", fetchedAreaId);
 
-        setSelectedDroneId(fetchedDroneId);
+        handleDroneSelection(fetchedDroneId);
         setAreaId(fetchedAreaId);
         setUsbAddress("Auto-filled");
 
@@ -395,7 +407,7 @@ export function ConfigurationPanel({ currentSensor }: ConfigurationPanelProps) {
           console.log("Fetched Drone ID:", droneIdToUse);
           console.log("Fetched Area ID:", areaIdToUse);
 
-          setSelectedDroneId(droneIdToUse);
+          if (droneIdToUse) handleDroneSelection(droneIdToUse);
           setAreaId(areaIdToUse);
         }
 
@@ -469,7 +481,7 @@ export function ConfigurationPanel({ currentSensor }: ConfigurationPanelProps) {
           console.log("Fetched Drone ID:", droneIdToUse);
           console.log("Fetched Area ID:", areaIdToUse);
 
-          setSelectedDroneId(droneIdToUse);
+          if (droneIdToUse) handleDroneSelection(droneIdToUse);
           setAreaId(areaIdToUse);
         }
 
@@ -543,7 +555,7 @@ export function ConfigurationPanel({ currentSensor }: ConfigurationPanelProps) {
           console.log("Fetched Drone ID:", droneIdToUse);
           console.log("Fetched Area ID:", areaIdToUse);
 
-          setSelectedDroneId(droneIdToUse);
+          if (droneIdToUse) handleDroneSelection(droneIdToUse);
           setAreaId(areaIdToUse);
         }
 
@@ -711,14 +723,6 @@ export function ConfigurationPanel({ currentSensor }: ConfigurationPanelProps) {
     }
   };
 
-  const handleDroneView = async () => {
-    if (typeof window !== "undefined") {
-      const mediaMtxHost = baseUrl.replace(":5000", ":8889");
-      const streamUrl = `${mediaMtxHost}/${selectedDroneId}`;
-      window.open(streamUrl, "_blank", "width=800,height=600");
-    }
-  };
-
   return (
     <>
       {isLoading && (
@@ -782,7 +786,7 @@ export function ConfigurationPanel({ currentSensor }: ConfigurationPanelProps) {
               <Label htmlFor="droneID">Drone ID</Label>
               <DroneDropdown
                 selectedDroneId={selectedDroneId ?? null}
-                setSelectedDroneId={(id) => setSelectedDroneId(id)}
+                setSelectedDroneId={handleDroneSelection}
               />
             </div>
 

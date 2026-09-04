@@ -28,7 +28,7 @@ export async function POST(request: Request) {
       );
     }
 
-    if (typeof cameraFeed !== "string") {
+    if (cameraFeed !== undefined && typeof cameraFeed !== "string") {
       return NextResponse.json(
         {
           status: false,
@@ -98,9 +98,7 @@ export async function POST(request: Request) {
         drone_id: drone_id.toLocaleLowerCase().trim(),
         area_id: area_id.toLocaleLowerCase().trim(),
         areaRef: area.id,
-        cameraFeed:
-          cameraFeed.toLocaleLowerCase().trim() ||
-          "rtsp://user:pass@ip:554/snl/live/1/1/3",
+        cameraFeed: cameraFeed?.trim() || null,
       },
     });
 

@@ -269,7 +269,7 @@ export async function POST(req: NextRequest) {
           "base",
         ];
         const droneWords = words.filter(
-          (w) => !actionWords.includes(w.toLowerCase()) && w.length > 0
+          (w: string) => !actionWords.includes(w.toLowerCase()) && w.length > 0
         );
 
         if (droneWords.length > 0) {
@@ -290,7 +290,7 @@ export async function POST(req: NextRequest) {
           "from",
         ];
         const droneWords = words.filter(
-          (w) => !actionWords.includes(w.toLowerCase()) && w.length > 0
+          (w: string) => !actionWords.includes(w.toLowerCase()) && w.length > 0
         );
 
         if (droneWords.length > 0) {
@@ -326,7 +326,7 @@ export async function POST(req: NextRequest) {
             "the",
           ];
           const droneWords = words.filter(
-            (w) => !actionWords.includes(w.toLowerCase()) && w.length > 0
+            (w: string) => !actionWords.includes(w.toLowerCase()) && w.length > 0
           );
 
           if (droneWords.length > 0) {
@@ -341,7 +341,7 @@ export async function POST(req: NextRequest) {
         const words = text.split(/\s+/);
         const actionWords = ["take", "off", "takeoff", "launch", "the"];
         const droneWords = words.filter(
-          (w) => !actionWords.includes(w.toLowerCase()) && w.length > 0
+          (w: string) => !actionWords.includes(w.toLowerCase()) && w.length > 0
         );
 
         if (droneWords.length > 0) {

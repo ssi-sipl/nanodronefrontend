@@ -68,6 +68,7 @@ export function SensorForm({ mode, sensorId }: SensorFormProps) {
             area_id: sensor.area_id,
             latitude: sensor.latitude,
             longitude: sensor.longitude,
+            cameraFeed: sensor.cameraFeed || "",
           });
         }
       } catch (error) {
@@ -176,6 +177,20 @@ export function SensorForm({ mode, sensorId }: SensorFormProps) {
                     )}
                   </SelectContent>
                 </Select>
+              </div>
+              <div className="w-full space-y-2">
+                <Label htmlFor="sensor-rtsp" className="text-sm font-semibold text-gray-700">
+                  RTSP URL
+                </Label>
+                <Input
+                  id="sensor-rtsp"
+                  type="text"
+                  inputMode="url"
+                  placeholder="rtsp://camera-ip:554/stream"
+                  value={form.cameraFeed || ""}
+                  onChange={(event) => setForm({ ...form, cameraFeed: event.target.value })}
+                  className="h-10 w-full"
+                />
               </div>
               <div className="w-full space-y-2">
                 <Label

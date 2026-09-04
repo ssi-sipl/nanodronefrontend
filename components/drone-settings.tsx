@@ -22,6 +22,7 @@ type Area = {
 export function DroneSettings() {
   const [droneId, setDroneId] = useState("");
   const [droneName, setDroneName] = useState("");
+  const [cameraFeed, setCameraFeed] = useState("");
   const [areas, setAreas] = useState<Area[]>([]);
   const [selectedAreaId, setSelectedAreaId] = useState<string | null>(null);
 
@@ -36,6 +37,7 @@ export function DroneSettings() {
           name: droneName,
           drone_id: droneId,
           area_id: selectedAreaId,
+          cameraFeed,
         }),
       });
 
@@ -47,6 +49,7 @@ export function DroneSettings() {
 
       setDroneId("");
       setDroneName("");
+      setCameraFeed("");
     } else {
       alert("Please fill in all fields");
     }
@@ -98,6 +101,18 @@ export function DroneSettings() {
               value={droneName}
               onChange={(e) => setDroneName(e.target.value)}
               placeholder="Enter drone name"
+            />
+          </div>
+
+          <div className="grid gap-2">
+            <Label htmlFor="droneRtsp">RTSP URL</Label>
+            <Input
+              id="droneRtsp"
+              type="text"
+              inputMode="url"
+              value={cameraFeed}
+              onChange={(e) => setCameraFeed(e.target.value)}
+              placeholder="rtsp://camera-ip:554/stream"
             />
           </div>
 

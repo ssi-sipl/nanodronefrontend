@@ -16,7 +16,7 @@ export async function POST(
     }
 
     const { id } = await params;
-    const { name, area_id, sensor_id, latitude, longitude } = body;
+    const { name, area_id, sensor_id, latitude, longitude, cameraFeed } = body;
 
     // Validate ID
     const sensorId = id;
@@ -31,6 +31,13 @@ export async function POST(
     if (!sensor_id) {
       return NextResponse.json(
         { status: false, message: "Sensor ID is required." },
+        { status: 400 }
+      );
+    }
+
+    if (cameraFeed !== undefined && typeof cameraFeed !== "string") {
+      return NextResponse.json(
+        { status: false, message: 'Invalid input: "cameraFeed" must be a string.' },
         { status: 400 }
       );
     }
@@ -69,6 +76,7 @@ export async function POST(
     if (sensor_id) updateData.sensor_id = sensor_id;
     if (latitude !== undefined) updateData.latitude = latitude;
     if (longitude !== undefined) updateData.longitude = longitude;
+    if (cameraFeed !== undefined) updateData.cameraFeed = cameraFeed.trim() || null;
 
     // Update the sensor
     const updatedSensor = await prisma.sensor.update({

@@ -33,6 +33,8 @@ const pwaConfig = withPWA({
   dest: "public",
   register: true,
   skipWaiting: true,
+  // Workbox rewrites sw.js continuously in Next's watch mode on Windows.
+  // Keep it enabled for production installs while avoiding dev-server file locks.
   disable: process.env.NODE_ENV === "development",
 });
 

@@ -64,6 +64,7 @@ export function DroneForm({ mode, droneId }: DroneFormProps) {
             name: drone.name,
             drone_id: drone.drone_id,
             area_id: drone.area_id,
+            cameraFeed: drone.cameraFeed || "",
           });
         }
       } catch (error) {
@@ -145,6 +146,20 @@ export function DroneForm({ mode, droneId }: DroneFormProps) {
                   }
                   className="h-10 w-full"
                   required
+                />
+              </div>
+              <div className="w-full space-y-2">
+                <Label htmlFor="drone-rtsp" className="text-sm font-semibold text-gray-700">
+                  RTSP URL
+                </Label>
+                <Input
+                  id="drone-rtsp"
+                  type="text"
+                  inputMode="url"
+                  placeholder="rtsp://camera-ip:554/stream"
+                  value={form.cameraFeed || ""}
+                  onChange={(event) => setForm({ ...form, cameraFeed: event.target.value })}
+                  className="h-10 w-full"
                 />
               </div>
               <div className="w-full space-y-2">

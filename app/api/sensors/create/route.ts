@@ -12,7 +12,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { name, area_id, sensor_id, latitude, longitude } = body;
+    const { name, area_id, sensor_id, latitude, longitude, cameraFeed } = body;
 
     // Basic validation
     if (
@@ -31,6 +31,13 @@ export async function POST(req: NextRequest) {
     if (typeof latitude !== "number" || typeof longitude !== "number") {
       return NextResponse.json(
         { status: false, message: "Latitude and longitude must be numbers." },
+        { status: 400 }
+      );
+    }
+
+    if (cameraFeed !== undefined && typeof cameraFeed !== "string") {
+      return NextResponse.json(
+        { status: false, message: 'Invalid input: "cameraFeed" must be a string.' },
         { status: 400 }
       );
     }
@@ -90,6 +97,7 @@ export async function POST(req: NextRequest) {
         sensor_id,
         latitude: Number(latitude.toPrecision(8)),
         longitude: Number(longitude.toPrecision(8)),
+        cameraFeed: cameraFeed?.trim() || null,
       },
     });
 

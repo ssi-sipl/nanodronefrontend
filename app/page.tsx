@@ -39,8 +39,8 @@ export default function Dashboard() {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
           {/* Map container with responsive height */}
-          <div className="lg:col-span-2 bg-gray-50 rounded-lg shadow-sm">
-            <div className="h-full ">
+          <div className="min-h-[360px] sm:min-h-[480px] lg:col-span-2 lg:min-h-[600px] bg-gray-50 rounded-lg shadow-sm">
+            <div className="h-full">
               <MapDisplay setCurrentSensor={setCurrentSensor} />
               {/* <div className="w-full">
               <TelemetryDashboard />

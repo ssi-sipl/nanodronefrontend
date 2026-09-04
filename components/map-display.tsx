@@ -18,6 +18,7 @@ interface Sensor {
   longitude: number;
   name: string;
   sensor_id: string;
+  cameraFeed?: string | null;
 }
 
 type Area = {
@@ -28,6 +29,11 @@ type Area = {
 interface MapDisplayProps {
   setCurrentSensor: (sensor: Sensor | null) => void;
 }
+
+const escapePopupText = (value: string) =>
+  value.replace(/[&<>"']/g, (character) =>
+    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[character]!
+  );
 
 export default function MapDisplay({ setCurrentSensor }: MapDisplayProps) {
   const mapRef = useRef<HTMLDivElement | null>(null);
@@ -150,11 +156,31 @@ export default function MapDisplay({ setCurrentSensor }: MapDisplayProps) {
                 icon: sensorIcon,
               })
                 .addTo(leafletMapRef.current)
-                .bindPopup(sensor.name);
+                .bindPopup(`
+                  <div class="min-w-36">
+                    <p class="mb-2 font-medium">${escapePopupText(sensor.name)}</p>
+                    ${sensor.cameraFeed ? `<button
+                      type="button"
+                      data-stream-id="${encodeURIComponent(sensor.sensor_id)}"
+                      class="rounded bg-slate-900 px-3 py-1.5 text-sm text-white hover:bg-slate-700"
+                    >Open live stream</button>` : '<p class="text-sm text-slate-500">No RTSP feed configured</p>'}
+                  </div>
+                `);
 
               marker.on("click", () => {
                 console.log("Sensor clicked:", sensor);
                 setCurrentSensor({ ...sensor });
+              });
+
+              marker.on("popupopen", () => {
+                const streamButton = document.querySelector<HTMLButtonElement>(
+                  `button[data-stream-id="${encodeURIComponent(sensor.sensor_id)}"]`
+                );
+                streamButton?.addEventListener(
+                  "click",
+                  () => window.location.assign(`/live?stream=${encodeURIComponent(sensor.sensor_id)}`),
+                  { once: true }
+                );
               });
             }
           });
@@ -212,6 +238,17 @@ export default function MapDisplay({ setCurrentSensor }: MapDisplayProps) {
   }, [clickAddSensor]);
 
   useEffect(() => {
+    if (!mapRef.current) return;
+
+    const resizeObserver = new ResizeObserver(() => {
+      leafletMapRef.current?.invalidateSize();
+    });
+
+    resizeObserver.observe(mapRef.current);
+    return () => resizeObserver.disconnect();
+  }, []);
+
+  useEffect(() => {
     if (sensorAddSuccess) {
       setClickAddSensor(false);
       setSensorAddSuccess(false);
@@ -225,9 +262,9 @@ export default function MapDisplay({ setCurrentSensor }: MapDisplayProps) {
   }, [sensorAddSuccess]);
 
   return (
-    <div className="w-full h-full relative rounded-lg border shadow ">
+    <div className="relative h-full w-full overflow-hidden rounded-lg border shadow">
       {/* Floating Icon Button */}
-      <div className="absolute z-[1000] top-4 right-4 flex flex-row gap-4">
+      <div className="absolute right-3 top-3 z-[1000] flex flex-row gap-2 sm:right-4 sm:top-4 sm:gap-4">
         <button
           className=" bg-white px-4 py-2 rounded-lg shadow hover:bg-gray-100 border border-gray-300"
           onClick={() => {
@@ -261,7 +298,7 @@ export default function MapDisplay({ setCurrentSensor }: MapDisplayProps) {
         </button>
       </div>
       {clickAddSensor && (
-        <div className="absolute z-[1000] top-4 left-4">
+        <div className="absolute left-3 top-3 z-[1000] max-h-[calc(100%-1.5rem)] max-w-[calc(100%-1.5rem)] overflow-y-auto sm:left-4 sm:top-4">
           <SensorSettings
             addSensorLat={addSensorLat}
             addSensorLng={addSensorLng}

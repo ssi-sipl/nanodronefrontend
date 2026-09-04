@@ -21,6 +21,7 @@ export type Drone = {
   drone_id: string;
   area_id: string;
   area?: Area;
+  cameraFeed?: string;
 };
 
 export type Sensor = {
@@ -30,6 +31,7 @@ export type Sensor = {
   area_id: string;
   latitude: number;
   longitude: number;
+  cameraFeed?: string;
 };
 
 export type DronePayload = {
@@ -45,6 +47,7 @@ export type SensorPayload = {
   area_id: string;
   latitude: number;
   longitude: number;
+  cameraFeed?: string;
 };
 
 export type AreaPayload = {
