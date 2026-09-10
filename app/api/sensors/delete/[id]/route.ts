@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { removeCameraPath } from "@/lib/mediamtx";
 
 export async function POST(
   req: NextRequest,
@@ -8,7 +9,6 @@ export async function POST(
   try {
     const { id } = await params;
 
-    // Validate ID
     const sensorId = id;
     if (!sensorId || typeof sensorId !== "string") {
       return NextResponse.json(
@@ -17,16 +17,23 @@ export async function POST(
       );
     }
 
-    // Attempt to delete the sensor
     const deletedSensor = await prisma.sensor
       .delete({ where: { id: sensorId } })
-      .catch(() => null); // Handle non-existent sensor
+      .catch(() => null);
 
     if (!deletedSensor) {
       return NextResponse.json(
         { status: false, message: "Sensor not found." },
         { status: 404 }
       );
+    }
+
+    if (deletedSensor.cameraFeed) {
+      try {
+        await removeCameraPath(deletedSensor.sensor_id);
+      } catch (mtxErr) {
+        console.error("MediaMTX path removal failed:", mtxErr);
+      }
     }
 
     return NextResponse.json(

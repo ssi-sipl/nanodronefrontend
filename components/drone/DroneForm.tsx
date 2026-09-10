@@ -22,6 +22,7 @@ import {
   type Area,
   type DronePayload,
 } from "@/lib/api";
+import { CameraFeedPlayer } from "@/components/camera/CameraFeedPlayer";
 
 type DroneFormProps = {
   mode: "create" | "edit";
@@ -32,6 +33,7 @@ const emptyForm: DronePayload = {
   name: "",
   drone_id: "",
   area_id: "",
+  cameraFeed: "",
 };
 
 export function DroneForm({ mode, droneId }: DroneFormProps) {
@@ -64,7 +66,7 @@ export function DroneForm({ mode, droneId }: DroneFormProps) {
             name: drone.name,
             drone_id: drone.drone_id,
             area_id: drone.area_id,
-            cameraFeed: drone.cameraFeed || "",
+            cameraFeed: drone.cameraFeed ?? "",
           });
         }
       } catch (error) {
@@ -149,20 +151,6 @@ export function DroneForm({ mode, droneId }: DroneFormProps) {
                 />
               </div>
               <div className="w-full space-y-2">
-                <Label htmlFor="drone-rtsp" className="text-sm font-semibold text-gray-700">
-                  RTSP URL
-                </Label>
-                <Input
-                  id="drone-rtsp"
-                  type="text"
-                  inputMode="url"
-                  placeholder="rtsp://camera-ip:554/stream"
-                  value={form.cameraFeed || ""}
-                  onChange={(event) => setForm({ ...form, cameraFeed: event.target.value })}
-                  className="h-10 w-full"
-                />
-              </div>
-              <div className="w-full space-y-2">
                 <Label htmlFor="drone-area" className="text-sm font-semibold text-gray-700">
                   Area
                 </Label>
@@ -188,6 +176,20 @@ export function DroneForm({ mode, droneId }: DroneFormProps) {
                   </SelectContent>
                 </Select>
               </div>
+              <div className="w-full space-y-2 md:col-span-3">
+                <Label htmlFor="drone-camera" className="text-sm font-semibold text-gray-700">
+                  Camera Feed (RTSP URL)
+                </Label>
+                <Input
+                  id="drone-camera"
+                  placeholder="rtsp://user:pass@ip:554/stream"
+                  value={form.cameraFeed ?? ""}
+                  onChange={(event) =>
+                    setForm({ ...form, cameraFeed: event.target.value })
+                  }
+                  className="h-10 w-full"
+                />
+              </div>
               <Button
                 type="submit"
                 disabled={saving}
@@ -201,6 +203,13 @@ export function DroneForm({ mode, droneId }: DroneFormProps) {
           )}
         </CardContent>
       </Card>
+
+      {mode === "edit" && !loading && form.cameraFeed && form.drone_id && (
+        <div>
+          <h2 className="text-lg font-semibold mb-2">Live Preview</h2>
+          <CameraFeedPlayer pathName={form.drone_id} label={form.name} />
+        </div>
+      )}
     </div>
   );
 }

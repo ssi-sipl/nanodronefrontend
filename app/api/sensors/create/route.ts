@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { registerCameraPath } from "@/lib/mediamtx";
 
 export async function POST(req: NextRequest) {
   try {
@@ -14,7 +15,6 @@ export async function POST(req: NextRequest) {
 
     const { name, area_id, sensor_id, latitude, longitude, cameraFeed } = body;
 
-    // Basic validation
     if (
       !name ||
       !area_id ||
@@ -35,13 +35,6 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    if (cameraFeed !== undefined && typeof cameraFeed !== "string") {
-      return NextResponse.json(
-        { status: false, message: 'Invalid input: "cameraFeed" must be a string.' },
-        { status: 400 }
-      );
-    }
-
     if (
       typeof name !== "string" ||
       typeof area_id !== "string" ||
@@ -56,7 +49,13 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Check if a sensor with the same sensor_id or name already exists
+    if (cameraFeed !== undefined && typeof cameraFeed !== "string") {
+      return NextResponse.json(
+        { status: false, message: 'Invalid input: "cameraFeed" must be a string.' },
+        { status: 400 }
+      );
+    }
+
     const existingSensor = await prisma.sensor.findFirst({
       where: {
         OR: [{ sensor_id }, { name }],
@@ -74,7 +73,6 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Check if the area exists
     const existingArea = await prisma.area.findUnique({
       where: { area_id },
     });
@@ -89,7 +87,6 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Create the sensor
     const newSensor = await prisma.sensor.create({
       data: {
         name,
@@ -100,6 +97,14 @@ export async function POST(req: NextRequest) {
         cameraFeed: cameraFeed?.trim() || null,
       },
     });
+
+    if (newSensor.cameraFeed) {
+      try {
+        await registerCameraPath({ pathName: newSensor.sensor_id, rtspUrl: newSensor.cameraFeed });
+      } catch (mtxErr) {
+        console.error("MediaMTX registration failed:", mtxErr);
+      }
+    }
 
     return NextResponse.json(
       {

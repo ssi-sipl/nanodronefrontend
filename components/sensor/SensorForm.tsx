@@ -22,6 +22,7 @@ import {
   type Area,
   type SensorPayload,
 } from "@/lib/api";
+import { CameraFeedPlayer } from "@/components/camera/CameraFeedPlayer";
 
 type SensorFormProps = {
   mode: "create" | "edit";
@@ -34,6 +35,7 @@ const emptyForm: SensorPayload = {
   area_id: "",
   latitude: 0,
   longitude: 0,
+  cameraFeed: "",
 };
 
 export function SensorForm({ mode, sensorId }: SensorFormProps) {
@@ -68,7 +70,7 @@ export function SensorForm({ mode, sensorId }: SensorFormProps) {
             area_id: sensor.area_id,
             latitude: sensor.latitude,
             longitude: sensor.longitude,
-            cameraFeed: sensor.cameraFeed || "",
+            cameraFeed: sensor.cameraFeed ?? "",
           });
         }
       } catch (error) {
@@ -179,20 +181,6 @@ export function SensorForm({ mode, sensorId }: SensorFormProps) {
                 </Select>
               </div>
               <div className="w-full space-y-2">
-                <Label htmlFor="sensor-rtsp" className="text-sm font-semibold text-gray-700">
-                  RTSP URL
-                </Label>
-                <Input
-                  id="sensor-rtsp"
-                  type="text"
-                  inputMode="url"
-                  placeholder="rtsp://camera-ip:554/stream"
-                  value={form.cameraFeed || ""}
-                  onChange={(event) => setForm({ ...form, cameraFeed: event.target.value })}
-                  className="h-10 w-full"
-                />
-              </div>
-              <div className="w-full space-y-2">
                 <Label
                   htmlFor="sensor-latitude"
                   className="text-sm font-semibold text-gray-700"
@@ -238,11 +226,28 @@ export function SensorForm({ mode, sensorId }: SensorFormProps) {
                   required
                 />
               </div>
+              <div className="w-full space-y-2 lg:col-span-5">
+                <Label
+                  htmlFor="sensor-camera"
+                  className="text-sm font-semibold text-gray-700"
+                >
+                  Camera Feed (RTSP URL)
+                </Label>
+                <Input
+                  id="sensor-camera"
+                  placeholder="rtsp://user:pass@ip:554/stream"
+                  value={form.cameraFeed ?? ""}
+                  onChange={(event) =>
+                    setForm({ ...form, cameraFeed: event.target.value })
+                  }
+                  className="h-10 w-full"
+                />
+              </div>
               <Button
                 type="submit"
                 disabled={saving}
                 className={`bg-black text-white hover:bg-gray-800 h-10 w-full ${
-                  isCreateMode ? "" : "md:w-auto"
+                  isCreateMode ? "" : "lg:w-auto"
                 }`}
               >
                 {saving
@@ -255,6 +260,13 @@ export function SensorForm({ mode, sensorId }: SensorFormProps) {
           )}
         </CardContent>
       </Card>
+
+      {mode === "edit" && !loading && form.cameraFeed && form.sensor_id && (
+        <div>
+          <h2 className="text-lg font-semibold mb-2">Live Preview</h2>
+          <CameraFeedPlayer pathName={form.sensor_id} label={form.name} />
+        </div>
+      )}
     </div>
   );
 }

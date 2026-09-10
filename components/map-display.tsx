@@ -178,7 +178,7 @@ export default function MapDisplay({ setCurrentSensor }: MapDisplayProps) {
                 );
                 streamButton?.addEventListener(
                   "click",
-                  () => window.location.assign(`/live?stream=${encodeURIComponent(sensor.sensor_id)}`),
+                  () => window.location.assign(`/live-view?stream=${encodeURIComponent(sensor.sensor_id)}`),
                   { once: true }
                 );
               });

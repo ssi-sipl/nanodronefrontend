@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { registerCameraPath } from "@/lib/mediamtx";
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const body = await req.json().catch(() => null);
@@ -25,7 +26,6 @@ export async function POST(
       );
     }
 
-    // Validate ID
     const droneId = id;
     if (!droneId || typeof droneId !== "string") {
       return NextResponse.json(
@@ -34,7 +34,6 @@ export async function POST(
       );
     }
 
-    // Validate fields
     if (!name || typeof name !== "string" || name.trim() === "") {
       return NextResponse.json(
         {
@@ -68,7 +67,6 @@ export async function POST(
       );
     }
 
-    // Find the drone
     const existingDrone = await prisma.drone.findUnique({
       where: { id: droneId },
     });
@@ -83,11 +81,11 @@ export async function POST(
       );
     }
 
-    // Find the area (if provided)
     let areaRef;
     if (area_id) {
+      const normalizedAreaId = area_id.toLocaleLowerCase().trim();
       const area = await prisma.area.findUnique({
-        where: { area_id },
+        where: { area_id: normalizedAreaId },
       });
 
       if (!area) {
@@ -102,17 +100,24 @@ export async function POST(
       areaRef = area.id;
     }
 
-    // Update the drone
     const updatedDrone = await prisma.drone.update({
       where: { id: droneId },
       data: {
         name,
         drone_id,
-        area_id,
+        area_id: area_id ? area_id.toLocaleLowerCase().trim() : area_id,
         areaRef: areaRef || existingDrone.areaRef,
         ...(cameraFeed !== undefined ? { cameraFeed: cameraFeed.trim() || null } : {}),
       },
     });
+
+    if (body.cameraFeed) {
+      try {
+        await registerCameraPath({ pathName: updatedDrone.drone_id, rtspUrl: body.cameraFeed });
+      } catch (mtxErr) {
+        console.error("MediaMTX update failed:", mtxErr);
+      }
+    }
 
     return NextResponse.json(
       {

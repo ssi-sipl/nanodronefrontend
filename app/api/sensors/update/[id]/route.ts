@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { registerCameraPath } from "@/lib/mediamtx";
 
 export async function POST(
   req: NextRequest,
@@ -18,7 +19,6 @@ export async function POST(
     const { id } = await params;
     const { name, area_id, sensor_id, latitude, longitude, cameraFeed } = body;
 
-    // Validate ID
     const sensorId = id;
     if (!sensorId || typeof sensorId !== "string") {
       return NextResponse.json(
@@ -27,7 +27,6 @@ export async function POST(
       );
     }
 
-    // Validate input
     if (!sensor_id) {
       return NextResponse.json(
         { status: false, message: "Sensor ID is required." },
@@ -46,7 +45,8 @@ export async function POST(
       !name &&
       !area_id &&
       latitude === undefined &&
-      longitude === undefined
+      longitude === undefined &&
+      cameraFeed === undefined
     ) {
       return NextResponse.json(
         {
@@ -57,7 +57,6 @@ export async function POST(
       );
     }
 
-    // Check if the sensor exists
     const existingSensor = await prisma.sensor.findUnique({
       where: { id: sensorId },
     });
@@ -69,7 +68,6 @@ export async function POST(
       );
     }
 
-    // Prepare update data
     const updateData: any = {};
     if (name) updateData.name = name;
     if (area_id) updateData.area_id = area_id;
@@ -78,11 +76,21 @@ export async function POST(
     if (longitude !== undefined) updateData.longitude = longitude;
     if (cameraFeed !== undefined) updateData.cameraFeed = cameraFeed.trim() || null;
 
-    // Update the sensor
     const updatedSensor = await prisma.sensor.update({
       where: { id: sensorId },
       data: updateData,
     });
+
+    if (updatedSensor.cameraFeed) {
+      try {
+        await registerCameraPath({
+          pathName: updatedSensor.sensor_id,
+          rtspUrl: updatedSensor.cameraFeed,
+        });
+      } catch (mtxErr) {
+        console.error("MediaMTX update failed:", mtxErr);
+      }
+    }
 
     return NextResponse.json(
       {

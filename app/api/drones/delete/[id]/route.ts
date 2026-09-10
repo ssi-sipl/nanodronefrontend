@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { removeCameraPath } from "@/lib/mediamtx";
 
 export async function POST(
   req: NextRequest,
@@ -8,7 +9,6 @@ export async function POST(
   try {
     const { id } = await params;
 
-    // Validate ID
     const droneId = id;
     if (!droneId || typeof droneId !== "string") {
       return NextResponse.json(
@@ -17,7 +17,6 @@ export async function POST(
       );
     }
 
-    // Attempt to delete the drone
     const drone = await prisma.drone.delete({
       where: { id: droneId },
     });
@@ -32,6 +31,14 @@ export async function POST(
       );
     }
 
+    if (drone.cameraFeed) {
+      try {
+        await removeCameraPath(drone.drone_id);
+      } catch (mtxErr) {
+        console.error("MediaMTX path removal failed:", mtxErr);
+      }
+    }
+
     return NextResponse.json(
       {
         status: true,
@@ -41,7 +48,6 @@ export async function POST(
       { status: 200 }
     );
   } catch (error: any) {
-    // Prisma throws an error if the record doesn’t exist
     if (error.code === "P2025") {
       return NextResponse.json(
         {

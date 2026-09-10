@@ -3,6 +3,7 @@ import { baseUrl } from "@/lib/config";
 export type ApiResponse<T> = {
   status?: boolean;
   message?: string;
+  streamWarning?: string;
   data?: T;
   sensor?: T;
 };
@@ -222,10 +223,11 @@ export async function getDrone(id: string) {
 
 export async function createDrone(payload: DronePayload) {
   try {
-    await request<Drone>("/drones/create", {
+    const response = await request<Drone>("/drones/create", {
       method: "POST",
       body: JSON.stringify({ ...payload, cameraFeed: payload.cameraFeed || "" }),
     });
+    if (response.status) return response;
   } catch {
     // Demo state handles offline/API failures below.
   }
@@ -238,10 +240,11 @@ export async function createDrone(payload: DronePayload) {
 
 export async function updateDrone(id: string, payload: DronePayload) {
   try {
-    await request<Drone>(`/drones/update/${id}`, {
+    const response = await request<Drone>(`/drones/update/${id}`, {
       method: "POST",
       body: JSON.stringify(payload),
     });
+    if (response.status) return response;
   } catch {
     // Demo state handles offline/API failures below.
   }
@@ -293,10 +296,11 @@ export async function getSensor(id: string) {
 
 export async function createSensor(payload: SensorPayload) {
   try {
-    await request<Sensor>("/sensors/create", {
+    const response = await request<Sensor>("/sensors/create", {
       method: "POST",
       body: JSON.stringify(payload),
     });
+    if (response.status) return response;
   } catch {
     // Demo state handles offline/API failures below.
   }
@@ -309,10 +313,11 @@ export async function createSensor(payload: SensorPayload) {
 
 export async function updateSensor(id: string, payload: SensorPayload) {
   try {
-    await request<Sensor>(`/sensors/update/${id}`, {
+    const response = await request<Sensor>(`/sensors/update/${id}`, {
       method: "POST",
       body: JSON.stringify(payload),
     });
+    if (response.status) return response;
   } catch {
     // Demo state handles offline/API failures below.
   }

@@ -1,8 +1,6 @@
-import prisma from "@/lib/prisma"; // adjust path as needed
+import prisma from "@/lib/prisma";
 import { NextResponse } from "next/server";
-import fs from "fs/promises";
-// import yaml from "js-yaml";
-// import { mediamtxPath, restartMediaMTXContainer } from "@/lib/mediamtx"; // adjust these imports
+import { registerCameraPath } from "@/lib/mediamtx";
 
 export async function POST(request: Request) {
   try {
@@ -60,7 +58,6 @@ export async function POST(request: Request) {
       );
     }
 
-    // Find area by area_id
     const area = await prisma.area.findUnique({
       where: { area_id: area_id.toLocaleLowerCase().trim() },
     });
@@ -71,7 +68,6 @@ export async function POST(request: Request) {
       );
     }
 
-    // Check if drone with same ID or name exists
     const droneExists = await prisma.drone.findFirst({
       where: {
         OR: [
@@ -91,7 +87,6 @@ export async function POST(request: Request) {
       );
     }
 
-    // Create new drone
     const drone = await prisma.drone.create({
       data: {
         name: name.toLocaleLowerCase().trim(),
@@ -102,22 +97,24 @@ export async function POST(request: Request) {
       },
     });
 
-    // // Update YAML config
-    // const fileContents = await fs.readFile(mediamtxPath, "utf8");
-    // const config = yaml.load(fileContents) || {};
-
-    // if (!config.paths) config.paths = {};
-    // config.paths[drone_id] = {
-    //   source: cameraFeed || "rtsp://user:pass@ip:554/snl/live/1/1/3",
-    //   sourceOnDemand: true,
-    // };
-
-    // await fs.writeFile(mediamtxPath, yaml.dump(config), "utf8");
-
-    // await restartMediaMTXContainer();
+    let streamWarning: string | undefined;
+    if (drone.cameraFeed) {
+      try {
+        await registerCameraPath({ pathName: drone.drone_id, rtspUrl: drone.cameraFeed });
+      } catch (mtxErr) {
+        console.error("MediaMTX registration failed:", mtxErr);
+        streamWarning =
+          mtxErr instanceof Error ? mtxErr.message : "MediaMTX stream setup failed.";
+      }
+    }
 
     return NextResponse.json(
-      { status: true, message: "Drone added successfully", data: drone },
+      {
+        status: true,
+        message: "Drone added successfully",
+        data: drone,
+        streamWarning,
+      },
       { status: 201 }
     );
   } catch (error) {
