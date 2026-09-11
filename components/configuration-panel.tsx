@@ -9,8 +9,6 @@ import { baseUrl } from "@/lib/config";
 import { DroneDropdown } from "./drone-dropdown";
 import { AreaDropdown } from "./area-dropdown";
 import { latLngToMGRS, mgrsToLatLng } from "@/lib/mgrs";
-import { supabase } from "@/lib/supabaseClient";
-import { set } from "date-fns";
 import { Buffer } from "buffer";
 
 interface Sensor {

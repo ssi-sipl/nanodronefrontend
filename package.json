@@ -47,6 +47,7 @@
     "assemblyai": "^4.17.0",
     "autoprefixer": "^10.4.20",
     "axios": "^1.9.0",
+    "bcryptjs": "^3.0.3",
     "buffer": "^6.0.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -80,6 +81,7 @@
     "zod": "^3.24.1"
   },
   "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
     "@types/leaflet": "^1.9.17",
     "@types/mqtt": "^0.0.34",
     "@types/node": "^22.16.3",

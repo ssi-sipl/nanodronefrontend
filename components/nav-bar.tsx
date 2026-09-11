@@ -1,12 +1,21 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Menu, X } from "lucide-react";
 import { useState, useEffect } from "react";
 
+
 export function NavBar() {
+
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    await fetch("/api/auth/logout", { method: "POST" });
+    router.push("/login");
+    router.refresh();
+  };
   const pathname = usePathname();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -78,7 +87,14 @@ export function NavBar() {
                   {link.label}
                 </Link>
               ))}
+              
             </div>
+            <button
+                onClick={handleLogout}
+                className="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100"
+              >
+                Logout
+              </button>
           </div>
 
           {/* Mobile menu button */}
@@ -122,14 +138,21 @@ export function NavBar() {
               href={link.href}
               className={cn(
                 "block px-3 py-4 rounded-md text-base font-medium border-b border-gray-100",
-                isActiveLink(link.href)                ? "bg-gray-900 text-white"
+                isActiveLink(link.href) ? "bg-gray-900 text-white"
                   : "text-gray-700 hover:bg-gray-100"
               )}
             >
               {link.label}
             </Link>
           ))}
+          
         </div>
+        <button
+            onClick={handleLogout}
+            className="block w-full text-left px-3 py-4 rounded-md text-base font-medium text-gray-700 hover:bg-gray-100"
+          >
+            Logout
+          </button>
       </div>
 
       {/* Overlay when mobile menu is open */}
