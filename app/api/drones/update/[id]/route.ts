@@ -17,13 +17,20 @@ export async function POST(
     }
 
     const { id } = await params;
-    const { name, drone_id, area_id, cameraFeed } = body;
+    const { name, drone_id, area_id, usbaddress, cameraFeed } = body;
 
     if (cameraFeed !== undefined && typeof cameraFeed !== "string") {
       return NextResponse.json(
         { status: false, message: 'Invalid input: "cameraFeed" must be a string.' },
         { status: 400 }
       );
+    }
+
+    if(usbaddress !== undefined && typeof usbaddress !== "string"){
+      return NextResponse.json(
+       { status:false, message: 'Invalid input: "usbaddress" must be a string.', },
+       {status: 400}
+      );    
     }
 
     const droneId = id;
@@ -107,6 +114,7 @@ export async function POST(
         drone_id,
         area_id: area_id ? area_id.toLocaleLowerCase().trim() : area_id,
         areaRef: areaRef || existingDrone.areaRef,
+        ...(usbaddress !== undefined ? { usbaddress: usbaddress.trim() || null }: {}),
         ...(cameraFeed !== undefined ? { cameraFeed: cameraFeed.trim() || null } : {}),
       },
     });

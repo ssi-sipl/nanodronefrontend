@@ -40,13 +40,19 @@ export async function GET(
     }
 
     return NextResponse.json(
-      {
-        status: true,
-        message: "Area fetched successfully.",
-        data: area,
-      },
-      { status: 200 }
-    );
+  {
+    status: true,
+    message: "Drone details fetched successfully.",
+    data: {
+      id: drone.id,
+      name: drone.name,
+      drone_id: drone.drone_id,
+      area_id: drone.area_id,
+      usbaddress: drone.usbaddress,
+    },
+  },
+  { status: 200 }
+);
   } catch (error) {
     console.error("Error in GET /api/area/[drone_id]:", error);
     return NextResponse.json(

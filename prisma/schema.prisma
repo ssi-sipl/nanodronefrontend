@@ -23,7 +23,7 @@ model Drone {
   areaRef    String   @db.ObjectId
   cameraFeed String?  @default("rtsp://<user>:<admin>@<ip>:554/{stream url}")
   area       Area?    @relation(fields: [areaRef], references: [id])
-  usb_address string 
+  usbaddress String?
 }
 
 model Sensor {

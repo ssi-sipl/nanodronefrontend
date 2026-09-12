@@ -13,7 +13,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const { name, drone_id, area_id, cameraFeed } = body;
+    const { name, drone_id, area_id,usbaddress, cameraFeed } = body;
 
     if (!name || typeof name !== "string" || name.trim() === "") {
       return NextResponse.json(
@@ -93,6 +93,7 @@ export async function POST(request: Request) {
         drone_id: drone_id.toLocaleLowerCase().trim(),
         area_id: area_id.toLocaleLowerCase().trim(),
         areaRef: area.id,
+        usbaddress: usbaddress?.trim() || null,
         cameraFeed: cameraFeed?.trim() || null,
       },
     });

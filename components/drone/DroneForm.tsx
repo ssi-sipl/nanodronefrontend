@@ -33,7 +33,9 @@ const emptyForm: DronePayload = {
   name: "",
   drone_id: "",
   area_id: "",
+  usbaddress: "",
   cameraFeed: "",
+
 };
 
 export function DroneForm({ mode, droneId }: DroneFormProps) {
@@ -66,6 +68,7 @@ export function DroneForm({ mode, droneId }: DroneFormProps) {
             name: drone.name,
             drone_id: drone.drone_id,
             area_id: drone.area_id,
+            usbaddress: drone.usbaddress ?? "",
             cameraFeed: drone.cameraFeed ?? "",
           });
         }
@@ -177,6 +180,21 @@ export function DroneForm({ mode, droneId }: DroneFormProps) {
                 </Select>
               </div>
               <div className="w-full space-y-2 md:col-span-3">
+                <Label htmlFor="usb-address" className="text-sm font-semibold text-gray-700">
+                  USB Address
+                </Label>
+                <Input
+                  id="usb-address"
+                  placeholder="Enter USB address"
+                  value={form.usbaddress ?? ""}
+                  onChange={(event) =>
+                    setForm({...form,usbaddress: event.target.value,
+                    })
+                  }
+                  className="h-10 w-full"
+                />
+              </div>
+              <div className="w-full space-y-2 md:col-span-3">
                 <Label htmlFor="drone-camera" className="text-sm font-semibold text-gray-700">
                   Camera Feed (RTSP URL)
                 </Label>
@@ -193,9 +211,8 @@ export function DroneForm({ mode, droneId }: DroneFormProps) {
               <Button
                 type="submit"
                 disabled={saving}
-                className={`bg-black text-white hover:bg-gray-800 h-10 w-full ${
-                  isCreateMode ? "" : "md:w-auto"
-                }`}
+                className={`bg-black text-white hover:bg-gray-800 h-10 w-full ${isCreateMode ? "" : "md:w-auto"
+                  }`}
               >
                 {saving ? "Saving..." : mode === "edit" ? "Save Drone" : "Create Drone"}
               </Button>

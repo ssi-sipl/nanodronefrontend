@@ -22,6 +22,7 @@ export type Drone = {
   drone_id: string;
   area_id: string;
   area?: Area;
+  usbaddress?: string;
   cameraFeed?: string;
 };
 
@@ -39,6 +40,7 @@ export type DronePayload = {
   name: string;
   drone_id: string;
   area_id: string;
+  usbaddress: string;
   cameraFeed?: string;
 };
 

@@ -90,10 +90,15 @@ export function ConfigurationPanel({
       try {
         const res = await fetch(`${baseUrl}/drones/drone/${selectedDroneId}`);
         const data = await res.json();
+        console.log(data);
 
         if (!res.ok) throw new Error(data.message || "Failed to fetch area");
 
-        setAreaId(data.data.area_id);
+        const drone = data.data;
+        console.log(drone);
+
+        setAreaId(drone.area_id);
+        setUsbAddress(drone.usbaddress || "");
       } catch (err) {
         setAreaId("No Area");
       }
@@ -123,7 +128,7 @@ export function ConfigurationPanel({
             latitude: Number(latitude),
             longitude: Number(longitude),
             altitude: Number(altitude),
-            usb_address: usbAddress,
+            usbaddress: usbAddress,
           }),
         });
 
@@ -789,9 +794,9 @@ export function ConfigurationPanel({
             </div>
 
             <div className="grid gap-2">
-              <Label htmlFor="usb_address">USB Address</Label>
+              <Label htmlFor="usbaddress">USB Address</Label>
               <Input
-                id="usb_address"
+                id="usbaddress"
                 type="text"
                 value={usbAddress}
                 onChange={(e) => setUsbAddress(e.target.value)}
