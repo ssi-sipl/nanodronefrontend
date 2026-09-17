@@ -15,7 +15,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const { drone_id, area_id, latitude, longitude, altitude, usb_address } =
+    const { drone_id, area_id, latitude, longitude, altitude, usbaddress } =
       body;
 
     if (!drone_id || typeof drone_id !== "string" || drone_id.trim() === "") {
@@ -56,9 +56,9 @@ export async function POST(request: Request) {
     }
 
     if (
-      !usb_address ||
-      typeof usb_address !== "string" ||
-      usb_address.trim() === ""
+      !usbaddress ||
+      typeof usbaddress !== "string" ||
+      usbaddress.trim() === ""
     ) {
       return NextResponse.json(
         {
@@ -120,7 +120,7 @@ export async function POST(request: Request) {
       latitude: latitude.toString(),
       longitude: longitude.toString(),
       targetAltitude: altitude.toString(),
-      usbAddress: usb_address.toString(),
+      usbAddress: usbaddress.toString(),
       event: "send_drone",
     };
 

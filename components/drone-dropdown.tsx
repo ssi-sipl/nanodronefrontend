@@ -8,7 +8,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { baseUrl } from "@/lib/config.js";
+import { baseUrl } from "@/lib/config";
 
 type Drone = {
   name: string;
@@ -30,10 +30,8 @@ export function DroneDropdown({
       setLoading(true);
       const res = await fetch(`${baseUrl}/drones`, { cache: "no-store" });
       const response = await res.json();
-      if (response.status) {
-        if (response.data) {
-          setDrones(response.data || []);
-        }
+      if (response.status && response.data) {
+        setDrones(response.data || []);
       }
     } catch (error) {
       console.error("Failed to fetch drones:", error);
@@ -42,10 +40,11 @@ export function DroneDropdown({
     }
   }, []);
 
-  // Initial load
   useEffect(() => {
     fetchDrones();
   }, [fetchDrones]);
+
+  const selectedDroneName = drones.find((d) => d.drone_id === selectedDroneId)?.name;
 
   return (
     <div className="mt-4">
@@ -53,13 +52,13 @@ export function DroneDropdown({
         value={selectedDroneId || ""}
         onValueChange={(value) => setSelectedDroneId(value)}
         onOpenChange={(open) => {
-          // Refetch every time the dropdown is opened, so newly
-          // created drones show up without needing a hard page reload.
           if (open) fetchDrones();
         }}
       >
         <SelectTrigger className="w-full">
-          <SelectValue placeholder={loading ? "Loading drones..." : "Select a drone"} />
+          <SelectValue placeholder={loading ? "Loading..." : "Select a drone"}>
+            {selectedDroneName ?? (loading ? "Loading..." : undefined)}
+          </SelectValue>
         </SelectTrigger>
         <SelectContent>
           {drones.length > 0 ? (

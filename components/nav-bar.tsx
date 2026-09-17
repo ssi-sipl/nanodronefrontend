@@ -19,6 +19,10 @@ export function NavBar() {
   const pathname = usePathname();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
+  // Full-screen control view manages its own chrome — don't render the site nav there.
+ const hideNav = pathname.startsWith("/drones/control");
+
+
   // Close mobile menu when pathname changes (navigation occurs)
   useEffect(() => {
     setIsMenuOpen(false);
@@ -63,6 +67,9 @@ export function NavBar() {
   const isActiveLink = (href: string) =>
     href === "/" ? pathname === href : pathname.startsWith(href);
 
+   if (hideNav) {
+    return null;
+  }
   return (
     <nav className="border-b bg-white z-[10000]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

@@ -7,6 +7,7 @@ const client = getMqttClient();
 export async function POST(request: Request) {
   try {
     const body = await request.json();
+    console.log(body);
 
     if (!body) {
       return NextResponse.json(
@@ -16,6 +17,7 @@ export async function POST(request: Request) {
     }
 
     const { drone_id, area_id, usb_address } = body;
+    console.log("usbaddress:",usb_address);
 
     if (!drone_id || typeof drone_id !== "string" || drone_id.trim() === "") {
       return NextResponse.json(
@@ -87,7 +89,7 @@ export async function POST(request: Request) {
     const droneData = {
       droneid: "DR001",
       areaid: "A001",
-      usbAddress: "COM24",
+      usbaddress:"COM24",
       event: "recall_drone",
     };
 

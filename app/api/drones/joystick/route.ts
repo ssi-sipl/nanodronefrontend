@@ -5,8 +5,12 @@ import { getMqttClient } from "@/lib/mqtt";
 const client = getMqttClient();
 const topic = process.env.MQTT_BROKER_TOPIC as string;
 
-function isValidAxis(value: any) {
+function isValidCenteredAxis(value: any) {
   return typeof value === "number" && value >= -1 && value <= 1;
+}
+
+function isValidAltitude(value: any) {
+  return typeof value === "number" && value >= 0 && value <= 1;
 }
 
 export async function POST(request: Request) {
@@ -19,7 +23,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const { drone_id, area_id, Altitude, yaw, pitch, roll } = body;
+    const { drone_id, area_id, altitude, yaw, pitch, roll } = body;
 
     if (!drone_id || typeof drone_id !== "string" || drone_id.trim() === "") {
       return NextResponse.json(
@@ -34,8 +38,15 @@ export async function POST(request: Request) {
       );
     }
 
-    for (const [key, value] of Object.entries({ Altitude, yaw, pitch, roll })) {
-      if (!isValidAxis(value)) {
+    if (!isValidAltitude(altitude)) {
+      return NextResponse.json(
+        { status: false, message: '"altitude" must be a number between 0 and 1.' },
+        { status: 400 }
+      );
+    }
+
+    for (const [key, value] of Object.entries({ yaw, pitch, roll })) {
+      if (!isValidCenteredAxis(value)) {
         return NextResponse.json(
           { status: false, message: `"${key}" must be a number between -1 and 1.` },
           { status: 400 }
@@ -63,7 +74,7 @@ export async function POST(request: Request) {
       event: "joystick_control",
       droneid: drone.drone_id,
       areaid: area.area_id,
-      Altitude,
+      altitude,
       yaw,
       pitch,
       roll,

@@ -10,7 +10,8 @@ import { DroneDropdown } from "./drone-dropdown";
 import { AreaDropdown } from "./area-dropdown";
 import { latLngToMGRS, mgrsToLatLng } from "@/lib/mgrs";
 import { Buffer } from "buffer";
-import { JoystickModal } from "@/components/joystick/JoystickModal";
+import Link from "next/link";
+// import { JoystickModal } from "@/components/joystick/JoystickModal";
 
 interface Sensor {
   __v: number;
@@ -43,7 +44,7 @@ export function ConfigurationPanel({
   const selectedDroneId = controlledDroneId ?? selectedDroneIdState;
   const [usbAddress, setUsbAddress] = useState("");
   const [gridRef, setGridRef] = useState("");
-  const [JoystickOpen, setJoystickOpen] = useState(false);
+  // const [JoystickOpen, setJoystickOpen] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
@@ -851,24 +852,17 @@ export function ConfigurationPanel({
             >
               Drop Payload
             </Button>
-            <Button
-              className="w-full"
-              variant="outline"
-              onClick={() => setJoystickOpen(true)}
-              disabled={!selectedDroneId}
-            >
-              Joystick Control
-            </Button>
+            {selectedDroneId ? (
+              <Button asChild className="w-full" variant="outline">
+                <Link href={`/drones/control?droneId=${selectedDroneId}`}>Joystick Control</Link>
+              </Button>
+            ) : (
+              <Button className="w-full" variant="outline" disabled>
+                Joystick Control
+              </Button>
+            )}
           </div>
         </CardContent>
-        <JoystickModal
-          open={JoystickOpen}
-          onOpenChange={setJoystickOpen}
-          droneId={selectedDroneId ?? null}
-          areaId={areaId}
-          usbAddress={usbAddress}
-          hasCameraFeed={!!droneCameraFeed}
-        />
       </Card>
     </>
 
