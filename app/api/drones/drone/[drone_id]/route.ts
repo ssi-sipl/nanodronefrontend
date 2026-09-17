@@ -49,6 +49,7 @@ export async function GET(
       drone_id: drone.drone_id,
       area_id: drone.area_id,
       usbaddress: drone.usbaddress,
+      cameraFeed:drone.cameraFeed,
     },
   },
   { status: 200 }

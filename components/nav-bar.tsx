@@ -56,6 +56,7 @@ export function NavBar() {
     { href: "/drones", label: "Drone" },
     { href: "/sensors", label: "Sensor" },
     { href: "/live-view", label: "Live Stream" },
+    
     // { href: "/TelemetryDashboard", label: "Telemetry" },
   ];
 
