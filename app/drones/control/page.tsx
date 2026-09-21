@@ -161,7 +161,7 @@ function JoystickControlInner() {
   return (
     <div className="fixed inset-0 w-screen h-screen bg-slate-900 text-white grid grid-rows-[auto_1fr] overflow-hidden">
       {/* Header row — always in normal flow, never overlaps content below it */}
-      <div className="flex items-center justify-between px-2 sm:px-4 py-2 border-b border-slate-800 bg-slate-900 z-10">
+      <div className="flex items-center justify-between px-2 sm:px-4 py-1 border-b border-slate-800 bg-slate-900 z-10">
         <Button
           asChild
           variant="ghost"
@@ -255,7 +255,7 @@ function JoystickControlInner() {
                         }}
                       />
                     </div>
-                    <span className="text-[11px] sm:text-xs font-medium text-slate-400">Pitch / Roll</span>
+                    <span className="text-[11px] sm:text-xs font-medium text-slate-400 mt-4">Pitch / Roll</span>
                     <span className="text-[10px] sm:text-[11px] text-slate-400 tabular-nums">
                       {stickActive ? `${Math.round(bearingDeg)}\u00b0` : "\u2014"}
                     </span>
