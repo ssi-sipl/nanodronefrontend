@@ -41,3 +41,22 @@ model User {
   email     String  @unique
   password  String
 }
+
+model OfflineMap {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  name            String
+  description     String?
+  north           Float
+  south           Float
+  east            Float
+  west            Float
+  minZoom         Int
+  maxZoom         Int
+  totalTiles      Int
+  downloadedTiles Int      @default(0)
+  failedTiles     Int      @default(0)
+  status          String   @default("downloading")
+  folderPath      String
+  isActive        Boolean  @default(false)
+  createdAt       DateTime @default(now())
+}

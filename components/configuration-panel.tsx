@@ -146,7 +146,6 @@ export function ConfigurationPanel({
         setLatitude("");
         setLongitude("");
         setAltitude("10");
-        setUsbAddress("");
         setGridRef("");
       } else {
         alert("Please fill in all fields");
@@ -181,7 +180,6 @@ export function ConfigurationPanel({
         setLatitude("");
         setLongitude("");
         setAltitude("10");
-        setUsbAddress("");
         setGridRef("");
       } else {
         alert("Please fill in all fields");

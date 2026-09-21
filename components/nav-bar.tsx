@@ -21,6 +21,7 @@ export function NavBar() {
 
   // Full-screen control view manages its own chrome — don't render the site nav there.
  const hideNav = pathname.startsWith("/drones/control");
+ const hideNav1 = pathname.startsWith("/auth/login");
 
 
   // Close mobile menu when pathname changes (navigation occurs)
@@ -60,6 +61,7 @@ export function NavBar() {
     { href: "/drones", label: "Drone" },
     { href: "/sensors", label: "Sensor" },
     { href: "/live-view", label: "Live Stream" },
+      { href: "/maps/download", label: "Offline Maps" }
     
     // { href: "/TelemetryDashboard", label: "Telemetry" },
   ];
@@ -68,6 +70,9 @@ export function NavBar() {
     href === "/" ? pathname === href : pathname.startsWith(href);
 
    if (hideNav) {
+    return null;
+  }
+  if(hideNav1){
     return null;
   }
   return (
