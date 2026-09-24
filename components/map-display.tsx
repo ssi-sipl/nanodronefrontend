@@ -38,6 +38,7 @@ const escapePopupText = (value: string) =>
 export default function MapDisplay({ setCurrentSensor }: MapDisplayProps) {
   const mapRef = useRef<HTMLDivElement | null>(null);
   const leafletMapRef = useRef<any>(null);
+  const addSensorMarkerRef = useRef<L.Marker | null>(null);
   const [sensors, setSensors] = useState<any[]>([]);
   const [clickMode, setClickMode] = useState(false);
   const clickModeRef = useRef(false);
@@ -49,56 +50,35 @@ export default function MapDisplay({ setCurrentSensor }: MapDisplayProps) {
 
   const [sensorAddSuccess, setSensorAddSuccess] = useState(false);
   const [refreshSensorList, setRefreshSensorList] = useState(false);
+  const fakeSensorsLayerRef = useRef<L.LayerGroup | null>(null);
 
-  // Sector 32
-  // // ✅ Updated configuration to match tile download script
-  // const DEFAULT_LAT = 28.44796;
-  // const DEFAULT_LNG = 77.040915;
+  const [activeOfflineMap, setActiveOfflineMap] = useState<{
+    folderPath: string;
+    north: number;
+    south: number;
+    east: number;
+    west: number;
+    minZoom: number;
+    maxZoom: number;
+  } | null>(null);
+  const [activeMapLoaded, setActiveMapLoaded] = useState(false);
 
-  // // Bounds matching the downloaded tiles (NE to SW diagonal)
-  // const bounds: LatLngBoundsLiteral = [
-  //   [28.456969, 77.048835], // North-East corner
-  //   [28.438951, 77.033995], // South-West corner
-  // ];
-
-  // Manekshaw
-  // ✅ Updated configuration to match tile download script
-  // const DEFAULT_LAT = 28.587506;
-  // const DEFAULT_LNG = 77.147572;
-
-  // // Bounds matching the downloaded tiles (NE to SW diagonal)
-  // const bounds: LatLngBoundsLiteral = [
-  //   [28.59648911174991, 77.15780231690938], // North-East corner
-  //   [28.57852288825009, 77.13734168309061], // South-West corner
-  // ];
-
-  // const DEFAULT_LAT = 28.61275;
-  // const DEFAULT_LNG = 77.23;
-
-  // // Bounds matching the downloaded tiles (NE to SW diagonal)
-  // const bounds: LatLngBoundsLiteral = [
-  //   [28.6205, 77.24], // North-East corner
-  //   [28.605, 77.22], // South-West corner
-  // ];
-
-  // const DEFAULT_LAT = 19.952194;
-  // const DEFAULT_LNG = 73.754219;
-
-  // // Bounds (NE to SW diagonal)
-  // const bounds: LatLngBoundsLiteral = [
-  //   [19.9702, 73.7732], // North-East corner
-  //   [19.9342, 73.7352], // South-West corner
-  // ];
-
-   const DEFAULT_LAT = 26.27784;
-   const DEFAULT_LNG = 73.06014;
-
-  const bounds = [
-  [26.285, 73.07],   // North-East
-  [26.270, 73.05],   // South-West
-];
-
-  // North: 26.984012018018, South: 26.947975981982, West: 70.99111401562, East: 71.03154598438
+  useEffect(() => {
+    const fetchActiveMap = async () => {
+      try {
+        const res = await fetch(`${baseUrl}/offline-maps/active`);
+        const data = await res.json();
+        if (data.status && data.data) {
+          setActiveOfflineMap(data.data);
+        }
+      } catch (error) {
+        console.error("Failed to fetch active offline map:", error);
+      } finally {
+        setActiveMapLoaded(true);
+      }
+    };
+    fetchActiveMap();
+  }, []);
 
   // ✅ Define the sensor icon
   const sensorIcon = L.icon({
@@ -110,6 +90,12 @@ export default function MapDisplay({ setCurrentSensor }: MapDisplayProps) {
 
   useEffect(() => {
     const fetchSensors = async () => {
+      if (!activeMapLoaded) return;
+
+      if (!activeOfflineMap) {
+        console.log("No offline map available.");
+        return;
+      }
       try {
         console.log("Sensor Refresh Triggered");
         const res = await fetch(`${baseUrl}/sensors/`);
@@ -122,22 +108,40 @@ export default function MapDisplay({ setCurrentSensor }: MapDisplayProps) {
 
           // Check if the map is initialized, if not initialize it
           if (mapRef.current && !leafletMapRef.current) {
+            if (!activeOfflineMap) {
+              console.log("No offline map available.");
+              return;
+            }
+
+            const activeBounds: [[number, number], [number, number]] = [
+              [activeOfflineMap.north, activeOfflineMap.west],
+              [activeOfflineMap.south, activeOfflineMap.east],
+            ];
+
+            const center: [number, number] = [
+              (activeOfflineMap.north + activeOfflineMap.south) / 2,
+              (activeOfflineMap.east + activeOfflineMap.west) / 2,
+            ];
+
             leafletMapRef.current = L.map(mapRef.current, {
-              center: [DEFAULT_LAT, DEFAULT_LNG],
-              zoom: 15,
-              minZoom: 15,
-              maxZoom: 17,
-              maxBounds: bounds,
+              center,
+              zoom: activeOfflineMap ? activeOfflineMap.minZoom : 15,
+              minZoom: activeOfflineMap ? activeOfflineMap.minZoom : 15,
+              maxZoom: activeOfflineMap ? activeOfflineMap.maxZoom : 18,
+              maxBounds: activeBounds,
               maxBoundsViscosity: 1.0,
             });
+            fakeSensorsLayerRef.current = L.layerGroup().addTo(
+              leafletMapRef.current
+            );
 
-            // Add the tile layer to the map with proper attribution
-            L.tileLayer("/jodhpur_map/{z}/{x}/{y}.jpg", {
+            const tileUrl = `${activeOfflineMap.folderPath}/{z}/{x}/{y}.jpg`;
+
+            L.tileLayer(tileUrl, {
               tileSize: 256,
               noWrap: true,
-              bounds: bounds,
-              attribution:
-                '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+              bounds: activeBounds,
+              attribution: "\u00a9 Esri \u2014 Source: Esri, Maxar, Earthstar Geographics, and the GIS User Community",
               errorTileUrl: "/placeholder.jpg",
             }).addTo(leafletMapRef.current);
           }
@@ -187,31 +191,52 @@ export default function MapDisplay({ setCurrentSensor }: MapDisplayProps) {
 
           // Add click event listener to the map
           leafletMapRef.current?.on("click", (e: any) => {
-            if (clickModeRef.current) {
-              console.log("Clicked LatLng:", e.latlng.lat, e.latlng.lng);
-              if (clickAddSensorRef.current) {
-                setAddSensorLat(e.latlng.lat);
-                setAddSensorLng(e.latlng.lng);
-              } else {
-                setCurrentSensor({
-                  __v: 0,
-                  _id: "",
-                  area_id: "",
-                  latitude: e.latlng.lat,
-                  longitude: e.latlng.lng,
-                  name: "New Sensor",
-                  sensor_id: "",
-                });
+            if (!clickModeRef.current) return;
+
+            console.log("Clicked LatLng:", e.latlng.lat, e.latlng.lng);
+
+
+            if (clickAddSensorRef.current) {
+              setAddSensorLat(e.latlng.lat);
+              setAddSensorLng(e.latlng.lng);
+
+              if (addSensorMarkerRef.current) {
+                leafletMapRef.current?.removeLayer(
+                  addSensorMarkerRef.current
+                );
+
+                addSensorMarkerRef.current = null;
               }
 
-              // Add a marker at the clicked position
-              L.marker([e.latlng.lat, e.latlng.lng], {
-                icon: sensorIcon,
-              }).addTo(leafletMapRef.current);
+              const marker = L.marker(
+                [e.latlng.lat, e.latlng.lng],
+                {
+                  icon: sensorIcon,
+                }
+              );
+              addSensorMarkerRef.current = marker;
+              fakeSensorsLayerRef.current?.addLayer(marker);
+
+              return;
             }
+
+            setCurrentSensor({
+              __v: 0,
+              _id: "",
+              area_id: "",
+              latitude: e.latlng.lat,
+              longitude: e.latlng.lng,
+              name: "New Sensor",
+              sensor_id: "",
+            });
+            L.marker(
+              [e.latlng.lat, e.latlng.lng],
+              {
+                icon: sensorIcon,
+              }
+            ).addTo(leafletMapRef.current);
           });
 
-          // Invalidate the size of the map to ensure it's rendered properly
           requestAnimationFrame(() => {
             leafletMapRef.current.invalidateSize();
           });
@@ -222,7 +247,7 @@ export default function MapDisplay({ setCurrentSensor }: MapDisplayProps) {
     };
 
     fetchSensors();
-  }, [refreshSensorList]);
+  }, [refreshSensorList, activeOfflineMap, activeMapLoaded]);
 
   useEffect(() => {
     if (!leafletMapRef.current) return;
@@ -285,6 +310,11 @@ export default function MapDisplay({ setCurrentSensor }: MapDisplayProps) {
             setClickMode((prev) => {
               const newState = !prev;
               clickModeRef.current = newState;
+
+              // Remove all fake sensors when PIN mode is disabled
+              if (!newState) {
+                fakeSensorsLayerRef.current?.clearLayers();
+              }
               return newState;
             });
           }}
@@ -308,8 +338,20 @@ export default function MapDisplay({ setCurrentSensor }: MapDisplayProps) {
           <div className="absolute top-4 right-4 flex flex-row gap-4 z-[1001]">
             <Button
               onClick={() => {
+                if (addSensorMarkerRef.current) {
+                  leafletMapRef.current?.removeLayer(
+                    addSensorMarkerRef.current
+                  );
+
+                  addSensorMarkerRef.current = null;
+                }
                 setClickAddSensor(false);
                 setClickMode(false);
+
+                clickModeRef.current = false;
+                clickAddSensorRef.current = false;
+                setAddSensorLat(0);
+                setAddSensorLng(0);
               }}
               className="bg-white px-4 py-2 rounded-lg shadow hover:bg-gray-100 border border-gray-300 text-black"
             >
@@ -320,11 +362,30 @@ export default function MapDisplay({ setCurrentSensor }: MapDisplayProps) {
       )}
 
       {/* Map container */}
-      <div
-        ref={mapRef}
-        id="leaflet-map"
-        style={{ width: "100%", height: "100%" }}
-      />
+      {!activeMapLoaded ? (
+        <div className="flex h-full w-full items-center justify-center bg-gray-50">
+          <p className="text-sm text-gray-500">
+            Loading map...
+          </p>
+        </div>
+      ) : !activeOfflineMap ? (
+        <div className="flex h-full w-full items-center justify-center bg-gray-50">
+          <div className="text-center">
+            <p className="text-lg font-semibold text-gray-700">
+              No active map available
+            </p>
+            <p className="mt-1 text-sm text-gray-500">
+              Download an offline map to display it here.
+            </p>
+          </div>
+        </div>
+      ) : (
+        <div
+          ref={mapRef}
+          id="leaflet-map"
+          style={{ width: "100%", height: "100%" }}
+        />
+      )}
     </div>
   );
 }

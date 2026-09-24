@@ -30,6 +30,7 @@ export default function OfflineMapViewerPage() {
       try {
         const res = await fetch(`/api/offline-maps/${id}`, { cache: "no-store" });
         const data = await res.json();
+        console.log(data);
         if (data.status) setMap(data.data);
       } finally {
         setLoading(false);
@@ -49,17 +50,17 @@ export default function OfflineMapViewerPage() {
     leafletMapRef.current = L.map(mapRef.current, {
       minZoom: map.minZoom,
       maxZoom: map.maxZoom,
+      maxBounds: bounds,
+      maxBoundsViscosity: 1.0,
     }).fitBounds(bounds);
 
-    L.tileLayer(`${map.folderPath}/{z}/{x}/{y}.png`, {
+    L.tileLayer(`${map.folderPath}/{z}/{x}/{y}.jpg`, {
       tileSize: 256,
       noWrap: true,
       bounds,
       errorTileUrl: "/placeholder.jpg",
-      attribution: "\u00a9 OpenStreetMap contributors",
+      attribution: "\u00a9 Esri \u2014 Source: Esri, Maxar, Earthstar Geographics, and the GIS User Community",
     }).addTo(leafletMapRef.current);
-
-    L.rectangle(bounds, { color: "#3388ff", weight: 1, fill: false }).addTo(leafletMapRef.current);
   }, [map]);
 
   return (

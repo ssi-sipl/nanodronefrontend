@@ -44,7 +44,7 @@ model User {
 
 model OfflineMap {
   id              String   @id @default(auto()) @map("_id") @db.ObjectId
-  name            String
+  name            String   @unique
   description     String?
   north           Float
   south           Float

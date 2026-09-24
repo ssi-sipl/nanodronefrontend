@@ -832,7 +832,7 @@ export function ConfigurationPanel({
               onClick={handleSendDrone}
               disabled={!selectedDroneId}
             >
-              Send Drone
+              <Link href={`/drones/control?droneId=${selectedDroneId}`}>send Drone</Link>
             </Button>
 
             <Button

@@ -1,9 +1,24 @@
 import fs from "fs/promises";
 import path from "path";
+import { isCancelled, isPaused } from "./download-control";
 
 export const MAX_TILES_PER_DOWNLOAD = 2500;
-const TILE_REQUEST_DELAY_MS = 300; // polite delay between requests to OSM's tile server
-const USER_AGENT = "DroneManagementApp/1.0 (offline-map-downloader)";
+const TILE_REQUEST_DELAY_MS = 200; // matches the reference script's pacing for this server
+const PAUSE_POLL_MS = 300;
+const USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64)";
+
+// Esri World Imagery (satellite) — free, no API key required.
+// Note: this server's path order is {z}/{y}/{x}, not the usual {z}/{x}/{y}.
+const TILE_URL_TEMPLATE =
+  process.env.OFFLINE_MAP_TILE_URL_TEMPLATE ||
+  "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}";
+const TILE_EXTENSION = process.env.OFFLINE_MAP_TILE_EXTENSION || "jpg";
+
+function buildTileUrl(zoom: number, x: number, y: number): string {
+  return TILE_URL_TEMPLATE.replace("{z}", String(zoom))
+    .replace("{y}", String(y))
+    .replace("{x}", String(x));
+}
 
 function clampLat(lat: number) {
   return Math.max(-85.0511, Math.min(85.0511, lat));
@@ -55,14 +70,6 @@ function delay(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-/**
- * Downloads every tile in the given ranges from OpenStreetMap's tile server,
- * sequentially (not in parallel) with a delay between requests, to stay
- * reasonable under OSM's tile usage policy. Saves each tile under:
- * public/offline-maps/<mapId>/<z>/<x>/<y>.png
- *
- * Calls onProgress after each tile attempt (success or failure).
- */
 export async function downloadTiles(
   mapId: string,
   ranges: TileRange[],
@@ -77,13 +84,32 @@ export async function downloadTiles(
   for (const range of ranges) {
     for (let x = range.xMin; x <= range.xMax; x++) {
       for (let y = range.yMin; y <= range.yMax; y++) {
+        if (isCancelled(mapId)) {
+          return { downloaded, failed, total, cancelled: true };
+        }
+
+        while (isPaused(mapId)) {
+          await delay(PAUSE_POLL_MS);
+          if (isCancelled(mapId)) {
+            return { downloaded, failed, total, cancelled: true };
+          }
+        }
+
         const tileDir = path.join(baseDir, String(range.zoom), String(x));
-        const tilePath = path.join(tileDir, `${y}.png`);
+        const tilePath = path.join(tileDir, `${y}.${TILE_EXTENSION}`);
+
+        try {
+          await fs.access(tilePath);
+          downloaded++;
+          onProgress(downloaded, failed, total);
+          continue;
+        } catch {
+        }
 
         try {
           await fs.mkdir(tileDir, { recursive: true });
 
-          const url = `https://tile.openstreetmap.org/${range.zoom}/${x}/${y}.png`;
+          const url = buildTileUrl(range.zoom, x, y);
           const res = await fetch(url, {
             headers: { "User-Agent": USER_AGENT },
           });
@@ -105,10 +131,9 @@ export async function downloadTiles(
     }
   }
 
-  return { downloaded, failed, total };
+  return { downloaded, failed, total, cancelled: false };
 }
 
-/** Deletes the on-disk tile folder for a map (call on delete). */
 export async function deleteMapTiles(mapId: string) {
   const baseDir = path.join(process.cwd(), "public", "offline-maps", mapId);
   await fs.rm(baseDir, { recursive: true, force: true });

@@ -20,8 +20,8 @@ export function NavBar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   // Full-screen control view manages its own chrome — don't render the site nav there.
- const hideNav = pathname.startsWith("/drones/control");
- const hideNav1 = pathname.startsWith("/auth/login");
+ const hideNav1 = pathname.startsWith("/drones/control");
+ const hideNav = pathname === "/login";
 
 
   // Close mobile menu when pathname changes (navigation occurs)
@@ -61,7 +61,7 @@ export function NavBar() {
     { href: "/drones", label: "Drone" },
     { href: "/sensors", label: "Sensor" },
     { href: "/live-view", label: "Live Stream" },
-      { href: "/maps/download", label: "Offline Maps" }
+    { href: "/maps/download", label: "Maps" }
     
     // { href: "/TelemetryDashboard", label: "Telemetry" },
   ];
@@ -81,7 +81,7 @@ export function NavBar() {
         <div className="flex justify-between h-16">
           <div className="flex items-center">
             <div className="flex-shrink-0 flex items-center">
-              <h1 className="text-xl font-bold">Drone Management</h1>
+              <h4 className="text-xl font-bold">Drone Management</h4>
             </div>
 
             {/* Desktop Navigation */}
