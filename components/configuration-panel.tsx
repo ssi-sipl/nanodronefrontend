@@ -10,6 +10,7 @@ import { DroneDropdown } from "./drone-dropdown";
 import { AreaDropdown } from "./area-dropdown";
 import { latLngToMGRS, mgrsToLatLng } from "@/lib/mgrs";
 import { Buffer } from "buffer";
+import { DropPayloadConfirmDialog } from "@/components/drone/DropPayloadConfirmDialog";
 import Link from "next/link";
 // import { JoystickModal } from "@/components/joystick/JoystickModal";
 
@@ -44,7 +45,8 @@ export function ConfigurationPanel({
   const selectedDroneId = controlledDroneId ?? selectedDroneIdState;
   const [usbAddress, setUsbAddress] = useState("");
   const [gridRef, setGridRef] = useState("");
-  // const [JoystickOpen, setJoystickOpen] = useState(false);
+  const [dropConfirmOpen, setDropConfirmOpen] = useState(false);
+  // const [JoysickOpen, setJoystickOpen] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
@@ -697,36 +699,29 @@ export function ConfigurationPanel({
     setIsRecording(false);
   };
 
-  const handleDropPayload = async () => {
-    try {
-      if (selectedDroneId && areaId) {
-        const res = await fetch(`${baseUrl}/drones/dropPayload`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            drone_id: selectedDroneId,
-            area_id: areaId,
-          }),
-        });
-
-        const result = await res.json();
-
-        setIsLoading?.(false);
-        setLoadingStatus?.("Processing complete!");
-
-        alert(result.message);
-
-        console.log(result);
-      }
-    } catch (error) {
-      setIsLoading?.(false);
-      setLoadingStatus?.("Failed to process command.");
-
-      console.error("Error dropping payload:", error);
-      alert("Failed to drop payload. Please try again.");
+  const handleDropPayload = async (pin: string) => {
+    if (!selectedDroneId || !areaId) {
+      throw new Error("Please select a drone first.");
     }
+
+    const res = await fetch(`${baseUrl}/drones/dropPayload`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        drone_id: selectedDroneId,
+        area_id: areaId,
+        pin,
+      }),
+    });
+
+    const result = await res.json();
+
+    if (!res.ok || !result.status) {
+      throw new Error(result.message || "Failed to drop payload.");
+    }
+
+    alert(result.message);
+    console.log(result);
   };
 
   return (
@@ -845,7 +840,7 @@ export function ConfigurationPanel({
 
             <Button
               className="w-full bg-green-500 hover:bg-green-600 transition-all ease-in-out"
-              onClick={handleDropPayload}
+              onClick={() => setDropConfirmOpen(true)}
               disabled={!selectedDroneId}
             >
               Drop Payload
@@ -862,7 +857,11 @@ export function ConfigurationPanel({
           </div>
         </CardContent>
       </Card>
+      <DropPayloadConfirmDialog
+        open={dropConfirmOpen}
+        onOpenChange={setDropConfirmOpen}
+        onConfirm={handleDropPayload}
+      />
     </>
-
   );
 }

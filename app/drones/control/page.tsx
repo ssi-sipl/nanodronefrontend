@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { CameraFeedPlayer } from "@/components/camera/CameraFeedPlayer";
 import { baseUrl } from "@/lib/config";
 import { useElementSize } from "@/hooks/use-element-size";
+import { DropPayloadConfirmDialog } from "@/components/drone/DropPayloadConfirmDialog";
 import { Wifi, WifiOff, Home, Package, Loader2, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
@@ -31,6 +32,7 @@ function JoystickControlInner() {
   const [usbAddress, setUsbAddress] = useState("");
   const [cameraFeed, setCameraFeed] = useState("");
   const [loadingDroneInfo, setLoadingDroneInfo] = useState(false);
+  const [dropConfirmOpen, setDropConfirmOpen] = useState(false);
 
   useEffect(() => {
     const fetchDroneInfo = async () => {
@@ -139,9 +141,6 @@ function JoystickControlInner() {
   const bearingDeg = ((Math.atan2(rollUi, pitchUi) * 180) / Math.PI + 360) % 360;
   const stickActive = Math.abs(pitchUi) > 0.05 || Math.abs(rollUi) > 0.05;
 
-  // Continuously measures the controls panel's real available space and derives
-  // every control size from it directly — no fixed breakpoints, updates on every
-  // resize frame via ResizeObserver.
   const { ref: controlsRef, size: controlsSize } = useElementSize<HTMLDivElement>();
 
   const sizes = useMemo(() => {
@@ -157,6 +156,19 @@ function JoystickControlInner() {
 
     return { stick, yawStick, stickKnob, yawKnob, leverHeight };
   }, [controlsSize]);
+
+  const handleDropConfirm = async (pin: string) => {
+    const res = await fetch(`${baseUrl}/drones/dropPayload`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ drone_id: selectedDroneId, area_id: areaId, pin }),
+    });
+    const data = await res.json();
+    if (!res.ok || !data.status) {
+      throw new Error(data.message || "Failed to drop payload.");
+    }
+    alert(data.message);
+  };
 
   return (
     <div className="fixed inset-0 w-screen h-screen bg-slate-900 text-white grid grid-rows-[auto_1fr] overflow-hidden">
@@ -282,14 +294,9 @@ function JoystickControlInner() {
                     variant="outline"
                     size="sm"
                     className="flex items-center gap-1.5 bg-slate-800 border-slate-600 text-white hover:bg-green-900/40 hover:border-green-500 text-xs sm:text-sm"
-                    disabled={pending !== null}
-                    onClick={() => handleQuickAction("drop", "/drones/dropPayload")}
+                    onClick={() => setDropConfirmOpen(true)}
                   >
-                    {pending === "drop" ? (
-                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                    ) : (
-                      <Package className="w-3.5 h-3.5 text-green-400" />
-                    )}
+                    <Package className="w-3.5 h-3.5 text-green-400" />
                     Drop Payload
                   </Button>
                 </div>
@@ -305,7 +312,13 @@ function JoystickControlInner() {
           </div>
         </div>
       </div>
+      <DropPayloadConfirmDialog
+        open={dropConfirmOpen}
+        onOpenChange={setDropConfirmOpen}
+        onConfirm={handleDropConfirm}
+      />
     </div>
+
   );
 }
 
