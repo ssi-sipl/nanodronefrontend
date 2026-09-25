@@ -6,6 +6,7 @@ export async function POST(
   _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  try{
   const { id } = await params;
 
   if (!isTracked(id)) {
@@ -22,4 +23,11 @@ export async function POST(
     data: {status: "paused",},
   });
   return NextResponse.json({ status: true, message: "Download paused." }, { status: 200 });
+}catch(error){
+  console.log("Error at pause:",error);
+  return NextResponse.json(
+    {status:false, message:"Internal server error"},
+    {status:500} 
+  )
+}
 }

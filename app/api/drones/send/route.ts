@@ -115,13 +115,13 @@ export async function POST(request: Request) {
     // };
 
     const droneData = {
-      droneid: "DR001",
-      areaid: "A001",
+      droneid: "DR0001",
+      areaid: "Area1",
       latitude: latitude.toString(),
       longitude: longitude.toString(),
       targetAltitude: altitude.toString(),
       usbAddress: usbaddress.toString(),
-      event: "send_drone",
+      event: "ARM",
     };
 
     const topic = process.env.MQTT_BROKER_TOPIC as string;

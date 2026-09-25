@@ -16,7 +16,21 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { drone_id, area_id } = body;
+    const { drone_id, area_id, pin } = body;
+
+    if (!pin || typeof pin !== "string" || pin.trim() === "") {
+      return NextResponse.json(
+        { status: false, message: "PIN is required to drop payload." },
+        { status: 400 }
+      );
+    }
+
+    if (pin !== process.env.DROP_PAYLOAD_PIN) {
+      return NextResponse.json(
+        { status: false, message: "Incorrect PIN." },
+        { status: 403 }
+      );
+    }
 
     if (!drone_id || typeof drone_id !== "string" || drone_id.trim() === "") {
       return NextResponse.json(

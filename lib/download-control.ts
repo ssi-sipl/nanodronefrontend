@@ -49,6 +49,7 @@ export function requestCancel(mapId: string) {
   if (entry) {
     entry.cancelled = true;
   }
+  
 }
 
 export function setPaused(mapId: string, paused: boolean) {

@@ -6,6 +6,7 @@ export async function POST(
   _request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  try{
   const { id } = await params;
 
   console.log("[cancel] ID:", id);
@@ -27,4 +28,11 @@ export async function POST(
     status: true,
     message: "Download cancellation requested.",
   });
+}catch (error) {
+    console.error("Error at cancel:", error);
+    return NextResponse.json(
+      { status: false, message: "Internal server error" },
+      { status: 500 }
+    );
+}
 }

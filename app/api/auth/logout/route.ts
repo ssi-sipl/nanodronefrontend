@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { SESSION_COOKIE } from "@/lib/auth";
 
 export async function POST() {
+  try{
   const response = NextResponse.json(
     { status: true, message: "Logged out successfully" },
     { status: 200 }
@@ -16,4 +17,11 @@ export async function POST() {
   });
 
   return response;
+}catch (error) {
+    console.error("Error at logout:", error);
+    return NextResponse.json(
+      { status: false, message: "Internal server error" },
+      { status: 500 }
+    );
+  }
 }
