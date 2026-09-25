@@ -4,30 +4,30 @@ generator client {
 }
 
 datasource db {
-  provider = "mongodb"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
 model Area {
-  id       String   @id @default(auto()) @map("_id") @db.ObjectId
+  id       String   @id @default(cuid()) 
   name     String
   area_id  String   @unique
   drones   Drone[]
 }
 
 model Drone {
-  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  id         String   @id @default(cuid())
   name       String
   drone_id   String   @unique
   area_id    String
-  areaRef    String   @db.ObjectId
+  areaRef    String   
   cameraFeed String?  @default("rtsp://<user>:<admin>@<ip>:554/{stream url}")
   area       Area?    @relation(fields: [areaRef], references: [id])
   usbaddress String?
 }
 
 model Sensor {
-  id         String  @id @default(auto()) @map("_id") @db.ObjectId
+  id         String  @id @default(cuid())
   name       String
   area_id    String
   sensor_id  String  @unique
@@ -37,13 +37,13 @@ model Sensor {
 }
 
 model User {
-  id        String  @id @default(auto()) @map("_id") @db.ObjectId
+  id        String  @id @default(cuid())
   email     String  @unique
   password  String
 }
 
 model OfflineMap {
-  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  id              String    @id @default(cuid())
   name            String   @unique
   description     String?
   north           Float
