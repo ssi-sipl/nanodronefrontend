@@ -64,6 +64,87 @@ export default function MapDisplay({ setCurrentSensor }: MapDisplayProps) {
   const [activeMapLoaded, setActiveMapLoaded] = useState(false);
 
   useEffect(() => {
+    if (!activeMapLoaded || !activeOfflineMap || !mapRef.current) {
+      return;
+    }
+
+    if (leafletMapRef.current) {
+      return;
+    }
+
+    const activeBounds: [[number, number], [number, number]] = [
+      [activeOfflineMap.north, activeOfflineMap.west],
+      [activeOfflineMap.south, activeOfflineMap.east],
+    ];
+
+    const center: [number, number] = [
+      (activeOfflineMap.north + activeOfflineMap.south) / 2,
+      (activeOfflineMap.east + activeOfflineMap.west) / 2,
+    ];
+
+
+    const map = L.map(mapRef.current, {
+      center,
+      zoom: activeOfflineMap.minZoom,
+      minZoom: activeOfflineMap.minZoom,
+      maxZoom: activeOfflineMap.maxZoom,
+      maxBounds: activeBounds,
+      maxBoundsViscosity: 1.0,
+    });
+
+    leafletMapRef.current = map;
+    fakeSensorsLayerRef.current = L.layerGroup().addTo(map);
+
+    const tileUrl = `${activeOfflineMap.folderPath}/{z}/{x}/{y}.jpg`;
+
+    L.tileLayer(tileUrl, {
+      tileSize: 256,
+      noWrap: true,
+      bounds: activeBounds,
+      attribution:
+        "© Esri — Source: Esri, Maxar, Earthstar Geographics, and the GIS User Community",
+      errorTileUrl: "/placeholder.jpg",
+    }).addTo(map);
+
+    // Map click listener ONCE
+    map.on("click", (e: any) => {
+      if (!clickModeRef.current) return;
+
+      const { lat, lng } = e.latlng;
+      console.log("Clicked LatLng:", lat, lng);
+
+      const tempMarker = L.marker([lat, lng], { icon: sensorIcon });
+
+      if (clickAddSensorRef.current) {
+        setAddSensorLat(lat);
+        setAddSensorLng(lng);
+
+        if (addSensorMarkerRef.current) {
+          fakeSensorsLayerRef.current?.removeLayer(addSensorMarkerRef.current);
+        }
+        fakeSensorsLayerRef.current?.addLayer(tempMarker);
+        addSensorMarkerRef.current = tempMarker;
+        return;
+      }
+      setCurrentSensor({
+        __v: 0,
+        _id: "",
+        area_id: "",
+        latitude: lat,
+        longitude: lng,
+        name: "New Sensor",
+        sensor_id: "",
+      });
+      fakeSensorsLayerRef.current?.addLayer(tempMarker);
+    });
+
+    requestAnimationFrame(() => {
+      map.invalidateSize();
+    });
+
+  }, [activeMapLoaded, activeOfflineMap]);
+
+  useEffect(() => {
     const fetchActiveMap = async () => {
       try {
         const res = await fetch(`${baseUrl}/offline-maps/active`);
@@ -125,8 +206,8 @@ export default function MapDisplay({ setCurrentSensor }: MapDisplayProps) {
 
             leafletMapRef.current = L.map(mapRef.current, {
               center,
-              zoom: activeOfflineMap ? activeOfflineMap.minZoom : 15,
-              minZoom: activeOfflineMap ? activeOfflineMap.minZoom : 15,
+              zoom: activeOfflineMap ? activeOfflineMap.minZoom : 14,
+              minZoom: activeOfflineMap ? activeOfflineMap.minZoom : 14,
               maxZoom: activeOfflineMap ? activeOfflineMap.maxZoom : 18,
               maxBounds: activeBounds,
               maxBoundsViscosity: 1.0,
@@ -146,7 +227,6 @@ export default function MapDisplay({ setCurrentSensor }: MapDisplayProps) {
             }).addTo(leafletMapRef.current);
           }
 
-          // Clear existing markers before adding new ones
           leafletMapRef.current?.eachLayer((layer: any) => {
             if (layer instanceof L.Marker) {
               leafletMapRef.current.removeLayer(layer);
@@ -190,52 +270,52 @@ export default function MapDisplay({ setCurrentSensor }: MapDisplayProps) {
           });
 
           // Add click event listener to the map
-          leafletMapRef.current?.on("click", (e: any) => {
-            if (!clickModeRef.current) return;
+          // leafletMapRef.current?.on("click", (e: any) => {
+          //   if (!clickModeRef.current) return;
 
-            console.log("Clicked LatLng:", e.latlng.lat, e.latlng.lng);
+          //   console.log("Clicked LatLng:", e.latlng.lat, e.latlng.lng);
 
 
-            if (clickAddSensorRef.current) {
-              setAddSensorLat(e.latlng.lat);
-              setAddSensorLng(e.latlng.lng);
+          //   if (clickAddSensorRef.current) {
+          //     setAddSensorLat(e.latlng.lat);
+          //     setAddSensorLng(e.latlng.lng);
 
-              if (addSensorMarkerRef.current) {
-                leafletMapRef.current?.removeLayer(
-                  addSensorMarkerRef.current
-                );
+          //     if (addSensorMarkerRef.current) {
+          //       leafletMapRef.current?.removeLayer(
+          //         addSensorMarkerRef.current
+          //       );
 
-                addSensorMarkerRef.current = null;
-              }
+          //       addSensorMarkerRef.current = null;
+          //     }
 
-              const marker = L.marker(
-                [e.latlng.lat, e.latlng.lng],
-                {
-                  icon: sensorIcon,
-                }
-              );
-              addSensorMarkerRef.current = marker;
-              fakeSensorsLayerRef.current?.addLayer(marker);
+          //     const marker = L.marker(
+          //       [e.latlng.lat, e.latlng.lng],
+          //       {
+          //         icon: sensorIcon,
+          //       }
+          //     );
+          //     addSensorMarkerRef.current = marker;
+          //     fakeSensorsLayerRef.current?.addLayer(marker);
 
-              return;
-            }
+          //     return;
+          //   }
 
-            setCurrentSensor({
-              __v: 0,
-              _id: "",
-              area_id: "",
-              latitude: e.latlng.lat,
-              longitude: e.latlng.lng,
-              name: "New Sensor",
-              sensor_id: "",
-            });
-            L.marker(
-              [e.latlng.lat, e.latlng.lng],
-              {
-                icon: sensorIcon,
-              }
-            ).addTo(leafletMapRef.current);
-          });
+          //   setCurrentSensor({
+          //     __v: 0,
+          //     _id: "",
+          //     area_id: "",
+          //     latitude: e.latlng.lat,
+          //     longitude: e.latlng.lng,
+          //     name: "New Sensor",
+          //     sensor_id: "",
+          //   });
+          //   L.marker(
+          //     [e.latlng.lat, e.latlng.lng],
+          //     {
+          //       icon: sensorIcon,
+          //     }
+          //   ).addTo(leafletMapRef.current);
+          // });
 
           requestAnimationFrame(() => {
             leafletMapRef.current.invalidateSize();
@@ -286,6 +366,15 @@ export default function MapDisplay({ setCurrentSensor }: MapDisplayProps) {
     }
   }, [sensorAddSuccess]);
 
+  useEffect(() => {
+    if (!clickMode) {
+      fakeSensorsLayerRef.current?.clearLayers();
+      addSensorMarkerRef.current = null;
+      setAddSensorLat(0);
+      setAddSensorLng(0);
+    }
+  }, [clickMode]);
+
   return (
     <div className="relative h-full w-full overflow-hidden rounded-lg border shadow">
       {/* Floating Icon Button */}
@@ -307,16 +396,9 @@ export default function MapDisplay({ setCurrentSensor }: MapDisplayProps) {
         <button
           className=" bg-white p-2 rounded-full shadow hover:bg-gray-100 border border-gray-300"
           onClick={() => {
-            setClickMode((prev) => {
-              const newState = !prev;
-              clickModeRef.current = newState;
-
-              // Remove all fake sensors when PIN mode is disabled
-              if (!newState) {
-                fakeSensorsLayerRef.current?.clearLayers();
-              }
-              return newState;
-            });
+            const newState = !clickModeRef.current;
+            clickModeRef.current = newState;
+            setClickMode(newState);
           }}
           title={clickMode ? "Disable LatLng Picker" : "Enable LatLng Picker"}
         >

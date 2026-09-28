@@ -139,7 +139,7 @@ export function NavBar() {
       {/* Mobile menu */}
       <div
         className={cn(
-          "xl:hidden fixed inset-0 z-50 bg-white transform transition-transform ease-in-out duration-300",
+          "xl:hidden fixed inset-0 z-50 bg-white h-[calc(100vh-64px)] overflow-y-auto transform transition-transform ease-in-out duration-300",
           isMenuOpen ? "translate-x-0" : "translate-x-full"
         )}
         id="mobile-menu"
@@ -175,7 +175,7 @@ export function NavBar() {
        {/* Overlay when mobile menu is open */}
       {isMenuOpen && (
         <div
-          className="md:hidden fixed inset-0 bg-black bg-opacity-25 z-40"
+          className="xl:hidden fixed inset-0 bg-black bg-opacity-25 z-40"
           style={{ top: "64px" }}
           aria-hidden="true"
         />

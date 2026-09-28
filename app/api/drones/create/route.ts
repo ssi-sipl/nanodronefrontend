@@ -59,7 +59,7 @@ export async function POST(request: Request) {
     }
 
     const area = await prisma.area.findUnique({
-      where: { area_id: area_id.toLocaleLowerCase().trim() },
+      where: { area_id: area_id },
     });
     if (!area) {
       return NextResponse.json(
@@ -71,8 +71,8 @@ export async function POST(request: Request) {
     const droneExists = await prisma.drone.findFirst({
       where: {
         OR: [
-          { drone_id: drone_id.toLocaleLowerCase().trim() },
-          { name: name.toLocaleLowerCase().trim() },
+          { drone_id: drone_id },
+          { name: name },
         ],
       },
     });
@@ -89,9 +89,9 @@ export async function POST(request: Request) {
 
     const drone = await prisma.drone.create({
       data: {
-        name: name.toLocaleLowerCase().trim(),
-        drone_id: drone_id.toLocaleLowerCase().trim(),
-        area_id: area_id.toLocaleLowerCase().trim(),
+        name: name,
+        drone_id: drone_id,
+        area_id: area_id,
         areaRef: area.id,
         usbaddress: usbaddress?.trim() || null,
         cameraFeed: cameraFeed?.trim() || null,

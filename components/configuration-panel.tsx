@@ -12,6 +12,8 @@ import { latLngToMGRS, mgrsToLatLng } from "@/lib/mgrs";
 import { Buffer } from "buffer";
 import { DropPayloadConfirmDialog } from "@/components/drone/DropPayloadConfirmDialog";
 import Link from "next/link";
+import { Route } from "lucide-react";
+import { useRouter } from "next/navigation";
 // import { JoystickModal } from "@/components/joystick/JoystickModal";
 
 interface Sensor {
@@ -46,6 +48,7 @@ export function ConfigurationPanel({
   const [usbAddress, setUsbAddress] = useState("");
   const [gridRef, setGridRef] = useState("");
   const [dropConfirmOpen, setDropConfirmOpen] = useState(false);
+  const router = useRouter();
   // const [JoysickOpen, setJoystickOpen] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
@@ -140,8 +143,10 @@ export function ConfigurationPanel({
         });
 
         const result = await res.json();
-
         alert(result.message);
+        if(result.status==true){
+          router.push(`/drones/control?droneId=${selectedDroneId}`);
+        }
 
         console.log(result);
 
@@ -827,7 +832,7 @@ export function ConfigurationPanel({
               onClick={handleSendDrone}
               disabled={!selectedDroneId}
             >
-              <Link href={`/drones/control?droneId=${selectedDroneId}`}>send Drone</Link>
+              send Drone
             </Button>
 
             <Button
