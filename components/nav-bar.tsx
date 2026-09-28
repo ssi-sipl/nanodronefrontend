@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { Menu, X } from "lucide-react";
+import { Menu, X ,LogOut} from "lucide-react";
 import { useState, useEffect } from "react";
 
 
@@ -78,14 +78,14 @@ export function NavBar() {
   return (
     <nav className="border-b bg-white z-[10000]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16">
+        <div className="flex justify-between h-16 items-center">
           <div className="flex items-center">
             <div className="flex-shrink-0 flex items-center">
               <h4 className="text-xl font-bold">Drone Management</h4>
             </div>
 
             {/* Desktop Navigation */}
-            <div className="hidden md:ml-10 md:flex md:items-center md:space-x-4">
+            <div className="hidden xl:ml-10 xl:flex xl:items-center xl:space-x-4">
               {navLinks.map((link) => (
                 <Link
                   key={link.href}
@@ -100,18 +100,20 @@ export function NavBar() {
                   {link.label}
                 </Link>
               ))}
-              
-            </div>
-            <button
-                onClick={handleLogout}
-                className="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100"
-              >
-                Logout
-              </button>
+              <button
+              onClick={handleLogout}
+              className="flex items-center justify-center gap-4 px-2 py-1.5 rounded-lg text-sm 
+              font-semibold text-white bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 
+              hover:to-red-700 shadow-md hover:shadow-lg transition-all duration-200 active:scale-[0.98]"
+            >
+              <LogOut className="h-3 w-3" />
+              Logout
+            </button>
+           </div>   
           </div>
 
           {/* Mobile menu button */}
-          <div className="md:hidden flex items-center">
+          <div className="xl:hidden flex items-center">
             <button
               type="button"
               className="inline-flex items-center justify-center p-2 rounded-md text-gray-700 hover:text-gray-900 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-gray-500"
@@ -137,7 +139,7 @@ export function NavBar() {
       {/* Mobile menu */}
       <div
         className={cn(
-          "md:hidden fixed inset-0 z-50 bg-white transform transition-transform ease-in-out duration-300",
+          "xl:hidden fixed inset-0 z-50 bg-white transform transition-transform ease-in-out duration-300",
           isMenuOpen ? "translate-x-0" : "translate-x-full"
         )}
         id="mobile-menu"
@@ -158,17 +160,19 @@ export function NavBar() {
               {link.label}
             </Link>
           ))}
+          <button
+              onClick={handleLogout}
+              className="flex items-center justify-center gap-4 px-2 py-1.5 rounded-lg text-sm 
+              font-semibold text-white bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 
+              hover:to-red-700 shadow-md hover:shadow-lg transition-all duration-200 active:scale-[0.98]"
+            >
+              <LogOut className="h-3 w-3" />
+              Logout
+            </button>
           
         </div>
-        <button
-            onClick={handleLogout}
-            className="block w-full text-left px-3 py-4 rounded-md text-base font-medium text-gray-700 hover:bg-gray-100"
-          >
-            Logout
-          </button>
       </div>
-
-      {/* Overlay when mobile menu is open */}
+       {/* Overlay when mobile menu is open */}
       {isMenuOpen && (
         <div
           className="md:hidden fixed inset-0 bg-black bg-opacity-25 z-40"
