@@ -173,8 +173,13 @@ export async function getDrones(): Promise<Drone[]> {
   return response.data;
 }
 
-export async function getDrone(id: string): Promise<Drone | null> {
-  const response = await request<Drone>(`/drones/${id}`);
+export async function getDrone(drone_id: string): Promise<Drone | null> {
+  const path = `/drones/drone/${drone_id}`;
+
+  console.log("GET DRONE PATH:", path);
+  console.log("BASE URL:", baseUrl);
+
+  const response = await request<Drone>(path);
 
   if (!response.status || !response.data) {
     throw new Error(response.message || "Failed to fetch drone");

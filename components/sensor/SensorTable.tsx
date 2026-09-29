@@ -1,6 +1,6 @@
 "use client";
 
-import { memo, useCallback, useState } from "react";
+import { memo, useCallback, useState, type JSX } from "react";
 import Link from "next/link";
 import { Pencil, Plus, Trash2 } from "lucide-react";
 import toast, { Toaster } from "react-hot-toast";
@@ -86,7 +86,7 @@ export const SensorTable = memo(function SensorTable({
                         size="sm"
                         variant="outline"
                       >
-                        <Link href={`/sensors/edit/${sensor.id}`}>
+                        <Link href={`/sensors/edit/${sensor.sensor_id}`}>
                           <Pencil className="w-4 h-4" />
                         </Link>
                       </Button>
