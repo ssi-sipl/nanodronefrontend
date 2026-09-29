@@ -78,7 +78,7 @@ export const DroneTable = memo(function DroneTable({
                         size="sm"
                         variant="outline"
                       >
-                        <Link href={`/drones/edit/${drone.id}`}>
+                        <Link href={`/drones/edit/${drone.drone_id}`}>
                           <Pencil className="w-4 h-4" />
                         </Link>
                       </Button>
