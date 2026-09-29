@@ -5,10 +5,10 @@ import "leaflet/dist/leaflet.css";
 import type { LatLngBoundsLiteral } from "leaflet";
 import { baseUrl } from "@/lib/config";
 import L from "leaflet";
+import { Plus, Pin, Settings, Layers,Send,MapIcon } from "lucide-react";
 
 import { Button } from "./ui/button";
 import { SensorSettings } from "./sensor-settings";
-import { CloudLightning } from "lucide-react";
 
 interface Sensor {
   __v: number;
@@ -28,14 +28,14 @@ type Area = {
 
 interface MapDisplayProps {
   setCurrentSensor: (sensor: Sensor | null) => void;
+  onOpenConfig: () => void; // add
 }
-
 const escapePopupText = (value: string) =>
   value.replace(/[&<>"']/g, (character) =>
     ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[character]!
   );
 
-export default function MapDisplay({ setCurrentSensor }: MapDisplayProps) {
+export default function MapDisplay({ setCurrentSensor, onOpenConfig }: MapDisplayProps) {
   const mapRef = useRef<HTMLDivElement | null>(null);
   const leafletMapRef = useRef<any>(null);
   const addSensorMarkerRef = useRef<L.Marker | null>(null);
@@ -44,6 +44,8 @@ export default function MapDisplay({ setCurrentSensor }: MapDisplayProps) {
   const clickModeRef = useRef(false);
   const [clickAddSensor, setClickAddSensor] = useState(false);
   const clickAddSensorRef = useRef(false);
+  const handleZoomIn = () => leafletMapRef.current?.zoomIn();
+  const handleZoomOut = () => leafletMapRef.current?.zoomOut();
 
   const [addSensorLat, setAddSensorLat] = useState(0);
   const [addSensorLng, setAddSensorLng] = useState(0);
@@ -377,10 +379,28 @@ export default function MapDisplay({ setCurrentSensor }: MapDisplayProps) {
 
   return (
     <div className="relative h-full w-full overflow-hidden rounded-lg border shadow">
-      {/* Floating Icon Button */}
-      <div className="absolute right-3 top-3 z-[1000] flex flex-row gap-2 sm:right-4 sm:top-4 sm:gap-4">
+      {/* Left cluster: zoom + temporary sensor */}
+      <div className="absolute z-[1000] top-20 left-2 flex flex-col gap-2">
         <button
-          className=" bg-white px-4 py-2 rounded-lg shadow hover:bg-gray-100 border border-gray-300"
+          onClick={() => {
+            setClickMode((prev) => {
+              const newState = !prev;
+              clickModeRef.current = newState;
+              return newState;
+            });
+          }}
+          className={`w-10 h-10 py-6 rounded-lg shadow flex items-center justify-center border ${clickMode ? "bg-primary text-white border-primary" : "bg-white text-gray-700 border-gray-200 hover:bg-gray-100"
+            }`}
+          title="Temporary sensor / pick location"
+        >
+          <Pin className="w-5 h-5" />
+        </button>
+      </div>
+
+      {/* Right cluster: add sensor, map dropdown, configuration */}
+      <div className="absolute z-[1000] top-4 right-4 flex items-center gap-2">
+        <button
+          className="bg-white h-10 px-3 rounded-lg shadow flex items-center gap-1.5 hover:bg-gray-100 border border-gray-200 text-sm font-medium text-gray-700"
           onClick={() => {
             setClickMode((prev) => {
               const newState = true;
@@ -389,24 +409,26 @@ export default function MapDisplay({ setCurrentSensor }: MapDisplayProps) {
             });
             setClickAddSensor(true);
           }}
-          title={clickAddSensor ? "Disable Add Sensor" : "Enable Add Sensor"}
+          title="Add sensor"
         >
+          <Plus className="w-4 h-4" />
           Add Sensor
         </button>
+
         <button
-          className=" bg-white p-2 rounded-full shadow hover:bg-gray-100 border border-gray-300"
-          onClick={() => {
-            const newState = !clickModeRef.current;
-            clickModeRef.current = newState;
-            setClickMode(newState);
-          }}
-          title={clickMode ? "Disable LatLng Picker" : "Enable LatLng Picker"}
+          className="bg-white w-10 h-10 rounded-lg shadow flex items-center justify-center hover:bg-gray-100 border border-gray-200"
+          title="Change map"
+          onClick={() => (window.location.href = "/maps/download")}
         >
-          <img
-            src="/icons/pin.png"
-            alt="Pick Location"
-            className={`w-6 h-6 ${clickMode ? "opacity-100" : "opacity-50"}`}
-          />
+          <MapIcon className="w-5 h-5 text-gray-700" />
+        </button>
+
+        <button
+          onClick={onOpenConfig}
+          className="bg-white w-10 h-10 rounded-lg shadow flex items-center justify-center hover:bg-gray-100 border border-gray-200"
+          title="Configuration"
+        >
+          <Send className="w-5 h-5 text-gray-700" />
         </button>
       </div>
       {clickAddSensor && (

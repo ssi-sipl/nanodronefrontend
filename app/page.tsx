@@ -1,14 +1,11 @@
 "use client";
 import dynamic from "next/dynamic";
 
-// Import MapDisplay only on client-side
-const MapDisplay = dynamic(() => import("@/components/map-display"), {
-  ssr: false,
-});
-import { ConfigurationPanel } from "@/components/configuration-panel";
-// import MapDisplay from "@/components/map-display";
+const MapDisplay = dynamic(() => import("@/components/map-display"), { ssr: false });
+
 import { useState } from "react";
-import TelemetryDashboard from "@/components/TelemetryDashboard";
+import { Sheet, SheetContent } from "@/components/ui/sheet";
+import { ConfigurationPanel } from "@/components/configuration-panel";
 
 interface Sensor {
   __v: number;
@@ -24,6 +21,7 @@ export default function Dashboard() {
   const [currentSensor, setCurrentSensor] = useState<Sensor | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [loadingStatus, setLoadingStatus] = useState("");
+  const [configOpen, setConfigOpen] = useState(false);
 
   return (
     <>
@@ -34,30 +32,22 @@ export default function Dashboard() {
         </div>
       )}
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
-        {/* <h1 className="text-2xl font-bold mb-4 sm:mb-6">Dashboard</h1> */}
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
-          {/* Map container with responsive height */}
-          <div className="min-h-[360px] sm:min-h-[480px] lg:col-span-2 lg:min-h-[600px] bg-gray-50 rounded-lg shadow-sm">
-            <div className="h-full">
-              <MapDisplay setCurrentSensor={setCurrentSensor} />
-              {/* <div className="w-full">
-              <TelemetryDashboard />
-            </div> */}
-            </div>
-          </div>
-
-          {/* Configuration panel with responsive height */}
-          <div className="bg-white rounded-lg shadow-sm p-4">
-            <ConfigurationPanel
-              currentSensor={currentSensor}
-              setIsLoading={setIsLoading}
-              setLoadingStatus={setLoadingStatus}
-            />
-          </div>
-        </div>
+      <div className="w-full h-[calc(100vh-4rem)]">
+        <MapDisplay
+          setCurrentSensor={setCurrentSensor}
+          onOpenConfig={() => setConfigOpen(true)}
+        />
       </div>
+
+      <Sheet open={configOpen} onOpenChange={setConfigOpen}>
+        <SheetContent side="right" className="w-full sm:max-w-md p-0 overflow-y-auto">
+          <ConfigurationPanel
+            currentSensor={currentSensor}
+            setIsLoading={setIsLoading}
+            setLoadingStatus={setLoadingStatus}
+          />
+        </SheetContent>
+      </Sheet>
     </>
   );
 }
