@@ -12,8 +12,6 @@ export async function GET() {
       },
     });
 
-    console.log("[ACTIVE MAP] result:", activeMap);
-
     return NextResponse.json({
       status: true,
       message: "Active map fetched",

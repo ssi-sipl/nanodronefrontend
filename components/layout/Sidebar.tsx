@@ -11,6 +11,8 @@ import {
   Video,
   Map,
   LogOut,
+  ChevronLeft,
+  Joystick
 } from "lucide-react";
 
 const navLinks = [
@@ -20,15 +22,23 @@ const navLinks = [
   { href: "/sensors", label: "Sensors", icon: Radio },
   { href: "/live-view", label: "Livestream", icon: Video },
   { href: "/maps/download", label: "Maps", icon: Map },
+  { href: "/drones/control", label: "Drone Control", icon: Joystick },
 ];
 
 interface SidebarProps {
   collapsed: boolean;
+  onToggle:()=>void;
 }
 
-export function Sidebar({ collapsed }: SidebarProps) {
+
+
+export function Sidebar({ collapsed,onToggle }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
+  const hidesidebar = pathname === "/login";
+  if(hidesidebar) {
+  return null;
+}
 
   const isActiveLink = (href: string) =>
     href === "/" ? pathname === href : pathname.startsWith(href);
@@ -51,6 +61,21 @@ export function Sidebar({ collapsed }: SidebarProps) {
           {collapsed ? "DM" : "Drone Managment"}
         </span>
       </div>
+
+      <button
+      onClick={onToggle}
+      className="absolute left-full top-1/2 z-50 grid h-10 w-5 -translate-y-1/2 place-items-center
+          rounded-r-xl bg-[#0F2A24] text-white/70 transition-colors hover:text-[#7CF0C0]
+          focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#7CF0C0]"
+      aria-label="Toggle sidebar"
+      >
+      <ChevronLeft
+        className={cn(
+          "w-5 h-5 transition-transform duration-300",
+          collapsed && "rotate-180"
+        )}
+      />
+      </button>
 
       <nav className="flex-1 py-4 space-y-1 px-2 overflow-y-auto">
         {navLinks.map((link) => {

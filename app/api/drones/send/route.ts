@@ -121,7 +121,7 @@ export async function POST(request: Request) {
       longitude: longitude.toString(),
       targetAltitude: altitude.toString(),
       usbAddress: usbaddress.toString(),
-      event: "ARM",
+      event: "arm",
     };
 
     const topic = process.env.MQTT_BROKER_TOPIC as string;

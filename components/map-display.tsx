@@ -5,10 +5,13 @@ import "leaflet/dist/leaflet.css";
 import type { LatLngBoundsLiteral } from "leaflet";
 import { baseUrl } from "@/lib/config";
 import L from "leaflet";
-import { Plus, Pin, Settings, Layers,Send,MapIcon } from "lucide-react";
+import { Plus, Pin, Settings, Layers, Send, MapIcon } from "lucide-react";
 
 import { Button } from "./ui/button";
 import { SensorSettings } from "./sensor-settings";
+import { ConfigPopoverButton } from "@/components/map/ConfigPopoverButton";
+import { MapSwitcherPopoverButton } from "@/components/map/MapSwitcherPopoverButton";
+import { SendDroneDialog } from "@/components/map/SendDroneDialog";
 
 interface Sensor {
   __v: number;
@@ -28,14 +31,17 @@ type Area = {
 
 interface MapDisplayProps {
   setCurrentSensor: (sensor: Sensor | null) => void;
-  onOpenConfig: () => void; // add
+  currentSensor: Sensor | null;
+  setIsLoading: (value: boolean) => void;
+  setLoadingStatus: (value: string) => void;
 }
+
 const escapePopupText = (value: string) =>
   value.replace(/[&<>"']/g, (character) =>
     ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[character]!
   );
 
-export default function MapDisplay({ setCurrentSensor, onOpenConfig }: MapDisplayProps) {
+export default function MapDisplay({ setCurrentSensor, currentSensor, setIsLoading, setLoadingStatus, }: MapDisplayProps) {
   const mapRef = useRef<HTMLDivElement | null>(null);
   const leafletMapRef = useRef<any>(null);
   const addSensorMarkerRef = useRef<L.Marker | null>(null);
@@ -44,15 +50,13 @@ export default function MapDisplay({ setCurrentSensor, onOpenConfig }: MapDispla
   const clickModeRef = useRef(false);
   const [clickAddSensor, setClickAddSensor] = useState(false);
   const clickAddSensorRef = useRef(false);
-  const handleZoomIn = () => leafletMapRef.current?.zoomIn();
-  const handleZoomOut = () => leafletMapRef.current?.zoomOut();
-
   const [addSensorLat, setAddSensorLat] = useState(0);
   const [addSensorLng, setAddSensorLng] = useState(0);
 
   const [sensorAddSuccess, setSensorAddSuccess] = useState(false);
   const [refreshSensorList, setRefreshSensorList] = useState(false);
   const fakeSensorsLayerRef = useRef<L.LayerGroup | null>(null);
+  const [sendDroneSensor, setSendDroneSensor] = useState<Sensor | null>(null);
 
   const [activeOfflineMap, setActiveOfflineMap] = useState<{
     folderPath: string;
@@ -243,15 +247,20 @@ export default function MapDisplay({ setCurrentSensor, onOpenConfig }: MapDispla
               })
                 .addTo(leafletMapRef.current)
                 .bindPopup(`
-                  <div class="min-w-36">
-                    <p class="mb-2 font-medium">${escapePopupText(sensor.name)}</p>
-                    ${sensor.cameraFeed ? `<button
-                      type="button"
-                      data-stream-id="${encodeURIComponent(sensor.sensor_id)}"
-                      class="rounded bg-slate-900 px-3 py-1.5 text-sm text-white hover:bg-slate-700"
-                    >Open live stream</button>` : '<p class="text-sm text-slate-500">No RTSP feed configured</p>'}
-                  </div>
-                `);
+  <div class="min-w-36">
+    <p class="mb-2 font-medium">${escapePopupText(sensor.name)}</p>
+    ${sensor.cameraFeed ? `<button
+      type="button"
+      data-stream-id="${encodeURIComponent(sensor.sensor_id)}"
+      class="rounded bg-slate-900 px-3 py-1.5 text-sm text-white hover:bg-slate-700 mb-1 block w-full"
+    >Open live stream</button>` : '<p class="text-sm text-slate-500 mb-1">No RTSP feed configured</p>'}
+    <button
+      type="button"
+      data-send-id="${encodeURIComponent(sensor.sensor_id)}"
+      class="rounded bg-blue-600 px-3 py-1.5 text-sm text-white hover:bg-blue-700 block w-full"
+    >Send Drone</button>
+  </div>
+`);
 
               marker.on("click", () => {
                 console.log("Sensor clicked:", sensor);
@@ -265,6 +274,15 @@ export default function MapDisplay({ setCurrentSensor, onOpenConfig }: MapDispla
                 streamButton?.addEventListener(
                   "click",
                   () => window.location.assign(`/live-view?stream=${encodeURIComponent(sensor.sensor_id)}`),
+                  { once: true }
+                );
+
+                const sendButton = document.querySelector<HTMLButtonElement>(
+                  `button[data-send-id="${encodeURIComponent(sensor.sensor_id)}"]`
+                );
+                sendButton?.addEventListener(
+                  "click",
+                  () => setSendDroneSensor(sensor),
                   { once: true }
                 );
               });
@@ -378,7 +396,7 @@ export default function MapDisplay({ setCurrentSensor, onOpenConfig }: MapDispla
   }, [clickMode]);
 
   return (
-    <div className="relative h-full w-full overflow-hidden rounded-lg border shadow">
+    <div className="relative h-full w-full overflow-y-auto rounded-lg border shadow">
       {/* Left cluster: zoom + temporary sensor */}
       <div className="absolute z-[1000] top-20 left-2 flex flex-col gap-2">
         <button
@@ -393,7 +411,7 @@ export default function MapDisplay({ setCurrentSensor, onOpenConfig }: MapDispla
             }`}
           title="Temporary sensor / pick location"
         >
-          <Pin className="w-5 h-5" />
+          <Pin className="w-4 h-5" />
         </button>
       </div>
 
@@ -415,21 +433,28 @@ export default function MapDisplay({ setCurrentSensor, onOpenConfig }: MapDispla
           Add Sensor
         </button>
 
-        <button
-          className="bg-white w-10 h-10 rounded-lg shadow flex items-center justify-center hover:bg-gray-100 border border-gray-200"
-          title="Change map"
-          onClick={() => (window.location.href = "/maps/download")}
-        >
-          <MapIcon className="w-5 h-5 text-gray-700" />
-        </button>
+        <MapSwitcherPopoverButton
+          onMapChanged={() => {
+            // Tear down the current Leaflet instance so the init effects rebuild
+            // it fresh against the newly activated map's bounds/tiles.
+            leafletMapRef.current?.remove();
+            leafletMapRef.current = null;
+            setActiveOfflineMap(null);
+            setActiveMapLoaded(false);
+            fetch(`${baseUrl}/offline-maps/active`)
+              .then((res) => res.json())
+              .then((data) => {
+                if (data.status && data.data) setActiveOfflineMap(data.data);
+              })
+              .finally(() => setActiveMapLoaded(true));
+          }}
+        />
 
-        <button
-          onClick={onOpenConfig}
-          className="bg-white w-10 h-10 rounded-lg shadow flex items-center justify-center hover:bg-gray-100 border border-gray-200"
-          title="Configuration"
-        >
-          <Send className="w-5 h-5 text-gray-700" />
-        </button>
+        <ConfigPopoverButton
+          currentSensor={currentSensor}
+          setIsLoading={setIsLoading}
+          setLoadingStatus={setLoadingStatus}
+        />
       </div>
       {clickAddSensor && (
         <div className="absolute left-3 top-3 z-[1000] max-h-[calc(100%-1.5rem)] max-w-[calc(100%-1.5rem)] overflow-y-auto sm:left-4 sm:top-4">
@@ -464,6 +489,10 @@ export default function MapDisplay({ setCurrentSensor, onOpenConfig }: MapDispla
           </div>
         </div>
       )}
+      <SendDroneDialog
+        sensor={sendDroneSensor}
+        onOpenChange={(open) => !open && setSendDroneSensor(null)}
+      />
 
       {/* Map container */}
       {!activeMapLoaded ? (
@@ -491,5 +520,6 @@ export default function MapDisplay({ setCurrentSensor, onOpenConfig }: MapDispla
         />
       )}
     </div>
+
   );
 }

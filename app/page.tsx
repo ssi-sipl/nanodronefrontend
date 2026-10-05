@@ -4,8 +4,6 @@ import dynamic from "next/dynamic";
 const MapDisplay = dynamic(() => import("@/components/map-display"), { ssr: false });
 
 import { useState } from "react";
-import { Sheet, SheetContent } from "@/components/ui/sheet";
-import { ConfigurationPanel } from "@/components/configuration-panel";
 
 interface Sensor {
   __v: number;
@@ -21,7 +19,6 @@ export default function Dashboard() {
   const [currentSensor, setCurrentSensor] = useState<Sensor | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [loadingStatus, setLoadingStatus] = useState("");
-  const [configOpen, setConfigOpen] = useState(false);
 
   return (
     <>
@@ -35,19 +32,11 @@ export default function Dashboard() {
       <div className="w-full h-[calc(100vh-4rem)]">
         <MapDisplay
           setCurrentSensor={setCurrentSensor}
-          onOpenConfig={() => setConfigOpen(true)}
+          currentSensor={currentSensor}
+          setIsLoading={setIsLoading}
+          setLoadingStatus={setLoadingStatus}
         />
       </div>
-
-      <Sheet open={configOpen} onOpenChange={setConfigOpen}>
-        <SheetContent side="right" className="w-full sm:max-w-md p-0 overflow-y-auto">
-          <ConfigurationPanel
-            currentSensor={currentSensor}
-            setIsLoading={setIsLoading}
-            setLoadingStatus={setLoadingStatus}
-          />
-        </SheetContent>
-      </Sheet>
     </>
   );
 }

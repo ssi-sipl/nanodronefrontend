@@ -35,14 +35,9 @@ export default function SpeechToText() {
       await new Promise((resolve) => setTimeout(resolve, 1500));
 
       // Get public URL
-      const { data: publicUrl, error: urlError } = supabase.storage
+      const { data: publicUrl } = supabase.storage
         .from("audio-uploads")
         .getPublicUrl(fileName);
-
-      if (urlError) {
-        console.error("❌ Failed to get public URL:", urlError.message);
-        return;
-      }
 
       console.log("Uploaded audio URL:", publicUrl.publicUrl);
 

@@ -171,8 +171,7 @@ function JoystickControlInner() {
   };
 
   return (
-    <div className="fixed inset-0 w-screen h-screen bg-slate-900 text-white grid grid-rows-[auto_1fr] overflow-hidden">
-      {/* Header row — always in normal flow, never overlaps content below it */}
+    <div className="w-full h-screen bg-slate-900 text-white grid grid-rows-[auto_1fr] overflow-hidden">
       <div className="flex items-center justify-between px-2 sm:px-4 py-1 border-b border-slate-800 bg-slate-900 z-10">
         <Button
           asChild
