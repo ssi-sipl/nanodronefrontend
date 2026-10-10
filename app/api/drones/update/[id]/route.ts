@@ -75,7 +75,7 @@ export async function POST(
     }
 
     const existingDrone = await prisma.drone.findUnique({
-      where: { id: droneId },
+      where: { drone_id: droneId },
     });
 
     if (!existingDrone) {
@@ -108,7 +108,7 @@ export async function POST(
     }
 
     const updatedDrone = await prisma.drone.update({
-      where: { id: droneId },
+      where: { id: existingDrone.id },
       data: {
         name,
         drone_id,
