@@ -58,7 +58,7 @@ export async function POST(
     }
 
     const existingSensor = await prisma.sensor.findUnique({
-      where: { id: sensorId },
+      where: { sensor_id: sensorId },
     });
 
     if (!existingSensor) {
@@ -77,7 +77,7 @@ export async function POST(
     if (cameraFeed !== undefined) updateData.cameraFeed = cameraFeed.trim() || null;
 
     const updatedSensor = await prisma.sensor.update({
-      where: { id: sensorId },
+      where: { id: existingSensor.id },
       data: updateData,
     });
 

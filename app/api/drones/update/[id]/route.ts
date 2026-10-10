@@ -34,6 +34,7 @@ export async function POST(
     }
 
     const droneId = id;
+    console.log(droneId);
     if (!droneId || typeof droneId !== "string") {
       return NextResponse.json(
         { status: false, message: "Invalid drone ID format." },
@@ -75,7 +76,7 @@ export async function POST(
     }
 
     const existingDrone = await prisma.drone.findUnique({
-      where: { id: droneId },
+      where: { drone_id: droneId },
     });
 
     if (!existingDrone) {
@@ -108,7 +109,7 @@ export async function POST(
     }
 
     const updatedDrone = await prisma.drone.update({
-      where: { id: droneId },
+      where: { id: existingDrone.id },
       data: {
         name,
         drone_id,
