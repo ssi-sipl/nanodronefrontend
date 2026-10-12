@@ -194,12 +194,12 @@ export function ConfigurationPanel({ currentSensor }: ConfigurationPanelProps) {
         const [droneRes, sensorRes] = await Promise.all([
           fetch(
             `${baseUrl}/drones/name/${encodeURIComponent(
-              droneName.trim()
+              droneName.trim().toLowerCase()
             )}`
           ),
           fetch(
             `${baseUrl}/sensors/name/${encodeURIComponent(
-              sensorName.trim()
+              sensorName.trim().toLowerCase()
             )}`
           ),
         ]);
