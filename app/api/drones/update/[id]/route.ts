@@ -110,7 +110,7 @@ export async function POST(
     const updatedDrone = await prisma.drone.update({
       where: { id: existingDrone.id },
       data: {
-        name,
+        name:name.toLocaleLowerCase(),
         drone_id,
         area_id: area_id ? area_id.toLocaleLowerCase().trim() : area_id,
         areaRef: areaRef || existingDrone.areaRef,

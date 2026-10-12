@@ -89,7 +89,7 @@ export async function POST(request: Request) {
 
     const drone = await prisma.drone.create({
       data: {
-        name: name,
+        name: name.toLocaleLowerCase(),
         drone_id: drone_id,
         area_id: area_id,
         areaRef: area.id,

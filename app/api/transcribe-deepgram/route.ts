@@ -360,7 +360,7 @@ export async function POST(req: NextRequest) {
       const droneWords = droneName
         .split(" ")
         .filter((w) => !fillerWords.includes(w.toLowerCase()));
-      droneName = droneWords.join(" ");
+      droneName = droneWords.join(" ").toLowerCase();
     }
 
     if (sensorName) {
@@ -368,7 +368,7 @@ export async function POST(req: NextRequest) {
       const sensorWords = sensorName
         .split(" ")
         .filter((w) => !fillerWords.includes(w.toLowerCase()));
-      sensorName = sensorWords.join(" ");
+      sensorName = sensorWords.join(" ").toLowerCase();
     }
 
     if (droneName && droneName.length < 2) droneName = null;

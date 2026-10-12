@@ -144,9 +144,9 @@ export function ConfigurationPanel({
 
         const result = await res.json();
         alert(result.message);
-        if(result.status==true){
-          router.push(`/drones/control?droneId=${selectedDroneId}`);
-        }
+        // if(result.status==true){
+        //   router.push(`/drones/control?droneId=${selectedDroneId}`);
+        // }
 
         console.log(result);
 
@@ -261,14 +261,15 @@ export function ConfigurationPanel({
         setLatitude(fetchedSensor.latitude.toFixed(8));
         setLongitude(fetchedSensor.longitude.toFixed(8));
         setAreaId(droneData.data.area_id);
-        setUsbAddress("Auto-filled");
 
         const latitudeLocal = fetchedSensor.latitude.toFixed(8);
         const longitudeLocal = fetchedSensor.longitude.toFixed(8);
         const altitudeLocal = "10";
         const areaIdLocal = droneData.data.area_id;
         const selectedDroneIdLocal = fetchedDroneId;
-        const usbAddressLocal = "Auto-filled";
+        const usb_address = droneData.data.usbaddress || "Auto-filled";
+
+        console.log("usb_address:", usb_address);
 
         if (
           latitudeLocal &&
@@ -276,7 +277,7 @@ export function ConfigurationPanel({
           altitudeLocal &&
           selectedDroneIdLocal &&
           areaIdLocal &&
-          usbAddressLocal
+          usb_address
         ) {
           setLoadingStatus?.("Sending drone to location...");
 
@@ -291,7 +292,7 @@ export function ConfigurationPanel({
               latitude: Number(latitudeLocal),
               longitude: Number(longitudeLocal),
               altitude: Number(altitudeLocal),
-              usb_address: usbAddressLocal,
+              usbaddress: usb_address,
             }),
           });
 
@@ -442,6 +443,7 @@ export function ConfigurationPanel({
           body: JSON.stringify({
             drone_id: droneIdToUse,
             area_id: areaIdToUse,
+            pin: process.env.NEXT_PUBLIC_DROP_PAYLOAD_PIN || "1234", 
           }),
         });
 
@@ -701,7 +703,7 @@ export function ConfigurationPanel({
 
   const stopRecording = () => {
     mediaRecorderRef.current?.stop();
-    setIsRecording(false);
+    setIsRecording(false)
   };
 
   const handleDropPayload = async (pin: string) => {

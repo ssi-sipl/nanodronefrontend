@@ -89,7 +89,7 @@ export async function POST(req: NextRequest) {
 
     const newSensor = await prisma.sensor.create({
       data: {
-        name,
+        name: name.toLocaleLowerCase(),
         area_id,
         sensor_id,
         latitude: Number(latitude.toPrecision(8)),

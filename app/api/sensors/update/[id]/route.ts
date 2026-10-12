@@ -69,7 +69,7 @@ export async function POST(
     }
 
     const updateData: any = {};
-    if (name) updateData.name = name;
+    if (name) updateData.name = name.toLocaleLowerCase();
     if (area_id) updateData.area_id = area_id;
     if (sensor_id) updateData.sensor_id = sensor_id;
     if (latitude !== undefined) updateData.latitude = latitude;
